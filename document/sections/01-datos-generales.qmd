@@ -1,0 +1,96 @@
+
+# Datos Generales
+
+## Título de proyecto
+
+Superpíxeles diferenciables guiados por retención espectral para la clasificación semi-supervisada de imágenes hiperespectrales mediante redes convolucionales de grafos
+
+```{=latex}
+\addvspace{1sp}
+```
+
+## Datos del alumno
+
+<!-- Cada fila: Campo: & Valor \\   Para continuar un valor en otra línea,
+     deja vacío el campo:   & segunda línea \\ -->
+
+```{=latex}
+\begin{datos}
+Nombre: & Edgar Tobón Sosa \\
+Matrícula: & 251270014\\
+Dirección: & Calle Necaxa 140, Int 8. \\
+           & Col. Portales Norte \\
+           & C.P. 03300 \\
+           & Ciudad de México, CDMX. \\
+Teléfono (casa): & 2225081400 \\
+Teléfono (lugar de trabajo): & \\
+Dirección electrónica: &  etobon96@gmail.com\\
+Portal Internet: & \\
+\end{datos}
+```
+
+## Institución
+
+```{=latex}
+\begin{datos}
+Nombre: & CINVESTAV-IPN \\
+Departamento: & Depto. de Computación. \\
+Dirección: & Av. Instituto Politécnico Nacional No. 2508, \\
+ & Col. San Pedro Zacatenco, \\
+ & México, D. F. 07300. \\
+Teléfono: & (52) (55) 5747 3758 \\
+\end{datos}
+```
+
+## Beca de tesis
+
+```{=latex}
+\begin{datos}
+Institución otorgante: & \\
+Tipo de beca: & \\
+Vigencia: & \\
+\end{datos}
+```
+
+## Proyecto de origen\protect\footnotemark
+
+<!-- Solo si la tesis forma parte de un proyecto financiado; si no, deja los
+     valores vacíos, como en el protocolo de referencia. -->
+
+```{=latex}
+\begin{datos}
+Institución: & \\
+Nombre del proyecto: & \\
+Fuente de financiamiento: & \\
+\end{datos}
+```
+
+## Datos del asesor
+
+```{=latex}
+\begin{datos}
+Nombre: & Xiaoou Li Zhang\\
+Dirección: & Av. Instituto Politécnico Nacional No. 2508, \\
+ & Col. San Pedro Zacatenco, \\
+ & México, D.F. 07300 \\
+Teléfono (oficina): & \\
+Institución: & CINVESTAV-IPN \\
+Departamento adscripción: & Departamento de Computación \\
+Grado académico: & \\
+\end{datos}
+```
+
+## Datos del coasesor
+
+```{=latex}
+\begin{datos}
+Nombre: & \\
+Dirección: & Av. Instituto Politécnico Nacional No. 2508, \\
+ & Col. San Pedro Zacatenco, \\
+ & México, D.F. 07300 \\
+Teléfono (oficina): & \\
+Institución: & CINVESTAV-IPN \\
+Departamento adscripción: & Departamento de Computación \\
+Grado académico: & \\
+\end{datos}
+```

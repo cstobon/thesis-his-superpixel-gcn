@@ -1,0 +1,66 @@
+# Metodología {#sec-metodologia}
+
+<!-- Una subsección por cada objetivo particular (mismo orden y redacción que
+     en la sección 4.2). Dentro de cada una, una lista de actividades
+     concretas: qué se estudia, qué se diseña/implementa, con quién, con qué
+     muestra o datos, y cómo se mide. -->
+
+La presente investigación se ha pensado llevar a cabo de la siguiente manera:
+
+## Redacción del protocolo de tesis para la aceptación del proyecto
+
+## Revisión del estado del arte y estudio de los fundamentos
+
+- Estudio de los fundamentos de aprendizaje profundo: retropropagación, optimización y regularización, así como su implementación en PyTorch.
+- Estudio de las redes neuronales de grafos y del modelo GCN de Kipf y Welling, y su implementación con PyTorch Geometric sobre conjuntos de datos de prueba.
+- Estudio de la tesis de referencia sobre PCNN-SAM y PCNN-GCN, de los algoritmos de superpíxeles clásicos (SLIC) y de los métodos de superpíxeles diferenciables (Superpixel Sampling Networks y variantes).
+- Revisión de los trabajos que acoplan superpíxeles y GCN en la clasificación de imágenes hiperespectrales, con énfasis en los que emplean matrices de asociación píxel-superpíxel.
+- Elaboración de un cuadro comparativo de los trabajos relacionados.
+
+## Reproducción de las líneas base PCNN-GCN y SLIC-GCN
+
+- Obtención y preparación de los conjuntos de datos hiperespectrales de referencia: Indian Pines, Salinas, Pavia University, WHU-Hi-LongKou, WHU-Hi-HanChuan y WHU-Hi-HongHu, con normalización min-max por banda.
+- Integración del código de PCNN-SAM y del clasificador GCN de dos capas de la tesis de referencia, y de SLIC sobre la imagen reducida por PCA.
+- Implementación del protocolo experimental: cinco superpíxeles etiquetados por clase, escala K = 500 y diez ejecuciones independientes con semillas fijas.
+- Implementación de las métricas de segmentación (ASA, BR, EV) y de clasificación (OA, AA, $\kappa$).
+- Verificación de que la OA obtenida difiera en no más de dos puntos porcentuales de la reportada en la tesis de referencia.
+
+## Diseño del módulo de superpíxeles diferenciable con afinidad espectral
+
+- Implementación de un módulo inspirado en las Superpixel Sampling Networks, que extraiga características por píxel con una red convolucional ligera a partir del vector espectral completo.
+- Definición de la asociación suave entre cada píxel y los superpíxeles de su vecindad (3 $\times$ 3 superpíxeles) mediante una afinidad angular basada en la similitud coseno, como equivalente diferenciable de SAM.
+- Implementación de las iteraciones diferenciables de actualización de centros y asociaciones, restringidas a la vecindad local para mantener acotado el uso de memoria.
+- Preentrenamiento del módulo sin etiquetas, con pérdidas de reconstrucción espectral y de compacidad, sobre cada escena.
+- Comparación de los superpíxeles obtenidos frente a SLIC y PCNN-SAM mediante ASA, BR y EV, como verificación previa al acoplamiento con la GCN.
+
+## Construcción diferenciable del grafo de superpíxeles
+
+- Cálculo de la matriz de características de los nodos como el promedio de las firmas espectrales ponderado por la asociación suave.
+- Cálculo de la matriz de adyacencia a partir de la superposición de las asociaciones suaves entre superpíxeles vecinos, y su normalización simétrica.
+- Proyección de las predicciones por superpíxel de regreso al nivel de píxel mediante la misma asociación suave.
+- Verificación de que el gradiente de la pérdida de clasificación llegue al módulo de segmentación, mediante pruebas de gradiente sobre imágenes sintéticas pequeñas.
+
+## Definición de la función de pérdida y de la estrategia de entrenamiento
+
+- Formulación de la pérdida compuesta: entropía cruzada sobre los nodos etiquetados, reconstrucción espectral (aproximación diferenciable de EV) y compacidad espacial.
+- Definición de la estrategia de entrenamiento en dos fases: preentrenamiento no supervisado del módulo de segmentación y ajuste conjunto de extremo a extremo con la GCN.
+- Ajuste de los pesos de cada término de la pérdida y de los hiperparámetros sobre un conjunto de validación, manteniendo la GCN de la tesis de referencia sin cambios para no introducir factores de confusión.
+- Detección y corrección de soluciones degeneradas, como superpíxeles vacíos o asociaciones uniformes.
+
+## Evaluación comparativa de la arquitectura propuesta
+
+<!-- Cómo se medirá el éxito: método de evaluación, participantes o casos de
+     estudio, instrumentos (encuestas, métricas), duración y análisis de
+     resultados. -->
+
+- Ejecución de la arquitectura propuesta, PCNN-GCN y SLIC-GCN sobre los seis conjuntos de datos bajo el mismo protocolo (cinco muestras por clase, K = 500, diez ejecuciones).
+- Medición de la calidad de segmentación (ASA, BR, EV), de clasificación (OA, AA, $\kappa$) y del costo computacional (tiempo de entrenamiento e inferencia, memoria).
+- Estudio de ablación: superpíxeles aprendidos sin ajuste conjunto, sin pérdida de reconstrucción, sin término de compacidad y con distancia euclidiana en lugar de afinidad angular.
+- Pruebas de significancia estadística entre métodos sobre las diez ejecuciones.
+
+## Análisis de la relación entre segmentación y clasificación
+
+- Cálculo de la correlación de Pearson entre ASA, BR y EV y la OA sobre los pares conjunto de datos $\times$ método, incluyendo la arquitectura propuesta.
+- Contraste con el hallazgo de la tesis de referencia sobre EV como mejor predictor de la OA.
+- Análisis de los resultados según el tipo de dificultad de la escena (geométrica o espectral) y análisis visual de los mapas de clasificación.
+- Presentación de resultados.

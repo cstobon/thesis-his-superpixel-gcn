@@ -1,0 +1,27 @@
+# Objetivos generales y particulares del proyecto
+
+## General
+
+<!-- Una oración que empieza con verbo en infinitivo. -->
+
+Desarrollar un segmentador en superpíxeles diferenciable, basado en Superpixel Sampling Networks (SSN) con afinidad espectral angular y entrenado sin etiquetas para maximizar la varianza explicada (EV) con una restricción de compacidad, y evaluar su efecto en la clasificación semi-supervisada de imágenes hiperespectrales mediante redes convolucionales de grafos (GCN), en escenas de dificultad geométrica y espectral.
+
+## Particulares
+
+<!-- Escribe la lista con 1. 2. 3.; en el PDF sale como I, II, III.
+     Cada objetivo particular es una subsección de la Metodología y una fila
+     del Cronograma. -->
+
+1. Reproducir la arquitectura PCNN-GCN de Galarza (2026) y los métodos de referencia (SLIC, LSC, ERS, SEEDS y PCNN-SAM) sobre seis conjuntos de datos hiperespectrales, con el protocolo de cinco muestras etiquetadas por clase, para establecer la línea base de comparación.
+
+2. Adaptar la arquitectura SSN a imágenes hiperespectrales mediante un extractor de características espectrales y una afinidad angular, inspirada en SAM, entre píxeles y superpíxeles.
+
+3. Formular una función de pérdida no supervisada que combine la EV, calculada sobre las bandas originales, con un término de compacidad espacial, y entrenar con ella el segmentador sin utilizar etiquetas.
+
+4. Evaluar los superpíxeles obtenidos integrándolos en el clasificador GCN semi-supervisado y comparándolos con los métodos de referencia mediante métricas de segmentación (ASA, BR y EV) y de clasificación (OA, AA y $\kappa$).
+
+5. Analizar los resultados por tipo de escena (dificultad geométrica o espectral) y cuantificar la relación entre las métricas de segmentación y la exactitud de clasificación, para contrastar el hallazgo de Galarza (2026).
+
+6. Determinar, mediante ablaciones, el efecto del peso de la compacidad ($\lambda$), de la dimensión de las características aprendidas y del cálculo de la afinidad sobre las bandas originales frente a las características aprendidas.
+
+7. Explorar el entrenamiento de extremo a extremo del segmentador junto con la GCN, de modo que las muestras etiquetadas también influyan en la formación de los superpíxeles.

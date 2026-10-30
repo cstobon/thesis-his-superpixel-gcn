@@ -1,0 +1,13 @@
+# Contribuciones o resultados esperados {#sec-contribuciones}
+
+<!-- Qué se espera obtener al terminar la tesis (artefacto, conocimiento,
+     evaluación) y en qué contribuye al área. El protocolo de referencia cierra
+     con una lista de las capacidades que tendrá el resultado y señala que los
+     trabajos relacionados cumplen algunas, pero no todas. -->
+
+Con este trabajo se espera obtener [resultado principal].
+
+La arquitectura resultante de esta investigación va a cumplir con las siguientes características:
+
+- [Característica]
+- [Característica]

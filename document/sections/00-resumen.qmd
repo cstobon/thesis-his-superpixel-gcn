@@ -1,0 +1,16 @@
+<!-- RESUMEN: un solo párrafo (~250 palabras): contexto y relevancia del tema,
+     qué problema o carencia existe, qué propone el trabajo y qué se espera
+     lograr. -->
+
+Las imágenes hiperespectrales (HSI) registran cientos de bandas espectrales por píxel, lo que permite distinguir materiales que en una fotografía convencional resultan indistinguibles; sin embargo, su clasificación mediante aprendizaje profundo exige un alto volumen de datos etiquetados, y etiquetar píxeles es costoso. Para enfrentar esta limitación se emplean las redes convolucionales de grafos (GCN) con aprendizaje semi-supervisado, las cuales operan sobre un grafo cuyos nodos son superpíxeles, por lo que la calidad de la segmentación determina el resultado de la clasificación. Un trabajo previo mostró que ningún algoritmo de segmentación resulta superior en todas las escenas y que la varianza explicada (EV), que mide cuánta información espectral se conserva dentro de un superpíxel, predice la exactitud de clasificación mejor que su pureza geométrica. No obstante, los algoritmos actuales forman los superpíxeles mediante reglas fijas que no optimizan la EV y que, al tomar decisiones discretas, impiden el uso del gradiente. Se propone el desarrollo de un segmentador diferenciable basado en Superpixel Sampling Networks (SSN) que, mediante entrenamiento no supervisado, realice la segmentación buscando maximizar la EV sin descuidar la compacidad de los superpíxeles. El método se evaluará sobre seis conjuntos de datos de referencia con cinco muestras etiquetadas por clase, frente a SLIC y PCNN-SAM, y se espera que logre una exactitud de clasificación igual o superior en escenas de dificultad tanto geométrica como espectral.
+
+
+`\par\vspace{5pt}\noindent\textsf{Palabras clave:}`{=latex} 
+imágenes hiperespectrales, superpíxeles diferenciables, redes convolucionales de grafos, aprendizaje semi-supervisado, varianza explicada, aprendizaje no supervisado.
+
+
+```{=latex}
+\end{abstract}
+\endgroup
+\kern-2pt
+```

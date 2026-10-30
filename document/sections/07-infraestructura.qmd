@@ -1,0 +1,13 @@
+# Infraestructura {#sec-infraestructura}
+
+<!-- Infraestructura mínima necesaria para desarrollar la tesis, separada en
+     hardware y software (y, si aplica, datos o servicios: p. ej. conjuntos de
+     imágenes médicas, servidores PACS de prueba, cómputo con GPU). -->
+
+La infraestructura mínima necesaria para el desarrollo del proyecto de tesis es:
+
+Hardware
+:   [Equipo de cómputo]
+
+Software
+:   [Herramientas, lenguajes, plataformas]

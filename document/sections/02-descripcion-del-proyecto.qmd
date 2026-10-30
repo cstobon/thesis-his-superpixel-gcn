@@ -1,0 +1,18 @@
+
+# Descripción del proyecto
+
+## Resumen
+
+<!-- Plantea la PREGUNTA DE INVESTIGACIÓN de forma explícita y explica en
+     2-3 párrafos qué se va a construir o proponer y cómo responde a ella. -->
+
+En el presente trabajo se busca la respuesta a la pregunta: ¿[pregunta de investigación]?
+
+[Describir qué se va a proponer, para quién y cómo se espera responder a la pregunta.]
+
+## Antecedentes y motivación para el proyecto
+
+<!-- Contexto que lleva al problema: de dónde surge la necesidad, qué se sabe
+     del dominio y por qué vale la pena atenderlo, con citas \cite{clave}. -->
+
+[Redactar antecedentes y motivación. Ejemplo de cita: una arquitectura de referencia se describe conforme a \cite{iso42010}.]

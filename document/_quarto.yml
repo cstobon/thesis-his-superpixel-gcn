@@ -1,0 +1,23 @@
+project:
+  type: default
+
+lang: es
+number-sections: true
+format:
+  pdf:
+    documentclass: article
+    fontsize: 11pt
+    papersize: letter
+    pdf-engine: pdflatex
+    fontenc: OT1               
+    fontfamily: fix-cm
+    indent: true               
+    colorlinks: false
+    boxlinks: true             
+    geometry:
+      - left=53.24pt
+      - textwidth=469.8pt
+      - top=36.7pt
+      - textheight=636pt
+      - footskip=27pt
+    include-in-header: preamble.tex

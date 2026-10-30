@@ -1,0 +1,38 @@
+# Estado del arte {#sec-estado-del-arte}
+
+## Marco teórico {#sec-marco-teorico}
+
+<!-- Conceptos, modelos y teorías en los que se apoya el trabajo, con sus
+     fuentes. En el protocolo de referencia el título lleva el tema
+     ("Marco teórico: Modelos de ...") y cada modelo/concepto tiene su propio
+     párrafo encabezado, con figuras cuando ayudan.
+
+     Figuras: guarda la imagen en figuras/ y usa
+       ![Pie de la figura](figuras/archivo.png){#fig-etiqueta width=70%}
+     y refiérela en el texto con @fig-etiqueta. -->
+
+[Redactar el marco teórico.]
+
+## Trabajos relacionados {#sec-trabajos-relacionados}
+
+<!-- Un párrafo por trabajo (o grupo de trabajos): qué hicieron, cómo, qué
+     resultados obtuvieron y qué limitación tienen respecto a tu propuesta.
+     Puedes cerrar con productos o sistemas comerciales relevantes. -->
+
+[Describir los trabajos relacionados.]
+
+## Cuadro comparativo de los trabajos relacionados {#sec-cuadro-comparativo}
+
+<!-- Una fila por trabajo de la sección anterior, con su cita, y columnas con
+     los criterios que distinguen a tu propuesta. Las columnas de abajo son una
+     sugerencia a partir de los atributos de calidad de la tesis; cámbialas
+     libremente. Define las abreviaturas debajo de la tabla. -->
+
+| Trabajo   | Referencia | Multiesp. | IA img. | FHIR | DICOM | Trazab. IA | Offline |
+|-----------|------------|:---------:|:-------:|:----:|:-----:|:----------:|:-------:|
+| [Nombre]  | [cita]     |           |         |      |       |            |         |
+| [Nombre]  | [cita]     |           |         |      |       |            |         |
+
+: Cuadro comparativo de los trabajos relacionados {#tbl-comparativo}
+
+Multiesp. = Multiespecialidad; IA img. = Diagnóstico por imagen asistido por IA; Trazab. IA = Trazabilidad del modelo de IA por anotación; Offline = Operación ante fallas de red; No esp. = No especifica.

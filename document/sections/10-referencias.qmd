@@ -1,0 +1,8 @@
+# Referencias {#sec-referencias}
+
+<!-- No escribas nada aquí: la lista se genera sola a partir de las citas
+     usadas en el texto y de referencias.bib, con el estilo
+     csl/apa-corchetes.csl. -->
+
+::: {#refs}
+:::

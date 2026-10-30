@@ -1,0 +1,48 @@
+
+
+<!-- =====================================================================
+     CÓMO ESCRIBIR EN ESTE ARCHIVO
+     - Texto normal: Markdown. Deja una línea en blanco entre párrafos.
+     - Citas: \cite{clave}  ->  [Autor, año]. La clave se define en la
+       sección Referencias, al final, con \bibitem[Autor, año]{clave}.
+     - Bloques ```{=latex} ... ```: son partes en LaTeX que dan el formato
+       exacto (portada, tablas, cronograma). Solo cambia el texto dentro.
+       En ellos escribe \# \% \& \_ en lugar de # % & _.
+     - Los comentarios como este no aparecen en el PDF.
+     ===================================================================== -->
+
+```{=latex}
+% ---------------- PORTADA (edita los textos) ----------------
+\title{Centro de investigación y estudios avanzados del IPN\\
+       Departamento de Computación\\
+       \textbf{Protocolo de tesis}}
+\author{Tesista: Edgar Tobón Sosa\\
+        Director de tesis: [Grado y nombre del director], [Grado y nombre del codirector].}
+\date{\today}
+\begingroup\setlength{\parskip}{0pt}
+\maketitle
+\kern-15pt
+\begin{abstract}
+\kern-5pt
+```
+{{< include sections/00-resumen.qmd >}}
+
+{{< include sections/01-datos-generales.qmd >}}
+
+{{< include sections/02-descripcion-del-proyecto.qmd >}}
+
+{{< include sections/03-planteamiento-del-problema.qmd >}}
+
+{{< include sections/04-objetivos.qmd >}}
+
+{{< include sections/05-metodologia.qmd >}}
+
+{{< include sections/06-cronograma.qmd >}}
+
+{{< include sections/07-infraestructura.qmd >}}
+
+{{< include sections/08-estado-del-arte.qmd >}}
+
+{{< include sections/09-contribuciones.qmd >}}
+
+{{< include sections/10-referencias.qmd >}}

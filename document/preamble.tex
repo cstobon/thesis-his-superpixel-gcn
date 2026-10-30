@@ -1,0 +1,51 @@
+% ---- Ajustes para igualar el protocolo de referencia ----
+\PassOptionsToPackage{hyperfootnotes=false}{hyperref}
+\setlength{\emergencystretch}{0pt}
+\microtypesetup{activate=false}
+\usepackage[table]{xcolor}
+\usepackage{lscape}
+\usepackage{array}
+% Color de las celdas del cronograma; en la tabla se marca con \X
+\definecolor{crono}{RGB}{209,25,66}
+\newcommand{\X}{\cellcolor{crono}}
+% Tono claro (actualización continua) y símbolo de hito
+\newcommand{\Xc}{\cellcolor{crono!35}}
+\usepackage{pifont}
+\newcommand{\hito}{\ding{117}}
+% Listas
+\renewcommand{\tightlist}{}
+\usepackage{enumitem}
+\setlist{topsep=-7.1pt, partopsep=0pt}
+% Listas "1. 2. 3." en Markdown salen como I, II, III (objetivos);
+% las listas "a) b)" conservan su formato.
+\makeatletter
+\let\origdef\def
+\def\swallowlabeldef{\let\def\origdef\futurelet\next\checklabeldef}
+\def\checklabeldef{\ifx\next\labelenumi\expandafter\handlelabeldef\else\expandafter\origdef\fi}
+\def\pandocarabic{\arabic{enumi}.}
+\def\handlelabeldef#1#2{\def\tmplabel{#2}%
+  \ifx\tmplabel\pandocarabic
+    \def\labelenumi{\Roman{enumi}}%
+    \advance\@totalleftmargin -5.57pt \advance\linewidth 5.57pt
+    \advance\leftmargin -5.57pt \advance\labelwidth -5.57pt
+    \parshape \@ne \@totalleftmargin \linewidth
+  \else\origdef\labelenumi{#2}\fi}
+\setlist[enumerate,1]{first=\let\def\swallowlabeldef}
+\makeatother
+% Resumen con la misma letra y ancho que el cuerpo (sin \small ni márgenes de cita)
+\renewenvironment{abstract}{\begin{center}\bfseries\abstractname\vspace{-.5em}\end{center}}{\par}
+% Tablas de "Datos Generales" (Campo: & Valor \\)
+\newenvironment{datos}{\par\begin{tabular}{ll}}{\end{tabular}\par\addvspace{1sp}}
+% Una línea en blanco entre párrafos, como el original
+\setlength{\parskip}{13.55pt}
+\makeatletter
+\renewcommand\section{\@startsection{section}{1}{\z@}{-2.95pt \@plus -1ex \@minus -.2ex}{2.3ex \@plus.2ex}{\normalfont\Large\bfseries}}
+\renewcommand\subsection{\ifdim\lastskip=\z@\def\subskip{-3.25ex\@plus -1ex \@minus -.2ex}\else\def\subskip{-1.75pt\@plus -1ex \@minus -.2ex}\fi
+  \@startsection{subsection}{2}{\z@}{\subskip}{1.5ex \@plus .2ex}{\normalfont\large\bfseries}}
+\def\@xsect#1{\@tempskipa #1\relax
+  \ifdim \@tempskipa>\z@ \par \nobreak \vskip \@tempskipa \vskip -\parskip \@afterheading
+  \else \@nobreakfalse \global\@noskipsectrue
+    \everypar{\if@noskipsec \global\@noskipsecfalse {\setbox\z@\lastbox}\clubpenalty\@clubpenalty
+      \begingroup \@svsechd \endgroup \unskip \@tempskipa #1\relax \hskip -\@tempskipa
+      \else \clubpenalty \@clubpenalty \everypar{}\fi}\fi\ignorespaces}
+\makeatother

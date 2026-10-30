@@ -1,0 +1,6 @@
+/.quarto/
+**/*.quarto_ipynb
+
+# Salida HTML generada por Quarto (el PDF sí se versiona)
+/Protocolo.html
+/Protocolo_files/

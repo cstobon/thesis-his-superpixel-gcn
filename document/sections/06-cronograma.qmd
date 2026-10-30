@@ -1,0 +1,45 @@
+`\clearpage`{=latex}
+
+# Cronograma de actividades (plan de trabajo)
+
+<!-- Una fila por actividad. Pon \X en cada mes en que se trabaja la
+     actividad (celda roja), \Xc para el tono claro (actualización continua)
+     y \hito para marcar un hito; deja vacío el resto. -->
+
+```{=latex}
+\kern10pt
+\noindent\begin{tabular}{|p{6cm}|c|c|c|c|c|c|c|c|c|c|c|}
+\hline\hline
+ & oct & nov & dic & ene & feb & mar & abr & may & jun & jul & ago \\ \hline
+Revisión del estado del arte.
+ & \X & \X & \X & \X & \X & \X & \Xc & \Xc & \Xc & \Xc & \\ \hline
+Estudio de fundamentos de aprendizaje profundo, redes de grafos y superpíxeles diferenciables.
+ & \X & \X & \X & \X & & & & & & & \\ \hline
+Redacción y entrega del protocolo de tesis.
+ & \X & \X & \X\hito & & & & & & & & \\ \hline
+Reproducir las líneas base SLIC-GCN y PCNN-GCN sobre seis conjuntos de datos bajo el protocolo de referencia.
+ & & \X & \X & & & & & & & & \\ \hline
+Reproducir SSN en imágenes RGB (BSDS500) y evaluar su viabilidad.
+ & & & & \X\hito & & & & & & & \\ \hline
+Adaptar SSN a imágenes hiperespectrales mediante un extractor espectral y una afinidad angular inspirada en SAM.
+ & & & & & \X & & & & & & \\ \hline
+Formular la función de pérdida no supervisada (EV + compacidad) y entrenar el segmentador sin etiquetas.
+ & & & & & \X & \X & & & & & \\ \hline
+Integrar los superpíxeles en la GCN semi-supervisada y realizar la evaluación preliminar.
+ & & & & & & \X\hito & & & & & \\ \hline
+Explorar el entrenamiento de extremo a extremo del segmentador con la GCN.
+ & & & & & & & \X & \X & & & \\ \hline
+Evaluar la arquitectura propuesta frente a SLIC, LSC, ERS, SEEDS y PCNN-SAM, incluyendo el estudio de ablación.
+ & & & & & & & & \X & & & \\ \hline
+Analizar los resultados por tipo de escena y la relación entre las métricas de segmentación y la exactitud de clasificación.
+ & & & & & & & & & \X & & \\ \hline
+Redacción del manuscrito de tesis.
+ & & & & & \X & \X & \X & \X & \X & \X & \X \\ \hline
+Revisión final, preparación de artículo y defensa.
+ & & & & & & & & & & \X & \X\hito \\ \hline
+\end{tabular}
+
+\par\vspace{4pt}\noindent{\footnotesize
+\fcolorbox{black}{crono!35}{\rule{0pt}{5pt}\hspace{8pt}} = actualización continua.\quad
+\hito{} = hito.}
+```
