@@ -25,3 +25,8 @@ Desarrollar un segmentador en superpíxeles diferenciable, basado en Superpixel 
 6. Determinar, mediante ablaciones, el efecto del peso de la compacidad ($\lambda$), de la dimensión de las características aprendidas y del cálculo de la afinidad sobre las bandas originales frente a las características aprendidas.
 
 7. Explorar el entrenamiento de extremo a extremo del segmentador junto con la GCN, de modo que las muestras etiquetadas también influyan en la formación de los superpíxeles.
+
+<!-- Objetivo 8: responde a la línea de trabajo futuro TF1 de Galarza (2026,
+     sec. 5.3). Confirmar con la Dra. antes de enviar al comité. -->
+
+8. Implementar en GPU el cálculo de la afinidad espectral angular del segmentador y caracterizar su costo computacional por componente (tiempo, aceleración y memoria), comparándolo con PCNN-SAM y los métodos de referencia en el mismo hardware.
