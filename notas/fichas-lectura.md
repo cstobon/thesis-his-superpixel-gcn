@@ -23,19 +23,28 @@ Li et al. (2026). Joint Superpixel and Self-Representation Learning for Scalable
 
 > Por qué está en la lista: 2026: superpíxeles diferenciables entrenados sin etiquetas para HSI, pero con fines de agrupamiento (clustering), no de clasificación con GCN.
 
-- **Pasada 1 (fecha):** 
+- **Pasada 1 (9 de noviembre de 2026):** 
 - **Pasada 2 (fecha):** 
 - **¿Amenaza tu originalidad? (sí / no / parcial, y por qué):** 
+Parcial, y más cercana de lo que parece. Igual que mi propuesta, aprende superpíxeles diferenciables (tipo SSN) sin etiquetas sobre el espectro completo. Su pérdida de superpíxeles incluye un término de «compacidad espectral», (1/N) Σ‖X'ᵢ − Fᵢ‖² (Ec. 5), que es el error de reconstruir cada píxel con la media de su superpíxel; minimizarlo equivale prácticamente a maximizar la varianza explicada (EV = 1 − SSE intra/SST), aunque ellos no lo nombran así. Las diferencias que sí sostienen mi propuesta: (1) la EV es para mí el criterio central y explícito, mientras que en ellos ese término va mezclado con la consistencia local, la autorrepresentación y el ruido (Ec. 16); (2) ellos resuelven agrupamiento (clustering) por subespacios con una red ADMM desplegada, no clasificación semisupervisada con GCN; (3) no evalúan en Indian Pines.
 - **Problema que resuelve:** 
+El costo computacional y de memoria del agrupamiento por subespacios en HSI (crece cuadráticamente con el número de píxeles), y que los superpíxeles se generan como preprocesamiento independiente del agrupamiento, lo que produce particiones desalineadas con el objetivo (Sec. I). El agrupamiento se motiva por la falta de etiquetas en HSI.
 - **Cómo forma los superpíxeles (F / A / —, y con qué método):** 
+A. Asignación suave diferenciable tipo SSN: softmax de −d/τ sobre los 9 superpíxeles más cercanos (Ec. 3) y centroides como promedio ponderado (Ec. 4). Cada superpíxel aprende su propio parámetro de compacidad wⱼ, que equilibra la distancia espectral y la espacial (Sec. II-B). El número de superpíxeles M es el máximo entre una estimación por bordes y la cota 50C/R (Sec. III-A).
 - **Señal con la que los aprende (clasificación / sin etiquetas / —, y qué pérdida):** 
+Sin etiquetas. L_all = α·L_rep + L_spixel + L_noise (Ec. 16): L_rep = autorrepresentación dispersa (reconstrucción ‖ŜC − Ŝ‖², ℓ1 y entropía, Ec. 15) calculada por una red ADMM desplegada sobre los centroides; L_spixel = compacidad espectral + consistencia local (Ec. 5); L_noise regulariza el residuo δ (Ec. 17). Ojo: α se ajusta por conjunto de datos mirando la exactitud (Sec. III-C, Fig. 2) y M usa el número de clases C, así que no es del todo libre de etiquetas.
 - **Espectro completo o PCA:** 
+Espectro completo, X' = X + δ con un residuo aprendible δ (Sec. II-A); no menciona PCA.
 - **Distancia (euclidiana / angular / otra):** 
-- **Etiquetas por clase:** 
-- **Conjuntos de datos:** 
-- **OA en Indian Pines (y con cuántas etiquetas):** 
+Euclidiana al cuadrado, ponderada entre lo espectral y lo espacial: dᵢⱼ = wⱼ‖X'ᵢ − Sⱼ‖² + (1 − wⱼ)‖r(X'ᵢ) − r(Sⱼ)‖² (Ec. 2).
+- **Etiquetas por clase:** 0 (no supervisado).
+- **Conjuntos de datos:** Trento, Salinas y Urban (Tabla I). No usa Indian Pines.
+- **OA en Indian Pines (y con cuántas etiquetas):** — (no lo evalúa). Como referencia, OA de agrupamiento: Salinas 80,96 %, Trento 90,21 %, Urban 84,52 % (Tabla II).
+- **Código:** https://github.com/lxlscut/superpixel_ssc
 - **Limitación frente a tu propuesta:** 
+Los superpíxeles se optimizan para agrupar por subespacios, no para alimentar un clasificador: no hay GCN ni aprendizaje semisupervisado, y no se sabe si sus particiones sirven como nodos de un grafo para clasificar. Además, no evalúa en Indian Pines y sus hiperparámetros (α, M) dependen de información de las etiquetas.
 - **Para el protocolo (en qué sección lo citas y la idea en una oración):** 
+Trabajos relacionados C y planteamiento del problema: los marcos de superpíxeles diferenciables se han aplicado principalmente a tareas supervisadas, donde el gradiente proviene de las etiquetas, y llevarlos a entornos sin etiquetas exige otra señal de gradiente (Sec. I); Li et al. usan la autorrepresentación, mientras que mi propuesta usa la varianza explicada.
 
 ### wang2025multiscale · Prioridad A
 
@@ -43,19 +52,28 @@ Wang et al. (2025). Multiscale Graph Transformer Network With Dynamic Superpixel
 
 > Por qué está en la lista: 2025: superpíxeles diferenciables en varias escalas y un transformer de grafos; lo prueba en IP, PU, SA y WHU-Hi-HongHu (tus datos).
 
-- **Pasada 1 (fecha):** 
+- **Pasada 1 (8 de noviembre del 2026):** 
 - **Pasada 2 (fecha):** 
 - **¿Amenaza tu originalidad? (sí / no / parcial, y por qué):** 
+Parcial. MSGTN ya combina superpíxeles diferenciables con una GCN (multiescala) para clasificar HSI, que es el mismo esqueleto de mi propuesta. Le añade una pirámide de varias escalas y un transformer espectral–espacial sobre los superpíxeles, que yo no uso. La diferencia que sostiene mi originalidad es la señal: mis superpíxeles se aprenden sin etiquetas optimizando la varianza explicada (EV), mientras que en MSGTN la segmentación se entrena dentro de la red de clasificación [verificar en el PDF: ¿solo con entropía cruzada o con alguna pérdida adicional?].
 - **Problema que resuelve:** 
-- **Cómo forma los superpíxeles (F / A / —, y con qué método):** 
+Los objetos del terreno en las HSI aparecen a escalas espaciales diversas y los métodos tradicionales extraen características a una escala fija, por lo que no se adaptan a estructuras espaciales variables. Además, los métodos convencionales se centran en rasgos espectrales o espaciales locales y descuidan el contexto global. MSGTN extrae características multiescala (GCN sobre grafos adaptativos) y modela dependencias globales entre superpíxeles (transformer) (resumen).
+- **Cómo forma los superpíxeles (F / A / —, y con qué método):**
+A. Segmentación por superpíxeles diferenciable en el espacio de características (no sobre los píxeles crudos), repetida en varias escalas (pirámide dinámica de superpíxeles); cada nivel define la topología de un grafo (resumen). [Verificar en el PDF: método base (¿tipo SSN?) y número de superpíxeles por escala.]
 - **Señal con la que los aprende (clasificación / sin etiquetas / —, y qué pérdida):** 
+Clasificación (entrenamiento extremo a extremo con la red) [verificar en el PDF la pérdida exacta].
 - **Espectro completo o PCA:** 
+[Verificar en el PDF: el resumen no lo dice.]
 - **Distancia (euclidiana / angular / otra):** 
+[Verificar en el PDF.]
 - **Etiquetas por clase:** 
-- **Conjuntos de datos:** 
-- **OA en Indian Pines (y con cuántas etiquetas):** 
+No usa un número fijo por clase sino un porcentaje del total: 1 % en UP, SA y WHHH, 5 % en IP (resumen).
+- **Conjuntos de datos:** University of Pavia (UP), Indian Pines (IP), Salinas Valley (SA) y WHU-Hi-HongHu (WHHH).
+- **OA en Indian Pines (y con cuántas etiquetas):** 96,94 % con 5 % de muestras etiquetadas (resumen). Otras: UP 99,01 % (1 %), SA 99,43 % (1 %), WHHH 97,95 % (1 %).
 - **Limitación frente a tu propuesta:** 
+Los superpíxeles se aprenden dentro de la red supervisada, así que su calidad depende de las etiquetas; no hay un criterio sin etiquetas (como la EV) que garantice que cada superpíxel resuma bien el espectro de sus píxeles.
 - **Para el protocolo (en qué sección lo citas y la idea en una oración):** 
+Trabajos relacionados C (y planteamiento del problema): MSGTN muestra que los superpíxeles diferenciables combinados con GCN mejoran la clasificación de HSI frente a la segmentación fija de una sola escala; sin embargo, los aprende con la señal de clasificación, lo que deja abierto aprenderlos sin etiquetas.
 
 ### li2023feature · Prioridad A
 
@@ -63,19 +81,25 @@ Li et al. (2023). Feature-guided dynamic graph convolutional network for wetland
 
 > Por qué está en la lista: Módulo aprendible que genera superpíxeles adaptativos más una adyacencia dinámica. Revisa con qué pérdida aprende los superpíxeles.
 
-- **Pasada 1 (fecha):** 
+- **Pasada 1 (9 de noviembre de 2026, solo resumen):** 
 - **Pasada 2 (fecha):** 
 - **¿Amenaza tu originalidad? (sí / no / parcial, y por qué):** 
+Parcial. FG-DGCN ya combina un módulo de superpíxeles aprendible con una GCN para clasificar HSI con pocas muestras, que es el esqueleto de mi propuesta. Le añade una adyacencia dinámica guiada por características. Por el resumen, el módulo de superpíxeles se ajusta «por entrenamiento» dentro de la red de clasificación, es decir, con la señal de las etiquetas; mi propuesta los aprende sin etiquetas optimizando la varianza explicada (EV). [Verificar en el PDF si existe alguna pérdida adicional no supervisada; si la hay, la amenaza sube.]
 - **Problema que resuelve:** 
+Las GCN para clasificar humedales con pocas muestras dependen de superpíxeles generados con métodos que «dependen de la experiencia del usuario» (parámetros fijados a mano), y al construir el grafo se ignora la información espacial; ambas cosas limitan la clasificación (resumen).
 - **Cómo forma los superpíxeles (F / A / —, y con qué método):** 
+A. Módulo de generación de superpíxeles aprendible con dos bloques: uno de realce de características por píxel (mejora la discriminación) y otro de generación de superpíxeles que ajusta su representación durante el entrenamiento; produce bordes adaptativos. Al final, las características se proyectan de forma diferenciable de vuelta al espacio de píxeles (resumen). [Verificar en el PDF: método base (¿tipo SSN?, ¿inicializa con SLIC?) y número de superpíxeles.]
 - **Señal con la que los aprende (clasificación / sin etiquetas / —, y qué pérdida):** 
-- **Espectro completo o PCA:** 
-- **Distancia (euclidiana / angular / otra):** 
-- **Etiquetas por clase:** 
-- **Conjuntos de datos:** 
-- **OA en Indian Pines (y con cuántas etiquetas):** 
+Clasificación (extremo a extremo con la GCN) según el resumen. [Verificar en el PDF la ecuación de pérdida: ¿solo entropía cruzada?]
+- **Espectro completo o PCA:** [Verificar en el PDF.]
+- **Distancia (euclidiana / angular / otra):** [Verificar en el PDF: distancia de asignación píxel–superpíxel y similitud de la adyacencia dinámica, que combina correlaciones espectrales y espaciales entre nodos.]
+- **Etiquetas por clase:** Pocas muestras («limited samples»). [Verificar en el PDF el número o porcentaje por conjunto.]
+- **Conjuntos de datos:** Tres conjuntos de humedales (resumen). [Verificar nombres en el PDF: probablemente WHU-Hi u otros humedales; confirmar si incluye Indian Pines.]
+- **OA en Indian Pines (y con cuántas etiquetas):** [Verificar en el PDF; el resumen solo menciona humedales, así que posiblemente no lo evalúa.]
 - **Limitación frente a tu propuesta:** 
+Los superpíxeles se aprenden con la señal de clasificación, así que su calidad depende de las pocas etiquetas disponibles; no hay un criterio sin etiquetas (como la EV) que garantice que cada superpíxel resuma bien el espectro de sus píxeles. Además, se valida solo en humedales.
 - **Para el protocolo (en qué sección lo citas y la idea en una oración):** 
+Trabajos relacionados C y planteamiento del problema: Li et al. (2023) señalan que los superpíxeles generados con parámetros fijados a mano limitan a las GCN en HSI y proponen aprenderlos dentro de la red supervisada; mi propuesta comparte la motivación pero aprende los superpíxeles sin etiquetas mediante la EV.
 
 ### zhang2022ems · Prioridad A
 
@@ -83,19 +107,28 @@ Zhang et al. (2022). EMS-GCN: An End-to-End Mixhop Superpixel-Based Graph Convol
 
 > Por qué está en la lista: El más cercano a tu tesis: superpíxeles diferenciables dentro de una GCN, entrenados de extremo a extremo. Define si tu hueco sigue abierto.
 
-- **Pasada 1 (fecha):** 
+- **Pasada 1 (9 de noviembre de 2026, resumen + código oficial):** 
 - **Pasada 2 (fecha):** 
 - **¿Amenaza tu originalidad? (sí / no / parcial, y por qué):** 
+Parcial (la más alta hasta ahora). EMS-GCN ya hace lo que describe el título de mi tesis: superpíxeles diferenciables (SLIC diferenciable tipo SSN) dentro de una GCN, entrenados de extremo a extremo para clasificar HSI. La diferencia que sostiene mi propuesta es la señal: en EMS-GCN los superpíxeles se aprenden con entropía cruzada sobre las etiquetas más una pérdida de reconstrucción de etiquetas y una compacidad solo espacial (posiciones). No hay ningún término sin etiquetas que mida la fidelidad espectral de los superpíxeles; mi propuesta los aprende con la varianza explicada (EV), que es justamente ese término.
 - **Problema que resuelve:** 
+Las GCN basadas en superpíxeles para HSI usan una segmentación fija hecha como preprocesamiento (p. ej., SLIC), separada de la clasificación, así que los errores de segmentación se arrastran y los bordes no se pueden corregir. EMS-GCN integra una segmentación diferenciable para refinar los bordes durante el entrenamiento y una GCN mixhop que capta información local (dentro del superpíxel) y de largo alcance (entre superpíxeles) (resumen).
 - **Cómo forma los superpíxeles (F / A / —, y con qué método):** 
+A. SLIC diferenciable (DSLIC, basado en SSN/ESCNet): una CNN multiescala (convoluciones 1×1, 3×3 y 5×5, 128 canales) extrae características por píxel, se les concatenan las coordenadas escaladas (η_pos = 1,8) y se hacen 5 iteraciones de asignación suave (softmax) sobre los 9 superpíxeles vecinos de una rejilla inicial. Número de superpíxeles = H·W/escala, con escala = 100 por defecto (≈ 210 en Indian Pines) (código: EMSGCN.py, ssn.py).
 - **Señal con la que los aprende (clasificación / sin etiquetas / —, y qué pérdida):** 
+Clasificación. L = CE + 0,1·L_recon + 0,001·L_compact (código: main.py). CE = entropía cruzada de los píxeles etiquetados. L_recon = entropía cruzada entre las etiquetas y su reconstrucción píxel → superpíxel → píxel con la matriz de asignación Q (depende de etiquetas). L_compact = MSE entre las coordenadas de cada píxel y las de su superpíxel (sin etiquetas, pero solo espacial). [Verificar en el PDF que las ecuaciones coinciden con el código.]
 - **Espectro completo o PCA:** 
+Espectro completo estandarizado (StandardScaler por banda), sin PCA; la CNN lo proyecta a 128 canales antes de segmentar (código).
 - **Distancia (euclidiana / angular / otra):** 
-- **Etiquetas por clase:** 
-- **Conjuntos de datos:** 
-- **OA en Indian Pines (y con cuántas etiquetas):** 
+Euclidiana al cuadrado entre características CNN + posición del píxel y del superpíxel (kernel calc_assoc). En el grafo: la adyacencia binaria entre superpíxeles vecinos se calcula una sola vez y los pesos de las aristas se aprenden como sigmoid(HHᵀ) con softmax, tipo atención (GCNLayer).
+- **Etiquetas por clase:** 30 por clase por defecto (15 si la clase tiene menos de 30), muestreo aleatorio y opción de muestreo disjunto; 5 repeticiones con semillas distintas (código). [Verificar en el PDF otros tamaños de entrenamiento.]
+- **Conjuntos de datos:** Indian Pines y Pavia University en el código. [Verificar en el PDF si hay más.]
+- **OA en Indian Pines (y con cuántas etiquetas):** [Verificar en el PDF, tabla de resultados; configuración por defecto: 30 por clase.]
+- **Código:** https://github.com/immortal13/EMS-GCN-hyperspectral-image-classification (basado en ESCNet y CEGCN; requiere CUDA).
 - **Limitación frente a tu propuesta:** 
+Los superpíxeles dependen de las etiquetas: con pocas muestras, la señal para mover los bordes es escasa, y la única regularización sin etiquetas es espacial (compacidad), no espectral. Además, la adyacencia del grafo se fija con la segmentación inicial (la rejilla) y no se actualiza cuando cambian los superpíxeles (código: get_A con la variable global A).
 - **Para el protocolo (en qué sección lo citas y la idea en una oración):** 
+Trabajos relacionados C (antecedente directo) y justificación: Zhang et al. (2022) muestran que integrar superpíxeles diferenciables en una GCN de extremo a extremo mejora la clasificación de HSI frente a la segmentación fija, pero los aprenden con señal supervisada; queda abierto aprenderlos con un criterio espectral sin etiquetas como la EV.
 
 ### liu2024dual · Prioridad B
 
@@ -103,29 +136,29 @@ Liu et al. (2024). Dual-Stage Hyperspectral Image Classification Model with Spe
 
 > Por qué está en la lista: ECCV 2024: «supertokens» espectrales, una agrupación aprendida parecida a los superpíxeles. Sirve para mostrar la tendencia.
 
-- **Pasada 1 (fecha):** 
+- **Pasada 1 (9 de noviembre de 2026, texto completo arXiv 2407.07307v1):** 
 - **Pasada 2 (fecha):** 
 - **¿Amenaza tu originalidad? (sí / no / parcial, y por qué):** 
+No. DSTC agrupa píxeles espectralmente similares en «supertokens» (inspirados en superpíxeles) y los clasifica con un ViT, no con una GCN. La agrupación es un k-means suave desplegado dentro de la red, entrenada solo con entropía cruzada sobre etiquetas suaves (CPSL); no hay ningún término sin etiquetas ni varianza explicada. Sirve como evidencia de la tendencia a aprender la agrupación dentro de la red, no como competidor directo.
 - **Problema que resuelve:** 
+Los modelos píxel a píxel ignoran la similitud entre píxeles vecinos, lo que produce bordes borrosos o incorrectos entre clases y etiquetas inconsistentes dentro de regiones continuas con pequeñas variaciones espectrales. Además, SLIC es iterativo, se paraleliza mal en GPU y no garantiza etiquetas consistentes por región (Sec. 1).
 - **Cómo forma los superpíxeles (F / A / —, y con qué método):** 
+A (supertokens). Un codificador tipo UNet (ResNet18, PVTv2-b1 o Swin-tiny) da características densas F_D; la asociación píxel–centro usa F_D más proyecciones lineales aprendibles del espectro crudo y de su primera derivada espectral (Ec. 5). Centros iniciales tipo SLIC, actualización de k-means suave (Ec. 6) y asignación final por argmax. Se agrupa dentro de parches de 16×16 con M = 4 centros por parche (Sec. 4.1); los supertokens no tienen que ser regiones conexas.
 - **Señal con la que los aprende (clasificación / sin etiquetas / —, y qué pérdida):** 
+Clasificación. Única pérdida: entropía cruzada de los supertokens contra una etiqueta suave basada en la proporción de clases dentro de cada token (CPSL, Ecs. 11–12). Entrenamiento de extremo a extremo; no hay pérdida de agrupamiento, compacidad ni reconstrucción.
 - **Espectro completo o PCA:** 
+Espectro completo (sin PCA), más sus derivadas espectrales de primer orden (Ecs. 3–5).
 - **Distancia (euclidiana / angular / otra):** 
+Euclidiana al cuadrado dentro de un núcleo exponencial: A = exp(−‖F_D + I_a + I'_a − P‖²) (Ec. 5).
 - **Etiquetas por clase:** 
-- **Conjuntos de datos:** 
-- **OA en Indian Pines (y con cuántas etiquetas):** 
+No usa un número fijo por clase. En IP, KSC y UP: 10 % para entrenar y 90 % para probar, con parches de 9×9 solapados (Sec. 4.3); no dice si la partición es disjunta, así que puede haber fuga entre entrenamiento y prueba. En WHU-OHS: imágenes completas de 512×512 con anotación densa.
+- **Conjuntos de datos:** WHU-OHS (7795 imágenes, 32 bandas, 24 clases), Indian Pines, Kennedy Space Center (KSC) y Pavia University; HS-SOD solo en el material suplementario.
+- **OA en Indian Pines (y con cuántas etiquetas):** 98,75 % (AA 96,15 %, κ 98,57 %) con 10 % de muestras (Tabla 3). Ojo: el régimen es muy distinto al de pocas etiquetas, y el 10 % sobre parches solapados infla la comparación.
+- **Código:** https://github.com/laprf/DSTC
 - **Limitación frente a tu propuesta:** 
+La agrupación se aprende solo con la señal de clasificación y requiere muchas etiquetas (10 % o anotación densa); no se evalúa con pocas muestras por clase. Los autores reconocen que la ventaja es menor en IP, KSC y UP, donde trabajan con parches pequeños (Sec. 4.3). No modela relaciones entre regiones con un grafo.
 - **Para el protocolo (en qué sección lo citas y la idea en una oración):** 
-
-### cui2024superpixel · Prioridad C
-
-Cui et al. (2024). Superpixel-Based and Spatially Regularized Diffusion Learning for Unsupervised Hyperspectral Image Clustering. *IEEE Transactions on Geoscience and Remote Sensing*. <http://dx.doi.org/10.1109/TGRS.2024.3385202>
-
-> Por qué está en la lista: Superpíxeles más difusión para agrupar HSI sin etiquetas; contexto del enfoque no supervisado.
-
-- **Pasada 1 (fecha):** 
-- **Dato que citarás (con página o tabla):** 
-- **Para el protocolo (sección):** 
+Trabajos relacionados C (tendencia): Liu et al. (2024) agrupan píxeles en supertokens espectrales aprendidos de extremo a extremo para clasificar HSI, lo que confirma la tendencia a integrar la agrupación tipo superpíxel en la red; pero la aprenden solo con etiquetas y con un transformer, no con un criterio sin etiquetas ni una GCN.
 
 ---
 
