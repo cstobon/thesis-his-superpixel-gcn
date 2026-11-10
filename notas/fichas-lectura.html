@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.9.36">
+<meta name="generator" content="quarto-1.9.37">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -33,7 +33,7 @@ ul.task-list li input[type="checkbox"] {
 <script src="fichas-lectura_files/libs/quarto-html/tippy.umd.min.js"></script>
 <script src="fichas-lectura_files/libs/quarto-html/anchor.min.js"></script>
 <link href="fichas-lectura_files/libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="fichas-lectura_files/libs/quarto-html/quarto-syntax-highlighting-845c23b38eaddc0f92fda52bfe77a8c8.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="fichas-lectura_files/libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="fichas-lectura_files/libs/bootstrap/bootstrap.min.js"></script>
 <link href="fichas-lectura_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="fichas-lectura_files/libs/bootstrap/bootstrap-138a6193a3bd40baf1e627da441a4734.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
@@ -72,19 +72,22 @@ ul.task-list li input[type="checkbox"] {
 <p>Por qué está en la lista: 2026: superpíxeles diferenciables entrenados sin etiquetas para HSI, pero con fines de agrupamiento (clustering), no de clasificación con GCN.</p>
 </blockquote>
 <ul>
-<li><strong>Pasada 1 (fecha):</strong></li>
+<li><strong>Pasada 1 (9 de noviembre de 2026):</strong></li>
 <li><strong>Pasada 2 (fecha):</strong></li>
-<li><strong>¿Amenaza tu originalidad? (sí / no / parcial, y por qué):</strong></li>
-<li><strong>Problema que resuelve:</strong></li>
-<li><strong>Cómo forma los superpíxeles (F / A / —, y con qué método):</strong></li>
-<li><strong>Señal con la que los aprende (clasificación / sin etiquetas / —, y qué pérdida):</strong></li>
-<li><strong>Espectro completo o PCA:</strong></li>
-<li><strong>Distancia (euclidiana / angular / otra):</strong></li>
-<li><strong>Etiquetas por clase:</strong></li>
-<li><strong>Conjuntos de datos:</strong></li>
-<li><strong>OA en Indian Pines (y con cuántas etiquetas):</strong></li>
-<li><strong>Limitación frente a tu propuesta:</strong></li>
-<li><strong>Para el protocolo (en qué sección lo citas y la idea en una oración):</strong></li>
+<li><strong>¿Amenaza tu originalidad? (sí / no / parcial, y por qué):</strong> Parcial, y más cercana de lo que parece. Igual que mi propuesta, aprende superpíxeles diferenciables (tipo SSN) sin etiquetas sobre el espectro completo. Su pérdida de superpíxeles incluye un término de «compacidad espectral», (1/N) Σ‖X’ᵢ − Fᵢ‖² (Ec. 5), que es el error de reconstruir cada píxel con la media de su superpíxel; minimizarlo equivale prácticamente a maximizar la varianza explicada (EV = 1 − SSE intra/SST), aunque ellos no lo nombran así. Las diferencias que sí sostienen mi propuesta: (1) la EV es para mí el criterio central y explícito, mientras que en ellos ese término va mezclado con la consistencia local, la autorrepresentación y el ruido (Ec. 16); (2) ellos resuelven agrupamiento (clustering) por subespacios con una red ADMM desplegada, no clasificación semisupervisada con GCN; (3) no evalúan en Indian Pines.</li>
+<li><strong>Problema que resuelve:</strong> El costo computacional y de memoria del agrupamiento por subespacios en HSI (crece cuadráticamente con el número de píxeles), y que los superpíxeles se generan como preprocesamiento independiente del agrupamiento, lo que produce particiones desalineadas con el objetivo (Sec. I). El agrupamiento se motiva por la falta de etiquetas en HSI.</li>
+<li><strong>Cómo forma los superpíxeles (F / A / —, y con qué método):</strong> A. Asignación suave diferenciable tipo SSN: softmax de −d/τ sobre los 9 superpíxeles más cercanos (Ec. 3) y centroides como promedio ponderado (Ec. 4). Cada superpíxel aprende su propio parámetro de compacidad wⱼ, que equilibra la distancia espectral y la espacial (Sec. II-B). El número de superpíxeles M es el máximo entre una estimación por bordes y la cota 50C/R (Sec. III-A).</li>
+<li><strong>Señal con la que los aprende (clasificación / sin etiquetas / —, y qué pérdida):</strong> Sin etiquetas. L_all = α·L_rep + L_spixel + L_noise (Ec. 16): L_rep = autorrepresentación dispersa (reconstrucción ‖ŜC − Ŝ‖², ℓ1 y entropía, Ec. 15) calculada por una red ADMM desplegada sobre los centroides; L_spixel = compacidad espectral + consistencia local (Ec. 5); L_noise regulariza el residuo δ (Ec. 17). Ojo: α se ajusta por conjunto de datos mirando la exactitud (Sec. III-C, Fig. 2) y M usa el número de clases C, así que no es del todo libre de etiquetas.</li>
+<li><strong>Espectro completo o PCA:</strong> Espectro completo, X’ = X + δ con un residuo aprendible δ (Sec. II-A); no menciona PCA.</li>
+<li><strong>Distancia (euclidiana / angular / otra):</strong> Euclidiana al cuadrado, ponderada entre lo espectral y lo espacial: dᵢⱼ = wⱼ‖X’ᵢ − Sⱼ‖² + (1 − wⱼ)‖r(X’ᵢ) − r(Sⱼ)‖² (Ec. 2).</li>
+<li><strong>Etiquetas por clase:</strong> 0 (no supervisado).</li>
+<li><strong>Conjuntos de datos:</strong> Trento, Salinas y Urban (Tabla I). No usa Indian Pines.</li>
+<li><strong>OA en Indian Pines (y con cuántas etiquetas):</strong> — (no lo evalúa). Como referencia, OA de agrupamiento: Salinas 80,96 %, Trento 90,21 %, Urban 84,52 % (Tabla II).</li>
+<li><strong>Código:</strong> https://github.com/lxlscut/superpixel_ssc</li>
+<li><strong>Métricas de los superpíxeles (¿reporta ASA, BR o EV, o solo OA, AA y κ?):</strong></li>
+<li><strong>¿Analiza por tipo de escena? ¿Publica su código?:</strong></li>
+<li><strong>Limitación frente a tu propuesta:</strong> Los superpíxeles se optimizan para agrupar por subespacios, no para alimentar un clasificador: no hay GCN ni aprendizaje semisupervisado, y no se sabe si sus particiones sirven como nodos de un grafo para clasificar. Además, no evalúa en Indian Pines y sus hiperparámetros (α, M) dependen de información de las etiquetas.</li>
+<li><strong>Para el protocolo (en qué sección lo citas y la idea en una oración):</strong> Trabajos relacionados C y planteamiento del problema: los marcos de superpíxeles diferenciables se han aplicado principalmente a tareas supervisadas, donde el gradiente proviene de las etiquetas, y llevarlos a entornos sin etiquetas exige otra señal de gradiente (Sec. I); Li et al.&nbsp;usan la autorrepresentación, mientras que mi propuesta usa la varianza explicada.</li>
 </ul>
 </section>
 <section id="wang2025multiscale-prioridad-a" class="level3">
@@ -94,19 +97,21 @@ ul.task-list li input[type="checkbox"] {
 <p>Por qué está en la lista: 2025: superpíxeles diferenciables en varias escalas y un transformer de grafos; lo prueba en IP, PU, SA y WHU-Hi-HongHu (tus datos).</p>
 </blockquote>
 <ul>
-<li><strong>Pasada 1 (fecha):</strong></li>
+<li><strong>Pasada 1 (8 de noviembre del 2026):</strong></li>
 <li><strong>Pasada 2 (fecha):</strong></li>
-<li><strong>¿Amenaza tu originalidad? (sí / no / parcial, y por qué):</strong></li>
-<li><strong>Problema que resuelve:</strong></li>
-<li><strong>Cómo forma los superpíxeles (F / A / —, y con qué método):</strong></li>
-<li><strong>Señal con la que los aprende (clasificación / sin etiquetas / —, y qué pérdida):</strong></li>
-<li><strong>Espectro completo o PCA:</strong></li>
-<li><strong>Distancia (euclidiana / angular / otra):</strong></li>
-<li><strong>Etiquetas por clase:</strong></li>
-<li><strong>Conjuntos de datos:</strong></li>
-<li><strong>OA en Indian Pines (y con cuántas etiquetas):</strong></li>
-<li><strong>Limitación frente a tu propuesta:</strong></li>
-<li><strong>Para el protocolo (en qué sección lo citas y la idea en una oración):</strong></li>
+<li><strong>¿Amenaza tu originalidad? (sí / no / parcial, y por qué):</strong> Parcial. MSGTN ya combina superpíxeles diferenciables con una GCN (multiescala) para clasificar HSI, que es el mismo esqueleto de mi propuesta. Le añade una pirámide de varias escalas y un transformer espectral–espacial sobre los superpíxeles, que yo no uso. La diferencia que sostiene mi originalidad es la señal: mis superpíxeles se aprenden sin etiquetas optimizando la varianza explicada (EV), mientras que en MSGTN la segmentación se entrena dentro de la red de clasificación [verificar en el PDF: ¿solo con entropía cruzada o con alguna pérdida adicional?].</li>
+<li><strong>Problema que resuelve:</strong> Los objetos del terreno en las HSI aparecen a escalas espaciales diversas y los métodos tradicionales extraen características a una escala fija, por lo que no se adaptan a estructuras espaciales variables. Además, los métodos convencionales se centran en rasgos espectrales o espaciales locales y descuidan el contexto global. MSGTN extrae características multiescala (GCN sobre grafos adaptativos) y modela dependencias globales entre superpíxeles (transformer) (resumen).</li>
+<li><strong>Cómo forma los superpíxeles (F / A / —, y con qué método):</strong> A. Segmentación por superpíxeles diferenciable en el espacio de características (no sobre los píxeles crudos), repetida en varias escalas (pirámide dinámica de superpíxeles); cada nivel define la topología de un grafo (resumen). [Verificar en el PDF: método base (¿tipo SSN?) y número de superpíxeles por escala.]</li>
+<li><strong>Señal con la que los aprende (clasificación / sin etiquetas / —, y qué pérdida):</strong> Clasificación (entrenamiento extremo a extremo con la red) [verificar en el PDF la pérdida exacta].</li>
+<li><strong>Espectro completo o PCA:</strong> [Verificar en el PDF: el resumen no lo dice.]</li>
+<li><strong>Distancia (euclidiana / angular / otra):</strong> [Verificar en el PDF.]</li>
+<li><strong>Etiquetas por clase:</strong> No usa un número fijo por clase sino un porcentaje del total: 1 % en UP, SA y WHHH, 5 % en IP (resumen).</li>
+<li><strong>Conjuntos de datos:</strong> University of Pavia (UP), Indian Pines (IP), Salinas Valley (SA) y WHU-Hi-HongHu (WHHH).</li>
+<li><strong>OA en Indian Pines (y con cuántas etiquetas):</strong> 96,94 % con 5 % de muestras etiquetadas (resumen). Otras: UP 99,01 % (1 %), SA 99,43 % (1 %), WHHH 97,95 % (1 %).</li>
+<li><strong>Métricas de los superpíxeles (¿reporta ASA, BR o EV, o solo OA, AA y κ?):</strong></li>
+<li><strong>¿Analiza por tipo de escena? ¿Publica su código?:</strong></li>
+<li><strong>Limitación frente a tu propuesta:</strong> Los superpíxeles se aprenden dentro de la red supervisada, así que su calidad depende de las etiquetas; no hay un criterio sin etiquetas (como la EV) que garantice que cada superpíxel resuma bien el espectro de sus píxeles.</li>
+<li><strong>Para el protocolo (en qué sección lo citas y la idea en una oración):</strong> Trabajos relacionados C (y planteamiento del problema): MSGTN muestra que los superpíxeles diferenciables combinados con GCN mejoran la clasificación de HSI frente a la segmentación fija de una sola escala; sin embargo, los aprende con la señal de clasificación, lo que deja abierto aprenderlos sin etiquetas.</li>
 </ul>
 </section>
 <section id="li2023feature-prioridad-a" class="level3">
@@ -116,19 +121,28 @@ ul.task-list li input[type="checkbox"] {
 <p>Por qué está en la lista: Módulo aprendible que genera superpíxeles adaptativos más una adyacencia dinámica. Revisa con qué pérdida aprende los superpíxeles.</p>
 </blockquote>
 <ul>
-<li><strong>Pasada 1 (fecha):</strong></li>
-<li><strong>Pasada 2 (fecha):</strong></li>
-<li><strong>¿Amenaza tu originalidad? (sí / no / parcial, y por qué):</strong></li>
-<li><strong>Problema que resuelve:</strong></li>
-<li><strong>Cómo forma los superpíxeles (F / A / —, y con qué método):</strong></li>
-<li><strong>Señal con la que los aprende (clasificación / sin etiquetas / —, y qué pérdida):</strong></li>
-<li><strong>Espectro completo o PCA:</strong></li>
-<li><strong>Distancia (euclidiana / angular / otra):</strong></li>
-<li><strong>Etiquetas por clase:</strong></li>
-<li><strong>Conjuntos de datos:</strong></li>
-<li><strong>OA en Indian Pines (y con cuántas etiquetas):</strong></li>
+<li><strong>Pasada 1 (9 de noviembre de 2026, solo resumen):</strong></li>
+<li><strong>Pasada 2 (10 de noviembre de 2026, PDF completo, 16 pp.):</strong></li>
+<li><strong>¿Amenaza tu originalidad? (sí / no / parcial, y por qué):</strong> Parcial, menor que EMS-GCN. FG-DGCN ya combina un módulo de superpíxeles aprendible (tipo SSN) con una GCN para clasificar HSI con pocas muestras, que es el esqueleto de mi propuesta. Verificado en el PDF: la pérdida total es solo L_cro (Ec. 16, entropía cruzada) + L_rec (Ec. 17, reconstrucción de las <strong>etiquetas semánticas</strong> Y con Q̃Q̂ᵀY). Ambas usan solo los m píxeles etiquetados. No hay ningún término sin etiquetas: ni espectral ni de compacidad. La amenaza no sube. Mi EV usa la misma estructura de reconstrucción, pero con el espectro X en lugar de Y y sobre todos los píxeles, sin etiquetas.</li>
+<li><strong>Problema que resuelve:</strong> Las GCN para clasificar humedales con pocas muestras dependen de superpíxeles generados con procesos predefinidos y parámetros fijados a mano (p.&nbsp;ej. SLIC), y al construir el grafo se ignora la relación espacial entre superpíxeles; ambas cosas limitan la clasificación (resumen e introducción, p.&nbsp;2).</li>
+<li><strong>Cómo forma los superpíxeles (F / A / —, y con qué método):</strong> A. Dos bloques (sec.&nbsp;2.2): (1) realce de características por píxel: conv 1×1@64, dos A-Conv 3×3@32 (convolución + autoatención) y conv 3×3@128 con conexiones tipo DenseNet (Tabla 4); (2) generación de superpíxeles tipo SSN: rejilla regular inicial S⁰ con el promedio de características, asociación suave Q_ij = exp(−γ‖X_i − S_j‖) con los <strong>8 superpíxeles vecinos</strong> (γ aprendible, Ec. 9), centros S_j = promedio ponderado por Q (Ec. 10), 5 iteraciones. No inicializa con SLIC. Escala de superpíxeles: 100, 100 y 50 (GF-5, Chris y GT) y 100 en KSC; el artículo no aclara si es el número de superpíxeles o de píxeles por superpíxel [verificar en el código]. Al final, Q proyecta las características de la GCN de vuelta a los píxeles (Ec. 15).</li>
+<li><strong>Señal con la que los aprende (clasificación / sin etiquetas / —, y qué pérdida):</strong> Clasificación. L = L_cro + L_rec (sec.&nbsp;2.4; el texto no da pesos). L_cro = entropía cruzada sobre los m píxeles etiquetados (Ec. 16). L_rec = entropía cruzada entre las etiquetas one-hot Y y su reconstrucción píxel → superpíxel → píxel Q̃Q̂ᵀY (Ec. 17; Q̃ normalizada por filas, Q̂ por columnas): premia los superpíxeles puros en clase (tipo ASA diferenciable), igual que SSN y EMS-GCN. <strong>Sin término de compacidad</strong>, a diferencia de EMS-GCN. Entrenamiento extremo a extremo con Adam (lr 0,0005), 500 épocas, 2 capas GCN.</li>
+<li><strong>Espectro completo o PCA:</strong> Espectro completo: la red recibe X_in ∈ R^{H×W×C} con todas las bandas (150 en GF-5, 18 en Chris, 126 en GT, 224 en KSC); no menciona PCA. La asignación se calcula sobre las características aprendidas de 128 canales, no sobre el espectro original.</li>
+<li><strong>Distancia (euclidiana / angular / otra):</strong> Euclidiana (norma, sin elevar al cuadrado según la Ec. 9) entre características aprendidas del píxel y del superpíxel. <strong>No concatena coordenadas</strong> (EMS-GCN sí): lo espacial solo entra por la restricción a 8 vecinos. En el grafo usa similitud coseno entre nodos (Ec. 12, adyacencia espectral dinámica) más una adyacencia espacial binaria de superpíxeles con borde común ponderada por una «importancia» aprendida (Ecs. 11 y 13). Ojo: la coseno está en el grafo, no en la asignación píxel–superpíxel.</li>
+<li><strong>Etiquetas por clase:</strong> 200 por clase en GF-5 y Chris; 5 % por clase en GT (de 6 a 1645 muestras); 20 por clase en KSC (Tablas 1–3, sec.&nbsp;3.6). Sensibilidad (Tabla 10): 100–300 por clase o 1–10 %. Nunca baja de 100 por clase en los conjuntos principales, muy lejos de mis 5.</li>
+<li><strong>Conjuntos de datos:</strong> GF-5 (462×617, 150 bandas, 8 clases), Chris (510×511, 18 bandas, 6 clases), GT (dron, 590×512, 126 bandas, 9 clases): los tres son humedales del delta del río Amarillo; más KSC (614×512, 224 bandas, 13 clases) como generalización. Ninguno coincide con mis 6 conjuntos.</li>
+<li><strong>OA en Indian Pines (y con cuántas etiquetas):</strong> — (no lo evalúa). Referencia: OA 83,28 % GF-5, 88,25 % Chris, 97,85 % GT y 99,73 % KSC (Tablas 6, 7, 8 y 11).</li>
+<li><strong>Métricas de los superpíxeles (¿reporta ASA, BR o EV, o solo OA, AA y κ?):</strong> Solo OA, AA y κ. No mide la calidad de los superpíxeles (ni ASA, ni BR, ni EV). Reporta FLOPs, parámetros y tiempos de entrenamiento y prueba en una RTX 3090 (Tablas 12 y 13; útil para el grupo 8 de HPC).</li>
+<li><strong>¿Analiza por tipo de escena? ¿Publica su código?:</strong> No hay un análisis por tipo de escena; solo comenta casos (el río Amarillo queda en un solo superpíxel, sec.&nbsp;3.3.1). Código: https://github.com/MengQiao-stu/Elsevier-FG-DGCN-master</li>
+<li><strong>Dato clave de la ablación (Tabla 9):</strong> cambiar SLIC por los superpíxeles aprendidos mejora la OA solo <strong>+0,38 % (GF-5), +0,80 % (Chris) y +0,47 % (GT)</strong>, y eso con 200 etiquetas por clase. Argumento para mi tesis: aprender los superpíxeles con la señal de las etiquetas aporta poco incluso con muchas etiquetas; con 5 por clase la señal es todavía más débil.</li>
+<li><strong>Cita útil (introducción, p.&nbsp;2):</strong> los autores descartan los métodos no supervisados porque «they do not rely on the true labels, which is not robust». Mi tesis argumenta lo contrario para la etapa de segmentación: un criterio sin etiquetas (EV) es más robusto cuando hay solo 5 etiquetas por clase.</li>
 <li><strong>Limitación frente a tu propuesta:</strong></li>
-<li><strong>Para el protocolo (en qué sección lo citas y la idea en una oración):</strong></li>
+</ul>
+<ol type="1">
+<li>Los superpíxeles se aprenden solo con la señal de las etiquetas (L_cro + L_rec), así que su calidad depende de muchas muestras (≥100 por clase); no hay un criterio sin etiquetas que garantice la fidelidad espectral (EV). (2) No hay compacidad ni coordenadas en la asignación. (3) La distancia de asignación es euclidiana sobre características aprendidas, no angular. (4) No evalúa la calidad de los superpíxeles ni la relación entre las métricas de segmentación y la OA. (5) Solo humedales y ninguno de mis 6 conjuntos.</li>
+</ol>
+<ul>
+<li><strong>Para el protocolo (en qué sección lo citas y la idea en una oración):</strong> Trabajos relacionados C y planteamiento. Borrador del párrafo: Li et al.&nbsp;(2023) proponen FG-DGCN, que sustituye a SLIC por un módulo de superpíxeles aprendible tipo SSN y añade una adyacencia dinámica que combina similitudes espectrales y espaciales entre superpíxeles. Los superpíxeles se ajustan con dos pérdidas supervisadas: la entropía cruzada de clasificación y una pérdida de reconstrucción de las etiquetas semánticas, ambas calculadas solo sobre los píxeles etiquetados. Su ablación muestra que reemplazar SLIC por los superpíxeles aprendidos eleva la OA menos de un punto porcentual, aun con 200 muestras por clase. El trabajo no evalúa la calidad de los superpíxeles ni incluye un criterio sin etiquetas que preserve la información espectral, el hueco que esta tesis aborda con la EV.</li>
 </ul>
 </section>
 <section id="zhang2022ems-prioridad-a" class="level3">
@@ -138,19 +152,22 @@ ul.task-list li input[type="checkbox"] {
 <p>Por qué está en la lista: El más cercano a tu tesis: superpíxeles diferenciables dentro de una GCN, entrenados de extremo a extremo. Define si tu hueco sigue abierto.</p>
 </blockquote>
 <ul>
-<li><strong>Pasada 1 (fecha):</strong></li>
+<li><strong>Pasada 1 (9 de noviembre de 2026, resumen + código oficial):</strong></li>
 <li><strong>Pasada 2 (fecha):</strong></li>
-<li><strong>¿Amenaza tu originalidad? (sí / no / parcial, y por qué):</strong></li>
-<li><strong>Problema que resuelve:</strong></li>
-<li><strong>Cómo forma los superpíxeles (F / A / —, y con qué método):</strong></li>
-<li><strong>Señal con la que los aprende (clasificación / sin etiquetas / —, y qué pérdida):</strong></li>
-<li><strong>Espectro completo o PCA:</strong></li>
-<li><strong>Distancia (euclidiana / angular / otra):</strong></li>
-<li><strong>Etiquetas por clase:</strong></li>
-<li><strong>Conjuntos de datos:</strong></li>
-<li><strong>OA en Indian Pines (y con cuántas etiquetas):</strong></li>
-<li><strong>Limitación frente a tu propuesta:</strong></li>
-<li><strong>Para el protocolo (en qué sección lo citas y la idea en una oración):</strong></li>
+<li><strong>¿Amenaza tu originalidad? (sí / no / parcial, y por qué):</strong> Parcial (la más alta hasta ahora). EMS-GCN ya hace lo que describe el título de mi tesis: superpíxeles diferenciables (SLIC diferenciable tipo SSN) dentro de una GCN, entrenados de extremo a extremo para clasificar HSI. La diferencia que sostiene mi propuesta es la señal: en EMS-GCN los superpíxeles se aprenden con entropía cruzada sobre las etiquetas más una pérdida de reconstrucción de etiquetas y una compacidad solo espacial (posiciones). No hay ningún término sin etiquetas que mida la fidelidad espectral de los superpíxeles; mi propuesta los aprende con la varianza explicada (EV), que es justamente ese término.</li>
+<li><strong>Problema que resuelve:</strong> Las GCN basadas en superpíxeles para HSI usan una segmentación fija hecha como preprocesamiento (p.&nbsp;ej., SLIC), separada de la clasificación, así que los errores de segmentación se arrastran y los bordes no se pueden corregir. EMS-GCN integra una segmentación diferenciable para refinar los bordes durante el entrenamiento y una GCN mixhop que capta información local (dentro del superpíxel) y de largo alcance (entre superpíxeles) (resumen).</li>
+<li><strong>Cómo forma los superpíxeles (F / A / —, y con qué método):</strong> A. SLIC diferenciable (DSLIC, basado en SSN/ESCNet): una CNN multiescala (convoluciones 1×1, 3×3 y 5×5, 128 canales) extrae características por píxel, se les concatenan las coordenadas escaladas (η_pos = 1,8) y se hacen 5 iteraciones de asignación suave (softmax) sobre los 9 superpíxeles vecinos de una rejilla inicial. Número de superpíxeles = H·W/escala, con escala = 100 por defecto (≈ 210 en Indian Pines) (código: EMSGCN.py, ssn.py).</li>
+<li><strong>Señal con la que los aprende (clasificación / sin etiquetas / —, y qué pérdida):</strong> Clasificación. L = CE + 0,1·L_recon + 0,001·L_compact (código: main.py). CE = entropía cruzada de los píxeles etiquetados. L_recon = entropía cruzada entre las etiquetas y su reconstrucción píxel → superpíxel → píxel con la matriz de asignación Q (depende de etiquetas). L_compact = MSE entre las coordenadas de cada píxel y las de su superpíxel (sin etiquetas, pero solo espacial). [Verificar en el PDF que las ecuaciones coinciden con el código.]</li>
+<li><strong>Espectro completo o PCA:</strong> Espectro completo estandarizado (StandardScaler por banda), sin PCA; la CNN lo proyecta a 128 canales antes de segmentar (código).</li>
+<li><strong>Distancia (euclidiana / angular / otra):</strong> Euclidiana al cuadrado entre características CNN + posición del píxel y del superpíxel (kernel calc_assoc). En el grafo: la adyacencia binaria entre superpíxeles vecinos se calcula una sola vez y los pesos de las aristas se aprenden como sigmoid(HHᵀ) con softmax, tipo atención (GCNLayer).</li>
+<li><strong>Etiquetas por clase:</strong> 30 por clase por defecto (15 si la clase tiene menos de 30), muestreo aleatorio y opción de muestreo disjunto; 5 repeticiones con semillas distintas (código). [Verificar en el PDF otros tamaños de entrenamiento.]</li>
+<li><strong>Conjuntos de datos:</strong> Indian Pines y Pavia University en el código. [Verificar en el PDF si hay más.]</li>
+<li><strong>OA en Indian Pines (y con cuántas etiquetas):</strong> [Verificar en el PDF, tabla de resultados; configuración por defecto: 30 por clase.]</li>
+<li><strong>Código:</strong> https://github.com/immortal13/EMS-GCN-hyperspectral-image-classification (basado en ESCNet y CEGCN; requiere CUDA).</li>
+<li><strong>Métricas de los superpíxeles (¿reporta ASA, BR o EV, o solo OA, AA y κ?):</strong></li>
+<li><strong>¿Analiza por tipo de escena? ¿Publica su código?:</strong></li>
+<li><strong>Limitación frente a tu propuesta:</strong> Los superpíxeles dependen de las etiquetas: con pocas muestras, la señal para mover los bordes es escasa, y la única regularización sin etiquetas es espacial (compacidad), no espectral. Además, la adyacencia del grafo se fija con la segmentación inicial (la rejilla) y no se actualiza cuando cambian los superpíxeles (código: get_A con la variable global A).</li>
+<li><strong>Para el protocolo (en qué sección lo citas y la idea en una oración):</strong> Trabajos relacionados C (antecedente directo) y justificación: Zhang et al.&nbsp;(2022) muestran que integrar superpíxeles diferenciables en una GCN de extremo a extremo mejora la clasificación de HSI frente a la segmentación fija, pero los aprenden con señal supervisada; queda abierto aprenderlos con un criterio espectral sin etiquetas como la EV.</li>
 </ul>
 </section>
 <section id="liu2024dual-prioridad-b" class="level3">
@@ -160,31 +177,22 @@ ul.task-list li input[type="checkbox"] {
 <p>Por qué está en la lista: ECCV 2024: «supertokens» espectrales, una agrupación aprendida parecida a los superpíxeles. Sirve para mostrar la tendencia.</p>
 </blockquote>
 <ul>
-<li><strong>Pasada 1 (fecha):</strong></li>
+<li><strong>Pasada 1 (9 de noviembre de 2026, texto completo arXiv 2407.07307v1):</strong></li>
 <li><strong>Pasada 2 (fecha):</strong></li>
-<li><strong>¿Amenaza tu originalidad? (sí / no / parcial, y por qué):</strong></li>
-<li><strong>Problema que resuelve:</strong></li>
-<li><strong>Cómo forma los superpíxeles (F / A / —, y con qué método):</strong></li>
-<li><strong>Señal con la que los aprende (clasificación / sin etiquetas / —, y qué pérdida):</strong></li>
-<li><strong>Espectro completo o PCA:</strong></li>
-<li><strong>Distancia (euclidiana / angular / otra):</strong></li>
-<li><strong>Etiquetas por clase:</strong></li>
-<li><strong>Conjuntos de datos:</strong></li>
-<li><strong>OA en Indian Pines (y con cuántas etiquetas):</strong></li>
-<li><strong>Limitación frente a tu propuesta:</strong></li>
-<li><strong>Para el protocolo (en qué sección lo citas y la idea en una oración):</strong></li>
-</ul>
-</section>
-<section id="cui2024superpixel-prioridad-c" class="level3">
-<h3 class="anchored" data-anchor-id="cui2024superpixel-prioridad-c">cui2024superpixel · Prioridad C</h3>
-<p>Cui et al.&nbsp;(2024). Superpixel-Based and Spatially Regularized Diffusion Learning for Unsupervised Hyperspectral Image Clustering. <em>IEEE Transactions on Geoscience and Remote Sensing</em>. <a href="http://dx.doi.org/10.1109/TGRS.2024.3385202" class="uri">http://dx.doi.org/10.1109/TGRS.2024.3385202</a></p>
-<blockquote class="blockquote">
-<p>Por qué está en la lista: Superpíxeles más difusión para agrupar HSI sin etiquetas; contexto del enfoque no supervisado.</p>
-</blockquote>
-<ul>
-<li><strong>Pasada 1 (fecha):</strong></li>
-<li><strong>Dato que citarás (con página o tabla):</strong></li>
-<li><strong>Para el protocolo (sección):</strong></li>
+<li><strong>¿Amenaza tu originalidad? (sí / no / parcial, y por qué):</strong> No.&nbsp;DSTC agrupa píxeles espectralmente similares en «supertokens» (inspirados en superpíxeles) y los clasifica con un ViT, no con una GCN. La agrupación es un k-means suave desplegado dentro de la red, entrenada solo con entropía cruzada sobre etiquetas suaves (CPSL); no hay ningún término sin etiquetas ni varianza explicada. Sirve como evidencia de la tendencia a aprender la agrupación dentro de la red, no como competidor directo.</li>
+<li><strong>Problema que resuelve:</strong> Los modelos píxel a píxel ignoran la similitud entre píxeles vecinos, lo que produce bordes borrosos o incorrectos entre clases y etiquetas inconsistentes dentro de regiones continuas con pequeñas variaciones espectrales. Además, SLIC es iterativo, se paraleliza mal en GPU y no garantiza etiquetas consistentes por región (Sec. 1).</li>
+<li><strong>Cómo forma los superpíxeles (F / A / —, y con qué método):</strong> A (supertokens). Un codificador tipo UNet (ResNet18, PVTv2-b1 o Swin-tiny) da características densas F_D; la asociación píxel–centro usa F_D más proyecciones lineales aprendibles del espectro crudo y de su primera derivada espectral (Ec. 5). Centros iniciales tipo SLIC, actualización de k-means suave (Ec. 6) y asignación final por argmax. Se agrupa dentro de parches de 16×16 con M = 4 centros por parche (Sec. 4.1); los supertokens no tienen que ser regiones conexas.</li>
+<li><strong>Señal con la que los aprende (clasificación / sin etiquetas / —, y qué pérdida):</strong> Clasificación. Única pérdida: entropía cruzada de los supertokens contra una etiqueta suave basada en la proporción de clases dentro de cada token (CPSL, Ecs. 11–12). Entrenamiento de extremo a extremo; no hay pérdida de agrupamiento, compacidad ni reconstrucción.</li>
+<li><strong>Espectro completo o PCA:</strong> Espectro completo (sin PCA), más sus derivadas espectrales de primer orden (Ecs. 3–5).</li>
+<li><strong>Distancia (euclidiana / angular / otra):</strong> Euclidiana al cuadrado dentro de un núcleo exponencial: A = exp(−‖F_D + I_a + I’_a − P‖²) (Ec. 5).</li>
+<li><strong>Etiquetas por clase:</strong> No usa un número fijo por clase. En IP, KSC y UP: 10 % para entrenar y 90 % para probar, con parches de 9×9 solapados (Sec. 4.3); no dice si la partición es disjunta, así que puede haber fuga entre entrenamiento y prueba. En WHU-OHS: imágenes completas de 512×512 con anotación densa.</li>
+<li><strong>Conjuntos de datos:</strong> WHU-OHS (7795 imágenes, 32 bandas, 24 clases), Indian Pines, Kennedy Space Center (KSC) y Pavia University; HS-SOD solo en el material suplementario.</li>
+<li><strong>OA en Indian Pines (y con cuántas etiquetas):</strong> 98,75 % (AA 96,15 %, κ 98,57 %) con 10 % de muestras (Tabla 3). Ojo: el régimen es muy distinto al de pocas etiquetas, y el 10 % sobre parches solapados infla la comparación.</li>
+<li><strong>Código:</strong> https://github.com/laprf/DSTC</li>
+<li><strong>Métricas de los superpíxeles (¿reporta ASA, BR o EV, o solo OA, AA y κ?):</strong></li>
+<li><strong>¿Analiza por tipo de escena? ¿Publica su código?:</strong></li>
+<li><strong>Limitación frente a tu propuesta:</strong> La agrupación se aprende solo con la señal de clasificación y requiere muchas etiquetas (10 % o anotación densa); no se evalúa con pocas muestras por clase. Los autores reconocen que la ventaja es menor en IP, KSC y UP, donde trabajan con parches pequeños (Sec. 4.3). No modela relaciones entre regiones con un grafo.</li>
+<li><strong>Para el protocolo (en qué sección lo citas y la idea en una oración):</strong> Trabajos relacionados C (tendencia): Liu et al.&nbsp;(2024) agrupan píxeles en supertokens espectrales aprendidos de extremo a extremo para clasificar HSI, lo que confirma la tendencia a integrar la agrupación tipo superpíxel en la red; pero la aprenden solo con etiquetas y con un transformer, no con un criterio sin etiquetas ni una GCN.</li>
 </ul>
 <hr>
 </section>
@@ -229,6 +237,8 @@ ul.task-list li input[type="checkbox"] {
 <li><strong>Etiquetas por clase:</strong></li>
 <li><strong>Conjuntos de datos:</strong></li>
 <li><strong>OA en Indian Pines (y con cuántas etiquetas):</strong></li>
+<li><strong>Métricas de los superpíxeles (¿reporta ASA, BR o EV, o solo OA, AA y κ?):</strong></li>
+<li><strong>¿Analiza por tipo de escena? ¿Publica su código?:</strong></li>
 <li><strong>Limitación frente a tu propuesta:</strong></li>
 <li><strong>Para el protocolo (en qué sección lo citas y la idea en una oración):</strong></li>
 </ul>
@@ -251,6 +261,8 @@ ul.task-list li input[type="checkbox"] {
 <li><strong>Etiquetas por clase:</strong></li>
 <li><strong>Conjuntos de datos:</strong></li>
 <li><strong>OA en Indian Pines (y con cuántas etiquetas):</strong></li>
+<li><strong>Métricas de los superpíxeles (¿reporta ASA, BR o EV, o solo OA, AA y κ?):</strong></li>
+<li><strong>¿Analiza por tipo de escena? ¿Publica su código?:</strong></li>
 <li><strong>Limitación frente a tu propuesta:</strong></li>
 <li><strong>Para el protocolo (en qué sección lo citas y la idea en una oración):</strong></li>
 </ul>
@@ -273,6 +285,8 @@ ul.task-list li input[type="checkbox"] {
 <li><strong>Etiquetas por clase:</strong></li>
 <li><strong>Conjuntos de datos:</strong></li>
 <li><strong>OA en Indian Pines (y con cuántas etiquetas):</strong></li>
+<li><strong>Métricas de los superpíxeles (¿reporta ASA, BR o EV, o solo OA, AA y κ?):</strong></li>
+<li><strong>¿Analiza por tipo de escena? ¿Publica su código?:</strong></li>
 <li><strong>Limitación frente a tu propuesta:</strong></li>
 <li><strong>Para el protocolo (en qué sección lo citas y la idea en una oración):</strong></li>
 </ul>
@@ -295,6 +309,8 @@ ul.task-list li input[type="checkbox"] {
 <li><strong>Etiquetas por clase:</strong></li>
 <li><strong>Conjuntos de datos:</strong></li>
 <li><strong>OA en Indian Pines (y con cuántas etiquetas):</strong></li>
+<li><strong>Métricas de los superpíxeles (¿reporta ASA, BR o EV, o solo OA, AA y κ?):</strong></li>
+<li><strong>¿Analiza por tipo de escena? ¿Publica su código?:</strong></li>
 <li><strong>Limitación frente a tu propuesta:</strong></li>
 <li><strong>Para el protocolo (en qué sección lo citas y la idea en una oración):</strong></li>
 </ul>
@@ -317,6 +333,8 @@ ul.task-list li input[type="checkbox"] {
 <li><strong>Etiquetas por clase:</strong></li>
 <li><strong>Conjuntos de datos:</strong></li>
 <li><strong>OA en Indian Pines (y con cuántas etiquetas):</strong></li>
+<li><strong>Métricas de los superpíxeles (¿reporta ASA, BR o EV, o solo OA, AA y κ?):</strong></li>
+<li><strong>¿Analiza por tipo de escena? ¿Publica su código?:</strong></li>
 <li><strong>Limitación frente a tu propuesta:</strong></li>
 <li><strong>Para el protocolo (en qué sección lo citas y la idea en una oración):</strong></li>
 </ul>
@@ -339,6 +357,8 @@ ul.task-list li input[type="checkbox"] {
 <li><strong>Etiquetas por clase:</strong></li>
 <li><strong>Conjuntos de datos:</strong></li>
 <li><strong>OA en Indian Pines (y con cuántas etiquetas):</strong></li>
+<li><strong>Métricas de los superpíxeles (¿reporta ASA, BR o EV, o solo OA, AA y κ?):</strong></li>
+<li><strong>¿Analiza por tipo de escena? ¿Publica su código?:</strong></li>
 <li><strong>Limitación frente a tu propuesta:</strong></li>
 <li><strong>Para el protocolo (en qué sección lo citas y la idea en una oración):</strong></li>
 </ul>
@@ -450,6 +470,8 @@ ul.task-list li input[type="checkbox"] {
 <li><strong>Etiquetas por clase:</strong></li>
 <li><strong>Conjuntos de datos:</strong></li>
 <li><strong>OA en Indian Pines (y con cuántas etiquetas):</strong></li>
+<li><strong>Métricas de los superpíxeles (¿reporta ASA, BR o EV, o solo OA, AA y κ?):</strong></li>
+<li><strong>¿Analiza por tipo de escena? ¿Publica su código?:</strong></li>
 <li><strong>Limitación frente a tu propuesta:</strong></li>
 <li><strong>Para el protocolo (en qué sección lo citas y la idea en una oración):</strong></li>
 </ul>
@@ -472,6 +494,8 @@ ul.task-list li input[type="checkbox"] {
 <li><strong>Etiquetas por clase:</strong></li>
 <li><strong>Conjuntos de datos:</strong></li>
 <li><strong>OA en Indian Pines (y con cuántas etiquetas):</strong></li>
+<li><strong>Métricas de los superpíxeles (¿reporta ASA, BR o EV, o solo OA, AA y κ?):</strong></li>
+<li><strong>¿Analiza por tipo de escena? ¿Publica su código?:</strong></li>
 <li><strong>Limitación frente a tu propuesta:</strong></li>
 <li><strong>Para el protocolo (en qué sección lo citas y la idea en una oración):</strong></li>
 </ul>
@@ -494,6 +518,8 @@ ul.task-list li input[type="checkbox"] {
 <li><strong>Etiquetas por clase:</strong></li>
 <li><strong>Conjuntos de datos:</strong></li>
 <li><strong>OA en Indian Pines (y con cuántas etiquetas):</strong></li>
+<li><strong>Métricas de los superpíxeles (¿reporta ASA, BR o EV, o solo OA, AA y κ?):</strong></li>
+<li><strong>¿Analiza por tipo de escena? ¿Publica su código?:</strong></li>
 <li><strong>Limitación frente a tu propuesta:</strong></li>
 <li><strong>Para el protocolo (en qué sección lo citas y la idea en una oración):</strong></li>
 </ul>
@@ -516,6 +542,8 @@ ul.task-list li input[type="checkbox"] {
 <li><strong>Etiquetas por clase:</strong></li>
 <li><strong>Conjuntos de datos:</strong></li>
 <li><strong>OA en Indian Pines (y con cuántas etiquetas):</strong></li>
+<li><strong>Métricas de los superpíxeles (¿reporta ASA, BR o EV, o solo OA, AA y κ?):</strong></li>
+<li><strong>¿Analiza por tipo de escena? ¿Publica su código?:</strong></li>
 <li><strong>Limitación frente a tu propuesta:</strong></li>
 <li><strong>Para el protocolo (en qué sección lo citas y la idea en una oración):</strong></li>
 </ul>
@@ -538,6 +566,8 @@ ul.task-list li input[type="checkbox"] {
 <li><strong>Etiquetas por clase:</strong></li>
 <li><strong>Conjuntos de datos:</strong></li>
 <li><strong>OA en Indian Pines (y con cuántas etiquetas):</strong></li>
+<li><strong>Métricas de los superpíxeles (¿reporta ASA, BR o EV, o solo OA, AA y κ?):</strong></li>
+<li><strong>¿Analiza por tipo de escena? ¿Publica su código?:</strong></li>
 <li><strong>Limitación frente a tu propuesta:</strong></li>
 <li><strong>Para el protocolo (en qué sección lo citas y la idea en una oración):</strong></li>
 </ul>
@@ -560,6 +590,8 @@ ul.task-list li input[type="checkbox"] {
 <li><strong>Etiquetas por clase:</strong></li>
 <li><strong>Conjuntos de datos:</strong></li>
 <li><strong>OA en Indian Pines (y con cuántas etiquetas):</strong></li>
+<li><strong>Métricas de los superpíxeles (¿reporta ASA, BR o EV, o solo OA, AA y κ?):</strong></li>
+<li><strong>¿Analiza por tipo de escena? ¿Publica su código?:</strong></li>
 <li><strong>Limitación frente a tu propuesta:</strong></li>
 <li><strong>Para el protocolo (en qué sección lo citas y la idea en una oración):</strong></li>
 </ul>
@@ -671,6 +703,8 @@ ul.task-list li input[type="checkbox"] {
 <li><strong>Etiquetas por clase:</strong></li>
 <li><strong>Conjuntos de datos:</strong></li>
 <li><strong>OA en Indian Pines (y con cuántas etiquetas):</strong></li>
+<li><strong>Métricas de los superpíxeles (¿reporta ASA, BR o EV, o solo OA, AA y κ?):</strong></li>
+<li><strong>¿Analiza por tipo de escena? ¿Publica su código?:</strong></li>
 <li><strong>Limitación frente a tu propuesta:</strong></li>
 <li><strong>Para el protocolo (en qué sección lo citas y la idea en una oración):</strong></li>
 </ul>
@@ -693,6 +727,8 @@ ul.task-list li input[type="checkbox"] {
 <li><strong>Etiquetas por clase:</strong></li>
 <li><strong>Conjuntos de datos:</strong></li>
 <li><strong>OA en Indian Pines (y con cuántas etiquetas):</strong></li>
+<li><strong>Métricas de los superpíxeles (¿reporta ASA, BR o EV, o solo OA, AA y κ?):</strong></li>
+<li><strong>¿Analiza por tipo de escena? ¿Publica su código?:</strong></li>
 <li><strong>Limitación frente a tu propuesta:</strong></li>
 <li><strong>Para el protocolo (en qué sección lo citas y la idea en una oración):</strong></li>
 </ul>
@@ -732,6 +768,8 @@ ul.task-list li input[type="checkbox"] {
 <li><strong>Etiquetas por clase:</strong></li>
 <li><strong>Conjuntos de datos:</strong></li>
 <li><strong>OA en Indian Pines (y con cuántas etiquetas):</strong></li>
+<li><strong>Métricas de los superpíxeles (¿reporta ASA, BR o EV, o solo OA, AA y κ?):</strong></li>
+<li><strong>¿Analiza por tipo de escena? ¿Publica su código?:</strong></li>
 <li><strong>Limitación frente a tu propuesta:</strong></li>
 <li><strong>Para el protocolo (en qué sección lo citas y la idea en una oración):</strong></li>
 </ul>
@@ -754,6 +792,8 @@ ul.task-list li input[type="checkbox"] {
 <li><strong>Etiquetas por clase:</strong></li>
 <li><strong>Conjuntos de datos:</strong></li>
 <li><strong>OA en Indian Pines (y con cuántas etiquetas):</strong></li>
+<li><strong>Métricas de los superpíxeles (¿reporta ASA, BR o EV, o solo OA, AA y κ?):</strong></li>
+<li><strong>¿Analiza por tipo de escena? ¿Publica su código?:</strong></li>
 <li><strong>Limitación frente a tu propuesta:</strong></li>
 <li><strong>Para el protocolo (en qué sección lo citas y la idea en una oración):</strong></li>
 </ul>
@@ -776,6 +816,8 @@ ul.task-list li input[type="checkbox"] {
 <li><strong>Etiquetas por clase:</strong></li>
 <li><strong>Conjuntos de datos:</strong></li>
 <li><strong>OA en Indian Pines (y con cuántas etiquetas):</strong></li>
+<li><strong>Métricas de los superpíxeles (¿reporta ASA, BR o EV, o solo OA, AA y κ?):</strong></li>
+<li><strong>¿Analiza por tipo de escena? ¿Publica su código?:</strong></li>
 <li><strong>Limitación frente a tu propuesta:</strong></li>
 <li><strong>Para el protocolo (en qué sección lo citas y la idea en una oración):</strong></li>
 </ul>
@@ -798,6 +840,8 @@ ul.task-list li input[type="checkbox"] {
 <li><strong>Etiquetas por clase:</strong></li>
 <li><strong>Conjuntos de datos:</strong></li>
 <li><strong>OA en Indian Pines (y con cuántas etiquetas):</strong></li>
+<li><strong>Métricas de los superpíxeles (¿reporta ASA, BR o EV, o solo OA, AA y κ?):</strong></li>
+<li><strong>¿Analiza por tipo de escena? ¿Publica su código?:</strong></li>
 <li><strong>Limitación frente a tu propuesta:</strong></li>
 <li><strong>Para el protocolo (en qué sección lo citas y la idea en una oración):</strong></li>
 </ul>
@@ -820,6 +864,8 @@ ul.task-list li input[type="checkbox"] {
 <li><strong>Etiquetas por clase:</strong></li>
 <li><strong>Conjuntos de datos:</strong></li>
 <li><strong>OA en Indian Pines (y con cuántas etiquetas):</strong></li>
+<li><strong>Métricas de los superpíxeles (¿reporta ASA, BR o EV, o solo OA, AA y κ?):</strong></li>
+<li><strong>¿Analiza por tipo de escena? ¿Publica su código?:</strong></li>
 <li><strong>Limitación frente a tu propuesta:</strong></li>
 <li><strong>Para el protocolo (en qué sección lo citas y la idea en una oración):</strong></li>
 </ul>
@@ -842,6 +888,8 @@ ul.task-list li input[type="checkbox"] {
 <li><strong>Etiquetas por clase:</strong></li>
 <li><strong>Conjuntos de datos:</strong></li>
 <li><strong>OA en Indian Pines (y con cuántas etiquetas):</strong></li>
+<li><strong>Métricas de los superpíxeles (¿reporta ASA, BR o EV, o solo OA, AA y κ?):</strong></li>
+<li><strong>¿Analiza por tipo de escena? ¿Publica su código?:</strong></li>
 <li><strong>Limitación frente a tu propuesta:</strong></li>
 <li><strong>Para el protocolo (en qué sección lo citas y la idea en una oración):</strong></li>
 </ul>
@@ -864,6 +912,8 @@ ul.task-list li input[type="checkbox"] {
 <li><strong>Etiquetas por clase:</strong></li>
 <li><strong>Conjuntos de datos:</strong></li>
 <li><strong>OA en Indian Pines (y con cuántas etiquetas):</strong></li>
+<li><strong>Métricas de los superpíxeles (¿reporta ASA, BR o EV, o solo OA, AA y κ?):</strong></li>
+<li><strong>¿Analiza por tipo de escena? ¿Publica su código?:</strong></li>
 <li><strong>Limitación frente a tu propuesta:</strong></li>
 <li><strong>Para el protocolo (en qué sección lo citas y la idea en una oración):</strong></li>
 </ul>
@@ -886,6 +936,8 @@ ul.task-list li input[type="checkbox"] {
 <li><strong>Etiquetas por clase:</strong></li>
 <li><strong>Conjuntos de datos:</strong></li>
 <li><strong>OA en Indian Pines (y con cuántas etiquetas):</strong></li>
+<li><strong>Métricas de los superpíxeles (¿reporta ASA, BR o EV, o solo OA, AA y κ?):</strong></li>
+<li><strong>¿Analiza por tipo de escena? ¿Publica su código?:</strong></li>
 <li><strong>Limitación frente a tu propuesta:</strong></li>
 <li><strong>Para el protocolo (en qué sección lo citas y la idea en una oración):</strong></li>
 </ul>
@@ -908,6 +960,8 @@ ul.task-list li input[type="checkbox"] {
 <li><strong>Etiquetas por clase:</strong></li>
 <li><strong>Conjuntos de datos:</strong></li>
 <li><strong>OA en Indian Pines (y con cuántas etiquetas):</strong></li>
+<li><strong>Métricas de los superpíxeles (¿reporta ASA, BR o EV, o solo OA, AA y κ?):</strong></li>
+<li><strong>¿Analiza por tipo de escena? ¿Publica su código?:</strong></li>
 <li><strong>Limitación frente a tu propuesta:</strong></li>
 <li><strong>Para el protocolo (en qué sección lo citas y la idea en una oración):</strong></li>
 </ul>
@@ -930,6 +984,8 @@ ul.task-list li input[type="checkbox"] {
 <li><strong>Etiquetas por clase:</strong></li>
 <li><strong>Conjuntos de datos:</strong></li>
 <li><strong>OA en Indian Pines (y con cuántas etiquetas):</strong></li>
+<li><strong>Métricas de los superpíxeles (¿reporta ASA, BR o EV, o solo OA, AA y κ?):</strong></li>
+<li><strong>¿Analiza por tipo de escena? ¿Publica su código?:</strong></li>
 <li><strong>Limitación frente a tu propuesta:</strong></li>
 <li><strong>Para el protocolo (en qué sección lo citas y la idea en una oración):</strong></li>
 </ul>
@@ -952,6 +1008,8 @@ ul.task-list li input[type="checkbox"] {
 <li><strong>Etiquetas por clase:</strong></li>
 <li><strong>Conjuntos de datos:</strong></li>
 <li><strong>OA en Indian Pines (y con cuántas etiquetas):</strong></li>
+<li><strong>Métricas de los superpíxeles (¿reporta ASA, BR o EV, o solo OA, AA y κ?):</strong></li>
+<li><strong>¿Analiza por tipo de escena? ¿Publica su código?:</strong></li>
 <li><strong>Limitación frente a tu propuesta:</strong></li>
 <li><strong>Para el protocolo (en qué sección lo citas y la idea en una oración):</strong></li>
 </ul>
@@ -974,6 +1032,8 @@ ul.task-list li input[type="checkbox"] {
 <li><strong>Etiquetas por clase:</strong></li>
 <li><strong>Conjuntos de datos:</strong></li>
 <li><strong>OA en Indian Pines (y con cuántas etiquetas):</strong></li>
+<li><strong>Métricas de los superpíxeles (¿reporta ASA, BR o EV, o solo OA, AA y κ?):</strong></li>
+<li><strong>¿Analiza por tipo de escena? ¿Publica su código?:</strong></li>
 <li><strong>Limitación frente a tu propuesta:</strong></li>
 <li><strong>Para el protocolo (en qué sección lo citas y la idea en una oración):</strong></li>
 </ul>
@@ -1097,6 +1157,8 @@ ul.task-list li input[type="checkbox"] {
 <li><strong>Etiquetas por clase:</strong></li>
 <li><strong>Conjuntos de datos:</strong></li>
 <li><strong>OA en Indian Pines (y con cuántas etiquetas):</strong></li>
+<li><strong>Métricas de los superpíxeles (¿reporta ASA, BR o EV, o solo OA, AA y κ?):</strong></li>
+<li><strong>¿Analiza por tipo de escena? ¿Publica su código?:</strong></li>
 <li><strong>Limitación frente a tu propuesta:</strong></li>
 <li><strong>Para el protocolo (en qué sección lo citas y la idea en una oración):</strong></li>
 </ul>
@@ -1119,6 +1181,8 @@ ul.task-list li input[type="checkbox"] {
 <li><strong>Etiquetas por clase:</strong></li>
 <li><strong>Conjuntos de datos:</strong></li>
 <li><strong>OA en Indian Pines (y con cuántas etiquetas):</strong></li>
+<li><strong>Métricas de los superpíxeles (¿reporta ASA, BR o EV, o solo OA, AA y κ?):</strong></li>
+<li><strong>¿Analiza por tipo de escena? ¿Publica su código?:</strong></li>
 <li><strong>Limitación frente a tu propuesta:</strong></li>
 <li><strong>Para el protocolo (en qué sección lo citas y la idea en una oración):</strong></li>
 </ul>
@@ -1141,6 +1205,8 @@ ul.task-list li input[type="checkbox"] {
 <li><strong>Etiquetas por clase:</strong></li>
 <li><strong>Conjuntos de datos:</strong></li>
 <li><strong>OA en Indian Pines (y con cuántas etiquetas):</strong></li>
+<li><strong>Métricas de los superpíxeles (¿reporta ASA, BR o EV, o solo OA, AA y κ?):</strong></li>
+<li><strong>¿Analiza por tipo de escena? ¿Publica su código?:</strong></li>
 <li><strong>Limitación frente a tu propuesta:</strong></li>
 <li><strong>Para el protocolo (en qué sección lo citas y la idea en una oración):</strong></li>
 </ul>
@@ -1163,6 +1229,8 @@ ul.task-list li input[type="checkbox"] {
 <li><strong>Etiquetas por clase:</strong></li>
 <li><strong>Conjuntos de datos:</strong></li>
 <li><strong>OA en Indian Pines (y con cuántas etiquetas):</strong></li>
+<li><strong>Métricas de los superpíxeles (¿reporta ASA, BR o EV, o solo OA, AA y κ?):</strong></li>
+<li><strong>¿Analiza por tipo de escena? ¿Publica su código?:</strong></li>
 <li><strong>Limitación frente a tu propuesta:</strong></li>
 <li><strong>Para el protocolo (en qué sección lo citas y la idea en una oración):</strong></li>
 </ul>
@@ -1185,6 +1253,8 @@ ul.task-list li input[type="checkbox"] {
 <li><strong>Etiquetas por clase:</strong></li>
 <li><strong>Conjuntos de datos:</strong></li>
 <li><strong>OA en Indian Pines (y con cuántas etiquetas):</strong></li>
+<li><strong>Métricas de los superpíxeles (¿reporta ASA, BR o EV, o solo OA, AA y κ?):</strong></li>
+<li><strong>¿Analiza por tipo de escena? ¿Publica su código?:</strong></li>
 <li><strong>Limitación frente a tu propuesta:</strong></li>
 <li><strong>Para el protocolo (en qué sección lo citas y la idea en una oración):</strong></li>
 </ul>
