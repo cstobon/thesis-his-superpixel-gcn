@@ -1,0 +1,101 @@
+---
+lang: es
+number-sections: true
+bibliography: ../document/lecturas-verificadas.bib
+format:
+  pdf:
+    documentclass: article
+    fontsize: 11pt
+    papersize: letter
+    pdf-engine: pdflatex
+    fontenc: OT1
+    fontfamily: fix-cm
+    indent: true
+    colorlinks: false
+    boxlinks: true
+    geometry:
+      - left=53.24pt
+      - textwidth=469.8pt
+      - top=36.7pt
+      - textheight=636pt
+      - footskip=27pt
+    include-in-header: ../document/preamble.tex
+---
+
+<!-- =====================================================================
+     Mismo formato que document/Protocolo.qmd (usa su preamble.tex).
+     Fuentes: los 5 artículos de Documents/Artículos/Ingles y la tesis de
+     Galarza (2026). Entre paréntesis, la ecuación, figura o tabla de donde
+     sale cada dato. Para compilar: quarto render veredicto-originalidad.qmd
+     ===================================================================== -->
+
+```{=latex}
+\title{Centro de investigación y estudios avanzados del IPN\\
+       Departamento de Computación\\
+       \textbf{Veredicto de originalidad}}
+\author{Tesista: Edgar Tobón Sosa}
+\date{10 de noviembre de 2026}
+\begingroup\setlength{\parskip}{0pt}
+\maketitle
+\endgroup
+\kern-15pt
+```
+
+# Comparación con los trabajos más cercanos {#sec-comparacion}
+
+<!-- Una fila por trabajo, con su cita, y columnas con los criterios que
+     distinguen la propuesta. Las abreviaturas se definen debajo de la tabla. -->
+
+Se revisaron los cinco trabajos que más se acercan a la propuesta: tres que aprenden superpíxeles dentro de una red de clasificación con GCN [@zhang2022ems; @li2023feature; @wang2025multiscale] y dos que forman superpíxeles para el agrupamiento no supervisado [@li2026joint; @cui2024superpixel]. La @tbl-veredicto resume, para cada uno, cómo forma los superpíxeles, con qué señal los ajusta y si evalúa la calidad de la segmentación.
+
+| Trabajo | Tarea | Superp. | Señal para formarlos | Asignación | Etiquetas | ASA/BR/EV |
+|---------------|----------|----------|------------------------------|--------------------|--------------|----------|
+| EMS-GCN [@zhang2022ems] | Clas. (GCN) | A (SSN) | EC + recons. de etiquetas + compacidad espacial (Ecs. 15--17 y 20) | Euclidiana$^2$ con posición (Ec. 1) | 30 por clase; de 5 a 30 (Fig. 13) | No |
+| FG-DGCN [@li2023feature] | Clas. (GCN) | A (SSN) | EC + recons. de etiquetas (Ecs. 16--17) | Euclidiana sin posición (Ec. 9) | 200 por clase; 5 % (GT) | No |
+| MSGTN [@wang2025multiscale] | Clas. (GCN + transformer) | A (SSN, multiescala) | Solo EC (Sec. IV-C) | Euclidiana$^2$ (Ec. 5) | 1--5 % por clase | No |
+| @li2026joint | Agrup. | A (SSN) | Sin etiquetas: autorrepresentación + compacidad espectral + consistencia local (Ecs. 5, 15 y 16) | Euclidiana$^2$ con posición (Ec. 2) | 0 | No |
+| S$^2$DL [@cui2024superpixel] | Agrup. | F (ERS sobre PCA) | No aplica | No aplica | 0 | No |
+| Propuesta | Clas. (GCN) | A (SSN) | Sin etiquetas: EV explícita + compacidad | Angular (tipo SAM) | 5 por clase | Sí |
+
+: Comparación de la propuesta con los trabajos más cercanos {#tbl-veredicto}
+
+Clas. = clasificación semisupervisada; Agrup. = agrupamiento no supervisado; Superp. = superpíxeles; A = aprendidos; F = fijos; EC = entropía cruzada; recons. = reconstrucción; ASA/BR/EV = reporta alguna métrica de calidad de la segmentación.
+
+# Veredicto {#sec-veredicto}
+
+El hueco de investigación sigue abierto, pero es más estrecho de lo que plantea el protocolo. La afirmación de que los algoritmos actuales forman los superpíxeles mediante reglas fijas ya no es exacta: EMS-GCN, FG-DGCN y MSGTN los aprenden dentro de la red de clasificación, aunque los tres lo hacen con la señal de las etiquetas [@zhang2022ems; @li2023feature; @wang2025multiscale].
+
+Tampoco puede afirmarse que la propuesta sea la primera en usar una pérdida espectral sin etiquetas. El término de compacidad espectral de @li2026joint, $\frac{1}{N}\sum_i \lVert X'_i - F_i\rVert^2$ (Ec. 5), es el error de reconstruir cada píxel con la media de su superpíxel, por lo que minimizarlo equivale a maximizar la EV. Sin embargo, ese trabajo lo emplea para el agrupamiento, como un término auxiliar y sin medir la EV. Además, entrenar los superpíxeles solo con ese término no mejoró el agrupamiento de forma consistente: en Salinas, la exactitud global bajó de 78.90 % a 77.86 % (variantes M1 y M2, Tabla III).
+
+El mecanismo de reconstrucción tampoco es nuevo: EMS-GCN y FG-DGCN reconstruyen las etiquetas mediante $\tilde{Q}\hat{Q}^{T}Y$ [@zhang2022ems, Ec. 16; @li2023feature, Ec. 17]; lo nuevo es reconstruir el espectro. Por último, el régimen de cinco etiquetas por clase no constituye una aportación por sí mismo, ya que EMS-GCN evalúa de 5 a 30 muestras por clase [@zhang2022ems, Fig. 13].
+
+## Hueco de investigación reformulado {#sec-hueco}
+
+Los métodos que aprenden superpíxeles para clasificar imágenes hiperespectrales con GCN los ajustan con la señal de las etiquetas, y ninguno mide la calidad de la segmentación que produce [@zhang2022ems; @li2023feature; @wang2025multiscale]. El único trabajo que los aprende con un término espectral sin etiquetas lo hace para el agrupamiento y sin evaluar el efecto de ese término por separado [@li2026joint]. Por otra parte, Galarza (2026) encontró que la varianza explicada (EV) de los superpíxeles se relaciona con la exactitud de la clasificación semisupervisada mejor que la exactitud de segmentación alcanzable (ASA). Ningún trabajo usa la EV como criterio explícito y sin etiquetas para aprender los superpíxeles de una GCN semisupervisada, ni evalúa si maximizarla se traduce en una mayor exactitud cuando solo se dispone de cinco etiquetas por clase.
+
+La originalidad de la propuesta se sostiene en tres puntos:
+
+1. La EV como criterio central y sin etiquetas para aprender los superpíxeles de una GCN semisupervisada, justificada por el hallazgo de Galarza (2026).
+
+2. La afinidad angular, inspirada en SAM, en la asignación diferenciable entre píxeles y superpíxeles; los trabajos revisados emplean la distancia euclidiana (@tbl-veredicto).
+
+3. La evaluación de la segmentación aprendida mediante ASA, BR y EV, y de su relación con la exactitud de clasificación por tipo de escena, que ninguno de los trabajos revisados realiza.
+
+Los propios autores de los trabajos revisados señalan esta dirección. @li2026joint indican que los marcos de superpíxeles diferenciables se han aplicado principalmente a tareas supervisadas, en las que el gradiente proviene de las etiquetas (Sec. I); @wang2025multiscale proponen como trabajo futuro reducir la dependencia de los datos etiquetados (Sec. VII), y @cui2024superpixel, desarrollar métodos de segmentación en superpíxeles diseñados específicamente para HSI (Sec. V).
+
+## Riesgo {#sec-riesgo}
+
+La ablación de @li2026joint sugiere que optimizar solo un término equivalente a la EV puede no mejorar la tarea final. Por ello, el diseño experimental debe admitir una respuesta negativa a la pregunta de investigación: los superpíxeles aprendidos se compararán contra SLIC y PCNN-SAM, y se medirá la relación entre la EV y la exactitud de clasificación.
+
+# Cambios en el protocolo {#sec-cambios}
+
+En el planteamiento del problema, la frase sobre las reglas fijas se sustituirá por el primer párrafo del hueco reformulado (@sec-hueco), se citará a @li2026joint como el único antecedente con una señal espectral sin etiquetas y el riesgo de la @sec-riesgo se presentará como parte de la pregunta de investigación.
+
+En los objetivos, los objetivos particulares II y III (afinidad angular y pérdida EV) se mantienen como el núcleo original; en el III se aclarará que la pérdida de reconstrucción proviene de SSN y que la aportación es reconstruir el espectro sin etiquetas. El objetivo V (relación entre las métricas de segmentación y la exactitud) se refuerza, porque ningún trabajo lo aborda con superpíxeles aprendidos. El objetivo VII (entrenamiento de extremo a extremo) se mantiene como exploratorio y se comparará con EMS-GCN, FG-DGCN y MSGTN, que ya siguen ese enfoque.
+
+En el estado del arte, los trabajos relacionados incluirán un párrafo por cada uno de los cinco trabajos revisados, y la @tbl-veredicto servirá como base del cuadro comparativo.
+
+# Referencias {#sec-referencias}
+
+::: {#refs}
+:::
