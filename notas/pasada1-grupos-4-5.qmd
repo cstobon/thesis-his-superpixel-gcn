@@ -1,0 +1,742 @@
+---
+lang: es
+number-sections: false
+format:
+  pdf:
+    documentclass: article
+    fontsize: 11pt
+    papersize: letter
+    pdf-engine: pdflatex
+    fontenc: OT1
+    fontfamily: fix-cm
+    indent: false
+    colorlinks: false
+    boxlinks: true
+    geometry:
+      - left=53.24pt
+      - textwidth=469.8pt
+      - top=36.7pt
+      - textheight=636pt
+      - footskip=27pt
+    include-in-header:
+      - ../document/preamble.tex
+      - unicode-latex.tex
+---
+
+<!-- =====================================================================
+     PASADA 1 · GRUPOS 4 Y 5 (Keshav, «How to Read a Paper», 2007)
+     Por artículo, 5-10 minutos: título, resumen, introducción, encabezados
+     de sección y conclusiones. NO leas el método.
+     - Responde cada «C» en UNA línea, después de los dos puntos.
+     - Decide la prioridad (A, B o C). Si amenaza tu originalidad, súbelo
+       a A y léelo antes de escribir.
+     - Pregunta clave: ¿superpíxeles fijos (F) o aprendidos (A)? Si son
+       aprendidos, ¿con qué pérdida?
+     - Al terminar, copia lo esencial a la tabla resumen del final y a
+       fichas-lectura.md.
+     Para compilar: quarto render pasada1-grupos-4-5.qmd
+     ===================================================================== -->
+
+```{=latex}
+\title{Centro de investigación y estudios avanzados del IPN\\
+       Departamento de Computación\\
+       \textbf{Pasada 1: grupos 4 y 5}}
+\author{Tesista: Edgar Tobón Sosa}
+\date{[fecha]}
+\begingroup\setlength{\parskip}{0pt}
+\maketitle
+\endgroup
+\kern-15pt
+```
+
+**Las 5 C.** *Categoría*: qué tipo de artículo es (método nuevo, revisión, análisis, base de datos…). *Contexto*: con qué trabajos se relaciona y en qué teoría se apoya. *Corrección*: si sus supuestos parecen razonables. *Contribución*: qué aporta. *Claridad*: si está bien escrito.
+
+# Grupo 4 · GCN con superpíxeles en HSI
+
+## zhao2025review · Prioridad inicial A
+
+Zhao et al. (2025). A review of hyperspectral image classification based on graph neural networks. *Artificial Intelligence Review*. <http://dx.doi.org/10.1007/s10462-025-11169-y>
+
+> Revisión de 2025 de GNN en HSI: comprueba con sus referencias que no te falte nada.
+
+- **Fecha:**
+- **Categoría:**
+Revisión (56 pp.) de la clasificación de HSI con redes neuronales de grafos, con una comparación experimental propia de métodos representativos (Sec. 8).
+- **Contexto:**
+Búsqueda en Web of Science hasta octubre de 2024 (Sec. 1.2). Parte de la GCN de Kipf y Welling y clasifica los métodos en cuatro paradigmas: redes recurrentes de grafos, GCN (espectrales y espaciales), autocodificadores de grafos e híbridos (Secs. 4–7). En las GCN distingue los grafos de píxeles (miniGCN, GCN no local) de los grafos de superpíxeles (CAD-GCN, MDGCN, CEGCN, GiGCN, Tablas 4 y 5). No cita los trabajos con superpíxeles diferenciables (SSN, EMS-GCN, FG-DGCN). Referencias que no están en mis lecturas: GCGCN (Ding et al., 2021b), WFCG (Dong et al., 2022), la GCN no local (Mou et al., 2020) y MPAS (Yin et al., 2023).
+- **Corrección:**
+Útil como mapa, pero con descuidos. (1) Sus experimentos usan 10 % de etiquetas por clase en una partición aleatoria, sin desviación estándar en IP, PU y Houston (Sec. 8.2, Tablas 9–11): no informa sobre el régimen de pocas etiquetas. (2) Hay erratas en las tablas: en PU, la κ de MiniGCN (97.70) supera su OA (96.94), lo que es improbable (Tabla 10); Houston aparece con sensor ROSIS en lugar de CASI (Tabla 8); hay desviaciones imposibles en WHU-Hi-HongHu (93.64 ± 91.62; Tabla 13). (3) Describe CAD-GCN como «la primera construcción de grafos con superpíxeles aprendibles» (Tabla 4); es correcto: CAD-GCN aprende una asignación suave píxel–región (ver wan2021hyperspectral).
+- **Contribución:**
+Según los autores, es la primera revisión dedicada solo a GNN en HSI (Sec. 1.2): organiza los métodos en cuatro paradigmas con tablas resumen (Tablas 2–7), compara SVM, CNN y GNN en IP, PU y Houston, y siete GNN recientes en WHU-Hi-HongHu (Tablas 9–13, con enlaces al código en la Tabla 12), y propone cinco líneas futuras (Sec. 9).
+- **Claridad:**
+Bien estructurada y fácil de recorrer gracias a las tablas resumen; la redacción es desigual, con erratas en tablas y unidades («1.3 ms» por 1.3 m, Sec. 8.1) y, en algunos casos, descripciones de métodos muy breves.
+- **Superpíxeles (F / A / —; si A, ¿con qué pérdida?):**
+— (es una revisión). Los métodos con superpíxeles que revisa usan segmentación fija; afirma que la exactitud de la segmentación influye mucho en la clasificación y que una segmentación imprecisa sesga los resultados (Sec. 5.1.2, p. 19).
+- **¿Amenaza tu originalidad? (sí / no / parcial):**
+No. Al contrario, la respalda: entre sus líneas futuras propone construir el grafo de forma adaptativa a partir de superpíxeles (Sec. 9.1), usar «métodos de segmentación en superpíxeles precisos» para preparar el grafo (Sec. 9.3) y explotar señales autosupervisadas y no supervisadas ante la escasez de etiquetas (Sec. 9.4).
+- **Prioridad final (A / B / C) y por qué:**
+B. No compite con la propuesta, pero es útil en tres puntos: (1) en el planteamiento, para citar que la calidad de la segmentación condiciona la clasificación con GCN (Sec. 5.1.2) y que mejorar la segmentación es una línea abierta (Secs. 9.1 y 9.3); (2) en el marco teórico, para la taxonomía de GNN; y (3) para completar las lecturas con las referencias que faltan. Su comparación experimental no sirve como referencia de OA, porque usa 10 % de etiquetas.
+
+## hong2021graph · Prioridad inicial A
+
+Hong et al. (2021). Graph Convolutional Networks for Hyperspectral Image Classification. *IEEE Transactions on Geoscience and Remote Sensing*. <http://dx.doi.org/10.1109/TGRS.2020.3015157>
+
+> miniGCN: GCN contra CNN en HSI y entrenamiento por mini-lotes; muy citado.
+
+- **Fecha:** miércoles 11 de noviembre de 2026
+- **Categoría:**
+Método nuevo con análisis comparativo: compara CNN y GCN en la clasificación de HSI, propone una GCN entrenable por mini-lotes (miniGCN) y la fusiona con una CNN (FuNet).
+- **Contexto:**
+Se construye sobre la GCN de Kipf y Welling (Ec. 17) y sobre el muestreo de subgrafos del aprendizaje inductivo (Proposición 1, Sec. III-B). Cita como antecedentes de GCN en HSI a Qin et al. (2019) y a Wan et al. (2020), este último con superpíxeles, y se compara con KNN, RF, SVM, CNN 1-D, 2-D y 3-D, y la GCN original.
+- **Corrección:**
+Razonable, con reservas. El supuesto central (la GCN de lote completo es costosa, O(N²D), y no infiere muestras nuevas) está bien argumentado (Sec. III-A). Sin embargo: usa muchas etiquetas (50 por clase en IP, 695 en total; Tabla I); reporta una sola partición fija, sin repeticiones ni desviación estándar; la miniGCN sola apenas iguala a la CNN 2-D en IP (OA 75.11 % frente a 75.89 %; Tabla V), y la mejora fuerte viene de la fusión (FuNet-C, 79.89 %). Además, la GCN de referencia es débil: un grafo de píxeles con KNN, sin superpíxeles, y los propios autores admiten que σ quizá no quedó bien ajustado (Sec. IV-C).
+- **Contribución:**
+Tres aportes (Sec. I): (1) una comparación cualitativa y cuantitativa entre CNN y GCN en HSI; (2) miniGCN, que entrena por mini-lotes muestreando subgrafos, reduce el costo de O(N²D) a O(NMD) y clasifica muestras nuevas sin volver a entrenar; y (3) tres estrategias de fusión CNN + miniGCN (aditiva, multiplicativa y concatenación), de las que la concatenación da los mejores resultados.
+- **Claridad:**
+Claro y bien organizado. La Sec. II repasa la teoría espectral de grafos con más detalle del necesario (la prueba del Lema 1 es informal) y hay erratas menores.
+- **Superpíxeles (F / A / —; si A, ¿con qué pérdida?):**
+—. No usa superpíxeles: cada nodo es un píxel y la adyacencia es un grafo KNN (K = 10) con un kernel RBF sobre las firmas espectrales (Ec. 1, Sec. IV-B).
+- **¿Amenaza tu originalidad? (sí / no / parcial):**
+No. No segmenta en superpíxeles ni hace agrupamiento: clasifica píxeles con una GCN supervisada e inductiva, en la que los nodos de prueba no participan en el entrenamiento (Sec. III-B). Mi propuesta aprende superpíxeles sin etiquetas (EV) y los usa como nodos de una GCN semi-supervisada y transductiva.
+- **Prioridad final (A / B / C) y por qué:**
+B. No compite con mi propuesta, pero es una referencia muy citada para el marco teórico y los trabajos relacionados: documenta el costo O(N²) de la GCN sobre píxeles (Sec. III-A4), lo que justifica usar superpíxeles como nodos, y muestra que una GCN sobre píxeles sola no supera a una CNN 2-D en IP.
+
+## liu2021cnn · Prioridad inicial A
+
+Liu et al. (2021). CNN-Enhanced Graph Convolutional Network With Pixel- and Superpixel-Level Feature Fusion for Hyperspectral Image Classification. *IEEE Transactions on Geoscience and Remote Sensing*. <http://dx.doi.org/10.1109/TGRS.2020.3037361>
+
+> CEGCN: matriz de asociación píxel-superpíxel (la pieza que tu SSN vuelve suave). Tiene código público.
+
+- **Fecha:**
+- **Categoría:**
+Método nuevo: arquitectura híbrida CNN + GCN (CEGCN) que fusiona características a nivel de píxel y de superpíxel para clasificar HSI.
+- **Contexto:**
+Parte de la GCN sobre superpíxeles de Wan et al. (MDGCN), que sustituye los píxeles por superpíxeles como nodos para reducir el costo, y del marco de fusión píxel–superpíxel de [43] (Sec. I). La rama CNN usa la convolución espectral–espacial separable de los propios autores [44]. Se compara solo con CNN (DCNN, TCCNN, MCCNN, SSRN, FDSSC, HybridSN y DBDA), no con otras GCN (Sec. III).
+- **Corrección:**
+Razonable en el planteamiento, con reservas en la evaluación. El supuesto central (la GCN sobre superpíxeles pierde los detalles finos de cada píxel y suaviza en exceso) lo respaldan la ablación (Tabla VIII) y los mapas de probabilidad (Fig. 10). Pero: (1) usa muchas etiquetas en la comparación principal (10 % en IP; 1 % en PU y Salinas), con muestreo aleatorio; aun así, repite 10 veces y da la desviación estándar, y en la Sec. IV-H evalúa de 5 a 25 muestras por clase (Fig. 11); (2) no compara con ninguna GCN; (3) reduce la dimensión con LDA antes de SLIC (Sec. II-A), y LDA necesita etiquetas, de modo que la segmentación usa información supervisada aunque los autores presenten SLIC como no supervisado (Sec. IV-A, Tabla IX).
+- **Contribución:**
+(1) Un codificador y un decodificador de grafo, basados en la matriz de asociación píxel–superpíxel Q (Ecs. 2–4), que pasan características entre los píxeles y los nodos y permiten entrenar la CNN y la GCN juntas en una sola red; (2) codificar el grafo después de transformar el espectro con la red (STsN) y aprender los pesos de las aristas con los datos de entrenamiento, restringidos a superpíxeles vecinos con una máscara de adyacencia (Tabla XI); y (3) una arquitectura ligera que procesa la imagen completa y es más rápida que las CNN por parches (Tabla XII). OA de 99.12 % en IP con 10 % de etiquetas (Fig. 4). Código: https://github.com/qichaoliu/CNN_Enhanced_GCN.
+- **Claridad:**
+Clara: los módulos (SGC, STsN, SGsN y PCsN) se presentan por separado y con diagramas (Figs. 2 y 3), y la discusión analiza cada decisión de diseño con experimentos (Sec. IV).
+- **Superpíxeles (F / A / —; si A, ¿con qué pérdida?):**
+F. SLIC sobre la HSI reducida con LDA, con escala λ = 100 (≈ 210 superpíxeles en IP; Sec. III-A). Lo que se aprende son los pesos de las aristas, no la segmentación. La Sec. IV-C muestra que el mejor método de segmentación (SLIC, QS, FH, LSC o SEEDS) cambia según el conjunto de datos (Tabla X), y los autores concluyen que basta con elegirlo «según la experiencia».
+- **¿Amenaza tu originalidad? (sí / no / parcial):**
+No. Los superpíxeles son fijos (SLIC) y la matriz de asociación Q es binaria: Q_ij = 1 si el píxel i pertenece al superpíxel j (Ec. 2). Mi propuesta vuelve suave y aprendible esa matriz (con SSN) y la entrena sin etiquetas con la EV. CEGCN es el punto de partida directo de esa idea: el código de EMS-GCN se construye sobre el suyo.
+- **Prioridad final (A / B / C) y por qué:**
+A. No compite, pero es la base técnica de la propuesta: (1) el codificador y decodificador con Q es la pieza que SSN vuelve diferenciable; (2) la Tabla X respalda el planteamiento del problema, porque ningún método de segmentación es el mejor en todas las escenas y la elección se hace «según la experiencia», lo que coincide con Galarza (2026); y (3) es una línea base natural, con código público, para el objetivo VII.
+
+## wan2020multiscale · Prioridad inicial A
+
+Wan et al. (2020). Multiscale Dynamic Graph Convolutional Network for Hyperspectral Image Classification. *IEEE Transactions on Geoscience and Remote Sensing*. <http://dx.doi.org/10.1109/TGRS.2019.2949180>
+
+> MDGCN: GCN sobre superpíxeles SLIC con grafos dinámicos y multiescala; referencia clásica del área.
+
+- **Fecha:**
+- **Categoría:**
+Método nuevo: GCN semi-supervisada sobre superpíxeles, con grafos que se actualizan durante la convolución (dinámicos) y a varias escalas de vecindad (MDGCN). Nota: el PDF de Zotero es la versión de arXiv (1905.06133v1, 2019), no la final de TGRS.
+- **Contexto:**
+Parte de la GCN de Kipf y Welling [31] y de la GCN espectral–espacial S²GCN de Qin et al. [59], que usan grafos fijos de píxeles. Se compara con dos GCN (GCN y S²GCN), dos CNN (R-2D-CNN y DR-CNN) y tres métodos clásicos (MDA, HiFi y JSDF) (Sec. IV-B). Es el trabajo que CEGCN y miniGCN citan como el primero en usar superpíxeles como nodos de una GCN para HSI.
+- **Corrección:**
+Razonable. Los supuestos centrales (un grafo fijo calculado del dato ruidoso es impreciso, y un grafo de píxeles es demasiado costoso) se sostienen con la ablación (MGCN con grafos fijos frente a MDGCN y escalas aisladas, Tabla VII) y con los tiempos (74 s frente a 656 s de la GCN en IP, Tabla VIII). El protocolo es razonable para pocas etiquetas: 30 por clase (15 si la clase tiene menos de 30), 10 repeticiones con desviación estándar, y un barrido de 5 a 30 por clase en IP (Sec. IV-D, Fig. 9). Reservas: no dice cuántos superpíxeles usa ni sobre qué bandas aplica SLIC; muchas clases de MDGCN reportan una desviación de ±0.00 en 10 repeticiones con muestreo aleatorio, lo que es poco creíble (Tabla IV); y el 10 % de las etiquetas se usa como validación.
+- **Contribución:**
+(1) Una convolución con grafo dinámico, que en cada capa fusiona la adyacencia con la similitud de las representaciones aprendidas (Ec. 8) y la proyecta sobre el grafo inicial (Ec. 9); (2) grafos a tres escalas de vecindad (vecinos a 1, 2 y 3 saltos, Ec. 14) cuyas salidas se suman (Ec. 16); y (3) usar superpíxeles SLIC como nodos para reducir el costo. OA de 93.47 ± 0.38 % en IP con 30 etiquetas por clase (Tabla IV).
+- **Claridad:**
+Clara: la motivación, el método (Algoritmos 1 y 2) y los experimentos están bien separados. Faltan detalles para reproducir la segmentación (número de superpíxeles y entrada de SLIC), y hay erratas («north-western India» por Indiana; «DMGCN» por MDGCN).
+- **Superpíxeles (F / A / —; si A, ¿con qué pérdida?):**
+F. SLIC como preprocesamiento (Sec. III-A, Alg. 2); cada nodo es el promedio espectral de su superpíxel y las aristas iniciales usan un kernel gaussiano, e^(−γ‖xi − xj‖²) con γ = 0.2, entre superpíxeles vecinos (Ec. 1). Lo dinámico es el grafo, no la segmentación. Entrena con entropía cruzada sobre los superpíxeles etiquetados («seed superpixels»), con descenso de gradiente en lote completo y de forma transductiva (Ec. 17, Fig. 1).
+- **¿Amenaza tu originalidad? (sí / no / parcial):**
+No. La segmentación es fija y no se optimiza; lo que adapta es el grafo. Es justo el esquema que mi propuesta mantiene en el clasificador (GCN semi-supervisada sobre superpíxeles, de lote completo), pero cambiando SLIC por superpíxeles aprendidos sin etiquetas con la EV.
+- **Prioridad final (A / B / C) y por qué:**
+A. Es el antecedente fundacional de la GCN sobre superpíxeles en HSI y el esquema de clasificador que hereda la propuesta: (1) se cita en el planteamiento y el marco teórico como origen del grafo de superpíxeles; (2) su régimen de 5 a 30 etiquetas por clase (Fig. 9) es comparable con el de la propuesta; y (3) admite que el grafo inicial calculado con SLIC es impreciso y lo corrige en el grafo, no en la segmentación, que es el hueco que ataca la propuesta.
+
+## jia2024graph · Prioridad inicial B
+
+Jia et al. (2024). Graph-in-Graph Convolutional Network for Hyperspectral Image Classification. *IEEE Transactions on Neural Networks and Learning Systems*. <http://dx.doi.org/10.1109/TNNLS.2022.3182715>
+
+> GiGCN: cada superpíxel es a su vez un grafo interno.
+
+- **Fecha:**
+- **Categoría:**
+Método nuevo: modelo «grafo dentro de grafo» (GiG) y su red (GiGCN) para clasificar HSI con pocas etiquetas, en el que cada superpíxel es un grafo interno de píxeles y los superpíxeles forman un grafo externo.
+- **Contexto:**
+Distingue las GCN sobre píxeles (S²GCN de Qin et al.; miniGCN de Hong et al.; GraphSAGE) de las GCN sobre superpíxeles (MDGCN de Wan et al.) (Sec. I) y parte de la GCN de Kipf y Welling. Se compara con ocho métodos para pocas muestras: Two-CNN, 3DVSCNN, 3DCAE, MDL4OW, SSLstm, S-DMM, HSGAN y MDGCN (Sec. IV-D).
+- **Corrección:**
+El supuesto central es sólido y está bien documentado: describir un superpíxel con su media o su máximo pierde información, porque dentro de un superpíxel SLIC la variabilidad espectral sigue siendo grande (Fig. 3, Sec. III-A); la ablación lo respalda (Tabla V). Reservas: (1) la etiqueta de cada píxel de entrenamiento se asigna a todo su superpíxel (Ec. 22, O_{fσ(x)}), así que los píxeles de prueba que caen en el mismo superpíxel que uno de entrenamiento heredan su etiqueta; esa fuga espacial puede inflar la OA (97.10 % en PaviaU con 10 etiquetas por clase, Fig. 13); (2) no evalúa en Indian Pines ni en WHU-Hi; (3) reporta solo la media de 10 repeticiones en las tablas, y los mapas son de una sola corrida.
+- **Contribución:**
+(1) El modelo GiG: grafo interno de cada superpíxel, con conexiones a los 4 vecinos (Sec. III-A, Fig. 4), y grafo externo de adyacencia entre superpíxeles (Sec. III-B); (2) GiGCN, que extrae características internas (IGC) y externas (EGC) y las suma (Ec. 20), con una penalización L1 para volver dispersos los parámetros (Ec. 23); y (3) un ensamble con cuatro tamaños de superpíxel, n_p = 50, 100, 150 y 200 píxeles, combinados por voto mayoritario (Sec. III-E). Código: https://github.com/ShuGuoJ/GiGCN.git.
+- **Claridad:**
+Clara y bien ilustrada (Figs. 1–6); el método se sigue sin dificultad. Erratas menores (por ejemplo, Salinas «de 0.2 a 2.4 μm»).
+- **Superpíxeles (F / A / —; si A, ¿con qué pérdida?):**
+F. SLIC con varios tamaños fijos (n_p de 50 a 200 píxeles; Ec. 24); no dice si aplica PCA antes. Entrena con entropía cruzada + L1 (Ec. 23); la segmentación no se aprende. Los autores reconocen que el tamaño del superpíxel «influye mucho en la calidad de la segmentación y en la clasificación», y que el mejor n_p cambia según el conjunto de datos (Tabla VI); por eso recurren al ensamble.
+- **¿Amenaza tu originalidad? (sí / no / parcial):**
+No. Usa superpíxeles fijos y mejora la representación dentro de cada superpíxel, no la segmentación. Su Fig. 3 refuerza mi motivación: los superpíxeles de SLIC no son espectralmente homogéneos, que es justo lo que mide la EV.
+- **Prioridad final (A / B / C) y por qué:**
+B. No compite con la propuesta, pero aporta dos argumentos para el planteamiento del problema: (1) la variabilidad espectral dentro de los superpíxeles de SLIC (Fig. 3) muestra que la segmentación fija no garantiza superpíxeles homogéneos, lo que motiva maximizar la EV; y (2) el mejor tamaño de superpíxel depende del conjunto de datos (Tabla VI), y lo resuelven con un ensamble de segmentaciones fijas en lugar de aprender la segmentación. Su régimen de 10 etiquetas por clase es cercano al de la propuesta, pero sin Indian Pines.
+
+## yang2024semi · Prioridad inicial B
+
+Yang et al. (2024). Semi-Supervised Multiscale Dynamic Graph Convolution Network for Hyperspectral Image Classification. *IEEE Transactions on Neural Networks and Learning Systems*. <http://dx.doi.org/10.1109/TNNLS.2022.3212985>
+
+> GCN dinámica multiescala semi-supervisada (TNNLS 2024).
+
+- **Fecha:**
+- **Categoría:**
+Método nuevo: GCN semi-supervisada y multiescala sobre superpíxeles (DMSGer), con una métrica aprendida para las aristas y una actualización de las características de cada píxel a partir del grafo de regiones.
+- **Contexto:**
+Se apoya en la GCN de Kipf y Welling y continúa la línea de MDGCN (Wan et al., 2020) y CAD-GCN (Wan et al., 2021), con las que se compara junto con cinco métodos profundos: MSSFN, 3DOC-SSAN, 2-D-CNN, MSSGU y A2S2K (Sec. IV-C). Plantea tres problemas abiertos de las GCN sobre superpíxeles: qué distancia usar entre nodos, cómo devolver la información de las regiones a los píxeles y cómo aprovechar varias escalas (Sec. I).
+- **Corrección:**
+Razonable en el planteamiento, con reservas. Protocolo adecuado para pocas etiquetas: 30 por clase (15 si la clase tiene menos), 10 % de ellas para validación, y un barrido con 5, 30 y 150 por clase (Sec. IV-D2, Fig. 14b). Reservas: (1) la sensibilidad al número de regiones (N_sr de 20 a 140, Sec. IV-D1) no define bien ese parámetro y su texto es incoherente (da óptimos para Houston 2, que no está en el experimento, y explica PaviaU aparte); (2) en IP, la OA de MDGCN (93.47 %, Fig. 9) es idéntica a la del artículo original de MDGCN, lo que sugiere resultados copiados en lugar de recalculados con el mismo muestreo; (3) muestreo aleatorio de píxeles, con la misma posible fuga espacial que GiGCN; y (4) erratas («MSSUG» por MSSGU; «PFGU» por PGNU, Fig. 3).
+- **Contribución:**
+(1) Aristas con una distancia de Mahalanobis aprendida, M = W_dW_dᵀ, dentro de un kernel gaussiano (Ecs. 6–7), en lugar de la euclidiana fija; (2) la estrategia PGNU, que actualiza cada píxel con la fila de adjacencia de su región y recalcula los nodos como promedio de sus píxeles (Ecs. 8–9), lo que hace dinámico el grafo; y (3) una versión multiescala con cuatro D-GCN sobre la misma segmentación, cuya resolución se reduce con pooling, más una D-GCN final (Sec. III-C, Fig. 4). OA de 95.39 % en IP con 30 etiquetas por clase (Fig. 9). Código: https://github.com/TangXu-Group/DMSGer.
+- **Claridad:**
+Aceptable: la motivación y la arquitectura están bien ilustradas (Figs. 1–4), pero hay erratas y la sección de sensibilidad es confusa.
+- **Superpíxeles (F / A / —; si A, ¿con qué pérdida?):**
+F. SLIC fijo como «prerrequisito» (Sec. III-A); cada nodo es la media de su región. Lo que se aprende es la métrica de las aristas y las características de los píxeles, no la segmentación. Entrena con entropía cruzada, de forma semi-supervisada y transductiva (Sec. III-C). Los autores aclaran que SLIC «no es una limitación» y que puede usarse cualquier técnica de superpíxeles.
+- **¿Amenaza tu originalidad? (sí / no / parcial):**
+No. La segmentación es fija; adapta la métrica del grafo y la representación de los píxeles. Que declaren intercambiable el segmentador deja abierta la pregunta que aborda la propuesta: qué segmentación conviene a la GCN.
+- **Prioridad final (A / B / C) y por qué:**
+B. No compite, pero es una referencia útil: (1) una GCN semi-supervisada sobre superpíxeles evaluada en IP con 30 etiquetas por clase y con un barrido desde 5 por clase (Fig. 14b), comparable con la propuesta; (2) su Sec. I enumera los problemas abiertos de las GCN sobre superpíxeles, y ninguno es la calidad de la segmentación; y (3) es una línea base reciente con código público.
+
+## yu2024dspg · Prioridad inicial B
+
+Yu et al. (2024). dSPG: A New Discriminant Superpixel Graph Regularizer and Convolutional Network for Hyperspectral Image Classification. *IEEE Transactions on Geoscience and Remote Sensing*. <http://dx.doi.org/10.1109/TGRS.2024.3439434>
+
+> Regularizador de grafo de superpíxeles discriminante (TGRS 2024).
+
+- **Fecha:**
+- **Categoría:**
+Método nuevo con fundamento teórico: define qué es un grafo óptimo para la clasificación semi-supervisada (Proposiciones 1 y 2) y propone un grafo de superpíxeles discriminante (dSPG) que se usa como regularizador clásico y como guía de una GCN (dSPGCN).
+- **Contexto:**
+Clasifica los grafos para HSI en tres familias: grafos de píxeles por vecinos espectrales (NNG), grafos con vecindad espacial (SNG, SSNG) y grafos de superpíxeles (SPG, como el de Sellars et al., 2020) (Sec. I). Parte de la regularización por grafo clásica, ‖F − Y‖² + μ·tr(FᵀLF) (Ec. 5). Se compara con esos grafos, con GCN (MDGCN, DMSGer, GiGCN, MSSGU y CEGCN), con redes profundas no basadas en grafos y con SVM y MLR (Sec. IV-B).
+- **Corrección:**
+Planteamiento sólido: las dos proposiciones (pesos nulos entre clases y conexión de cada subconjunto de una clase con alguna etiqueta) dan un criterio claro, y la métrica de calidad del grafo GQ (Ec. 24) lo comprueba. Protocolo adecuado para pocas etiquetas: de 3 a 50 por clase, con 10 repeticiones (Sec. IV-B). Reservas: (1) en la comparación principal de IP elimina 4 clases y usa 12 (Sec. IV); solo usa las 16 contra los métodos profundos (Tabla III); (2) no dice qué algoritmo de superpíxeles usa; (3) μ se ajusta «por prueba empírica», sin decir sobre qué conjunto; (4) incoherencias: HongHu tiene 6807 o 5426 píxeles etiquetados según el párrafo, y la Ec. 10 escribe la media como una suma.
+- **Contribución:**
+(1) Dos proposiciones sobre el grafo óptimo para la clasificación semi-supervisada (Sec. III-A); (2) un grafo dentro de cada superpíxel que conecta cada píxel solo con sus vecinos espaciales del mismo superpíxel que además están entre sus k vecinos espectrales más cercanos, con similitud de correlación (Ecs. 10–12), y así desconecta los píxeles muy distintos dentro de un superpíxel mezclado; (3) un grafo entre superpíxeles que une los píxeles más representativos de superpíxeles espectralmente cercanos, aunque estén lejos en el espacio (Sec. III-D); y (4) dSPGCN, una GCN guiada por dSPG, con una capa 1-D y un módulo residual (Ec. 23). Con 5 etiquetas por clase alcanza una OA cercana al 85 % en IP (12 clases). Código: https://github.com/yulong112/dSPG.
+- **Claridad:**
+Clara y bien argumentada: el problema se formaliza antes de proponer la solución, y las figuras de los grafos (Figs. 1, 2 y 14) ayudan. Hay erratas en ecuaciones y datos.
+- **Superpíxeles (F / A / —; si A, ¿con qué pérdida?):**
+F. Segmentación fija con muchos superpíxeles pequeños (sp_n = 1100 en IP, unos 19 píxeles cada uno; Fig. 8). Lo que se diseña es el grafo, no la segmentación. dSPGCN entrena con entropía cruzada (Sec. III-F).
+- **¿Amenaza tu originalidad? (sí / no / parcial):**
+No, pero es muy cercana en motivación. Nombra explícitamente el «problema de mezcla dentro de los superpíxeles»: un superpíxel puede contener varias clases, sobre todo en los bordes, y eso crea conexiones entre clases en el grafo (Sec. I). Lo corrige desconectando píxeles dentro del superpíxel; mi propuesta lo ataca en la segmentación, maximizando la EV para que los superpíxeles sean espectralmente homogéneos.
+- **Prioridad final (A / B / C) y por qué:**
+A (sube de B). No amenaza la originalidad, pero (1) formula con precisión el problema que motiva la propuesta (la mezcla de clases dentro de los superpíxeles degrada el grafo) y da un criterio formal de grafo óptimo; (2) evalúa en el régimen de la propuesta (de 3 a 50 etiquetas por clase) contra MDGCN, DMSGer, GiGCN y CEGCN, lo que lo hace una línea base muy comparable; y (3) su métrica GQ (Ec. 24) puede servir para evaluar los grafos que produzcan los superpíxeles aprendidos.
+
+## zou2024psformer · Prioridad inicial B
+
+Zou et al. (2024). PSFormer: Pyramid Superpixel Transformer for Hyperspectral Image Classification. *IEEE Transactions on Geoscience and Remote Sensing*. <http://dx.doi.org/10.1109/TGRS.2024.3468876>
+
+> Transformer con pirámide de superpíxeles (TGRS 2024).
+
+- **Fecha:**
+- **Categoría:**
+Método nuevo: transformer jerárquico (PSFormer) que procesa la imagen completa, sin parches, y usa una pirámide de superpíxeles para reducir la resolución entre etapas.
+- **Contexto:**
+Mismos autores que EMS-GCN (Zou y Zhang). Parte de ViT y de los transformers piramidales de visión, y critica a los transformers para HSI que trabajan sobre parches pequeños alrededor de cada píxel (Sec. I). Toma de las GCN sobre superpíxeles la matriz de asociación entre niveles (Ec. 1, refs. [32] y [45]). Se compara con SVM, SuperPCA y siete redes profundas: HPDM-SPRN, A2S2K-ResNet, GAHT, SSFTT, GTFN, DCN-T y G²T (Sec. IV-B).
+- **Corrección:**
+Razonable. El supuesto central (los transformers sobre parches pierden la ventaja de modelar dependencias de largo alcance y no aprovechan varias escalas) se sostiene con la ablación de arquitecturas (Tabla V). Protocolo: 30 etiquetas por clase con muestreo aleatorio en SA y PU, la partición espacialmente disjunta oficial en Houston (lo que evita la fuga espacial), 5 repeticiones y un barrido de 5 a 30 por clase (Fig. 15). Reservas: (1) no evalúa en Indian Pines; (2) el número de superpíxeles óptimo cambia mucho entre conjuntos (Fig. 12) y se elige mirando la OA; (3) incoherencia: el texto habla de WHU-Hi-HongHu con 100 muestras por clase y la Tabla X dice WHU-Hi-LongKou; (4) el código se anuncia «será publicado» en una página genérica.
+- **Contribución:**
+(1) Una estrategia de fusión progresiva de superpíxeles: una jerarquía de fino a grueso con matrices de asociación binarias entre niveles, y fusión y división como productos de matrices diferenciables (Ecs. 1–2); (2) un backbone transformer con atención espectral de costo lineal; y (3) una cabeza de clasificación con compuertas que pondera las escalas para cada píxel (Ecs. 4–6). OA de 98.84 % en SA y 98.69 % en PU con 30 etiquetas por clase (Figs. 8–9).
+- **Claridad:**
+Clara y bien ilustrada (Figs. 1–3); el análisis de sensibilidad y la visualización (Figs. 11–14) ayudan a entender cada módulo. Hay erratas («Univerisity») y la incoherencia de la Tabla X.
+- **Superpíxeles (F / A / —; si A, ¿con qué pérdida?):**
+F. Super Hierarchy (SH, basado en un árbol de expansión mínima) sobre tres componentes no correlacionadas de la HSI, sin decir cómo se obtienen (Sec. III-A). Genera de una vez los cuatro niveles de la pirámide, con un número de superpíxeles que se reduce a la mitad entre etapas (p. ej., 1536, 768, 384 y 192 en PU). La segmentación no se aprende; solo es diferenciable el paso de características entre niveles. Entrena con entropía cruzada.
+- **¿Amenaza tu originalidad? (sí / no / parcial):**
+No. Los superpíxeles son fijos y el clasificador es un transformer, no una GCN. Al contrario, los propios autores señalan como limitación que la definición empírica de las escalas de superpíxeles puede afectar la exactitud, y proponen sustituirla por técnicas de segmentación de superpíxeles aprendibles (Sec. V).
+- **Prioridad final (A / B / C) y por qué:**
+B. No compite, pero aporta una cita útil para el planteamiento: los mismos autores de EMS-GCN reconocen que fijar a mano las escalas de los superpíxeles limita la exactitud y proponen aprender la segmentación como trabajo futuro (Sec. V). Muestra también que la tendencia de superpíxeles como unidad de cómputo se extiende a los transformers.
+
+## li2023multistage · Prioridad inicial B
+
+Li et al. (2023). Multistage Superpixel-Guided Hyperspectral Image Classification With Sparse Graph Attention Networks. *IEEE Transactions on Geoscience and Remote Sensing*. <http://dx.doi.org/10.1109/TGRS.2023.3304716>
+
+> Superpíxeles en varias etapas con atención de grafos dispersa (TGRS 2023).
+
+- **Fecha:**
+- **Categoría:**
+Método nuevo: red de atención de grafos (GAT) en forma de U, con codificador y decodificador, sobre una jerarquía de superpíxeles en cuatro etapas (MSG-SGAT).
+- **Contexto:**
+Parte de las GAT y de sus variantes y aplicaciones en HSI (Sec. II); la arquitectura en U imita a U-Net y la jerarquía de superpíxeles sigue la línea de MSSGU (Liu et al., 2022). Se compara con nueve métodos: IRTS-NKLCMV, HybridSN, SPRN, FDGC, CEGCN, MSSGU, SAGE-A, WFCG y SPGAT (Sec. IV-A).
+- **Corrección:**
+Razonable, con reservas. Los supuestos (las GAT densas son costosas y propensas al sobreajuste, y conviene combinar escalas) se apoyan en ablaciones (Sec. IV-C) y en la comparación SGAT frente a GAT (Sec. IV-G). Reservas: (1) el número de etiquetas por clase está en la Tabla I, que no pude extraer como texto; revísala antes de comparar la OA de IP (98.98 %, Fig. 6); (2) seis repeticiones con muestreo aleatorio, sin control de la fuga espacial; (3) el número inicial de superpíxeles óptimo cambia con el conjunto (r_s de 1/20 en IP a 1/500 en HU, Tabla VIII) y se elige mirando la exactitud; (4) el texto dice que el peso de fusión entre superpíxeles vecinos es su «distancia euclidiana espacial» (Sec. III-A), lo que no tiene sentido si los nodos son promedios espectrales. Mérito: admite que no gana con 10 etiquetas por clase en PU y SV (Sec. IV-E).
+- **Contribución:**
+(1) Grafos en cuatro etapas guiados por una jerarquía de superpíxeles obtenida por fusión de regiones, con 1024 nodos en la primera etapa y la mitad en cada etapa siguiente (Sec. III-A, Sec. IV); (2) SGAT, una GAT que poda las aristas por dispersión espectral y asigna un único coeficiente por arista para reducir parámetros (Sec. III-B); (3) un módulo espectral en paralelo (SIA) que forma con SGAT una unidad espacial–espectral (Sec. III-C); y (4) un módulo de refinamiento de superpíxel a píxel (PLT) (Sec. III-D). Entrena con entropía cruzada (Ec. 22).
+- **Claridad:**
+Aceptable: la arquitectura está bien ilustrada (Figs. 1–2), pero la redacción es irregular y algunas definiciones son ambiguas (la distancia de fusión, la Ec. 22 con lo predicho y lo verdadero intercambiados).
+- **Superpíxeles (F / A / —; si A, ¿con qué pérdida?):**
+F. Super Hierarchy (SH) sobre las componentes principales (PCA) de la HSI, con fusión de regiones vecinas para generar la jerarquía (Sec. III-A). Los autores aclaran que «otros métodos de segmentación también son apropiados». La segmentación no se aprende.
+- **¿Amenaza tu originalidad? (sí / no / parcial):**
+No. Segmentación fija sobre PCA y clasificador GAT. Su análisis del número inicial de superpíxeles (Sec. IV-H) describe el compromiso que mi propuesta intenta resolver: con muy pocos superpíxeles se mezclan regiones espectralmente distintas, y con demasiados se separan regiones homogéneas.
+- **Prioridad final (A / B / C) y por qué:**
+B. No compite. Aporta (1) otra evidencia de que el tamaño de los superpíxeles se ajusta a mano y depende del conjunto de datos (Tabla VIII); (2) una descripción explícita del compromiso entre superpíxeles heterogéneos y sobresegmentación (Sec. IV-H), útil para el planteamiento; y (3) otro ejemplo de segmentación sobre PCA, la práctica que la propuesta evita al trabajar con el espectro completo.
+
+## liu2022multilevel · Prioridad inicial B
+
+Liu et al. (2022). Multilevel Superpixel Structured Graph U-Nets for Hyperspectral Image Classification. *IEEE Transactions on Geoscience and Remote Sensing*. <http://dx.doi.org/10.1109/TGRS.2021.3112586>
+
+> Superpíxeles en varios niveles con Graph U-Net; mismo autor que CEGCN.
+
+- **Fecha:**
+- **Categoría:**
+Método nuevo: U-Net híbrida (MSSGU) con una CNN en el primer nivel y GCN en grafos de superpíxeles de varios niveles, de fino a grueso, unidos por funciones de pooling y unpooling.
+- **Contexto:**
+Mismos autores que CEGCN (Liu, Xiao, Yang y Wei); CEGCN equivale a MSSGU con dos niveles (Sec. IV-E). Parte de las GCN multiescala sobre un solo grafo (MDGCN y CEGCN, refs. [39] y [40]), de las Graph U-Nets y de la segmentación por fusión de regiones de Super Hierarchy [41]. Se compara con DCNN, TCCNN, MCCNN, SSRN, FDSSC, DBDA y CEGCN (Sec. III).
+- **Corrección:**
+Razonable. El supuesto (un solo grafo de superpíxeles limita la escala espacial, y concatenar escalas produce conflictos) se apoya en el análisis de profundidad, conexiones y fusión (Sec. IV). Protocolo con muchas etiquetas en la comparación principal: 5 % en IP, 0.5 % en PU y Salinas, 10 repeticiones con muestreo aleatorio; pero añade un barrido de 5 a 25 etiquetas por clase (Fig. 11) y pruebas con 10 por clase en Botswana y KSC (Tabla X). Reservas: el número de nodos del segundo nivel (2048) se fija «para que los píxeles de cada superpíxel pertenezcan, en lo posible, a la misma clase», sin medirlo; y con pocas etiquetas no supera a CEGCN en PU (Sec. IV-E).
+- **Contribución:**
+(1) Grafos de superpíxeles en varios niveles, obtenidos por fusión progresiva de regiones, con funciones de pooling y unpooling basadas en matrices de asociación binarias entre niveles (Ecs. 2–4); (2) MSSGU, que extrae características de fino a grueso y las fusiona de grueso a fino con conexiones de salto (Ec. 8); y (3) pesos de aristas aprendidos con atención y una convolución de imagen ligera en el primer nivel. OA de 98.25 % en IP con 5 % de etiquetas (Fig. 4). Código: https://github.com/qichaoliu/MSSG-UNet.
+- **Claridad:**
+Clara y bien ilustrada (Figs. 1–2); la construcción de la jerarquía se explica paso a paso.
+- **Superpíxeles (F / A / —; si A, ¿con qué pérdida?):**
+F. Fusión de regiones con el algoritmo de Boruvka (árbol de expansión mínima) sobre las tres primeras componentes principales (PCA), con distancia L1 entre píxeles vecinos (Sec. II-A). Niveles de 2048, 1024, 512 y 256 superpíxeles (Sec. III-A). Se calcula como preprocesamiento; solo los pesos de las aristas se aprenden con atención. Entrena con entropía cruzada.
+- **¿Amenaza tu originalidad? (sí / no / parcial):**
+No. Segmentación fija sobre PCA. Además, los autores justifican explícitamente no aprenderla: por la contradicción entre las pocas muestras de entrenamiento y las topologías espaciales complejas, «es difícil que una red aprenda automáticamente» las relaciones jerárquicas, así que definen los grafos en el preprocesamiento (Sec. I). Es un argumento a favor de aprender la segmentación sin etiquetas, que es lo que propone la tesis.
+- **Prioridad final (A / B / C) y por qué:**
+B. No compite, pero aporta (1) la justificación de los autores para no aprender la segmentación con etiquetas (Sec. I), que mi propuesta resuelve con una señal sin etiquetas; (2) otro ejemplo de segmentación sobre PCA con un número de superpíxeles fijado a mano; y (3) una línea base con código público y un barrido de 5 a 25 etiquetas por clase.
+
+## sellars2020superpixel · Prioridad inicial B
+
+Sellars et al. (2020). Superpixel Contracted Graph-Based Learning for Hyperspectral Image Classification. *IEEE Transactions on Geoscience and Remote Sensing*. <http://dx.doi.org/10.1109/TGRS.2019.2961599>
+
+> Grafo «contraído» de superpíxeles con aprendizaje semi-supervisado: muy cercano al flujo de Galarza.
+
+- **Fecha:**
+- **Categoría:**
+Método nuevo: marco semi-supervisado (SGL) con un algoritmo de superpíxeles diseñado para HSI (HMS) y un grafo «contraído» de superpíxeles clasificado por propagación de etiquetas (LGC), sin redes neuronales. Nota: el PDF de Zotero es la versión de arXiv (1903.06548v3, 2019).
+- **Contexto:**
+Parte de Manifold SLIC (MSLIC) para la segmentación, de la propagación de etiquetas Local and Global Consistency (LGC) de Zhou et al. [23] y de los trabajos de superpíxeles en HSI que aplican algoritmos para RGB sobre tres componentes principales (SC-MK [13]). Se compara con LCMR, SC-MK, EPF, LBP, IFRF y SVM (Sec. IV-B). Es el grafo de superpíxeles (SPG) que dSPG toma como referencia.
+- **Corrección:**
+Razonable y con un protocolo muy adecuado para pocas etiquetas: de 3 a 20 por clase, 10 repeticiones con desviación estándar (Tabla II). Reservas: (1) la etiqueta inicial de cada superpíxel es el promedio de las etiquetas de sus píxeles de entrenamiento y el resultado se asigna a todos sus píxeles (Sec. III-C), lo que produce la misma fuga espacial que GiGCN; (2) los parámetros comunes se eligen «por prueba empírica» y tres parámetros cambian por conjunto (σ_l, β y K; Tabla I), sin decir con qué datos se ajustan; (3) solo compara con métodos no profundos ni basados en GCN; (4) erratas (Salinas «con 200 canales», PU «con 115 canales» sin quitar los ruidosos).
+- **Contribución:**
+(1) HMS, una extensión de MSLIC a HSI: datos de cualquier número de bandas, una distancia de agrupamiento que combina la distancia euclidiana espectral, la distancia Log-Euclidiana entre matrices de covarianza locales y la distancia espacial (Ec. 1), y una fusión de semillas pequeñas con su vecina espectralmente más parecida (Ec. 2); según los autores, el primer algoritmo de superpíxeles diseñado específicamente para HSI; (2) características por superpíxel (media, media ponderada de los vecinos y centroide; Ecs. 3–6); y (3) un grafo kNN de superpíxeles con dos kernels gaussianos (Ecs. 7–8), clasificado con LGC en forma cerrada. OA de 82.6 ± 3.9 % en IP con 5 etiquetas por clase (Tabla II).
+- **Claridad:**
+Clara y bien estructurada; las ecuaciones y los parámetros (Tabla I) están completos. Erratas menores.
+- **Superpíxeles (F / A / —; si A, ¿con qué pérdida?):**
+F. HMS sobre las componentes principales que conservan una razón de varianza explicada ≥ 0.999 (Sec. IV-B), con K = 1200 en IP, 1400 en Salinas y 2400 en PU (Tabla I) y al menos 15 píxeles por superpíxel. La segmentación se diseña a mano para HSI, pero no se aprende ni se optimiza para la clasificación. No hay entrenamiento: LGC tiene solución cerrada.
+- **¿Amenaza tu originalidad? (sí / no / parcial):**
+No. Sus superpíxeles son fijos y el clasificador es propagación de etiquetas, no una GCN. Pero es un antecedente importante: reclama ser el primer algoritmo de superpíxeles diseñado para HSI (no para RGB), una idea que la propuesta lleva a un segmentador aprendido. Además, su Fig. 4 muestra que la exactitud depende del número de superpíxeles hasta que la imagen queda bien sobresegmentada.
+- **Prioridad final (A / B / C) y por qué:**
+A (sube de B). (1) Es el flujo más cercano al de Galarza: superpíxeles diseñados para HSI, grafo de superpíxeles y clasificación semi-supervisada transductiva; (2) da resultados en IP con 3 a 20 etiquetas por clase y 10 repeticiones (82.6 % con 5), una referencia directa para el régimen de la propuesta; y (3) su afirmación de ser el primer superpíxel diseñado para HSI debe citarse en el estado del arte, junto con PCNN-SAM.
+
+## qin2019spectral · Prioridad inicial B
+
+Qin et al. (2019). Spectral–Spatial Graph Convolutional Networks for Semisupervised Hyperspectral Image Classification. *IEEE Geoscience and Remote Sensing Letters*. <http://dx.doi.org/10.1109/LGRS.2018.2869563>
+
+> Una de las primeras GCN semi-supervisadas espectral-espaciales para HSI.
+
+- **Fecha:**
+- **Categoría:**
+Método nuevo (carta de 5 páginas): GCN semi-supervisada espectral–espacial (S²GCN) sobre un grafo de píxeles para clasificar HSI.
+- **Contexto:**
+Parte de la GCN de Kipf y Welling [11] y de la aproximación con polinomios de Chebyshev [12], y del aprendizaje semi-supervisado clásico por regularización con el laplaciano (LapSVM, SS-LapSVM) y por embebidos de grafos (SSGEL) (Sec. II). Se compara con SVM, 3-D-DWT, SVM-CK, semiMLR, LapSVM, S²SL, SS-LapSVM, SSGEL y la GCN original (Sec. IV).
+- **Corrección:**
+Razonable en la idea (un grafo solo espectral conecta píxeles de clases distintas, y la vecindad espacial lo corrige; Fig. 1), pero el protocolo es escueto: 1 % de etiquetas con muestreo aleatorio (unas 100 en IP), 10 repeticiones, y un barrido por porcentaje de etiquetas (Fig. 2). Reservas: (1) la simplificación de la Ec. 9 a la Ec. 10 fija θ₀ − θ₂ = −θ₁ = 2θ₂ sin justificarlo; (2) no dice si el grafo incluye todos los píxeles de la imagen o solo los etiquetados, ni el costo de memoria; (3) la Ec. 13 llama «distancia espacial» a lo que es un peso gaussiano de cercanía; (4) la GCN de referencia (66.8 % en IP) usa solo el grafo espectral, así que la mejora mide sobre todo el aporte de la información espacial.
+- **Contribución:**
+(1) Una convolución de grafo de segundo orden (K = 2, Ec. 10) cuyas aristas espectrales (k-vecinos mutuos, k = 10) se multiplican por un peso espacial gaussiano dentro de una ventana de 5 × 5 (Ecs. 13–16); (2) una GCN de dos capas entrenada con entropía cruzada sobre los nodos etiquetados (Ec. 20); y (3) la regla de retropropagación explícita (Ecs. 21–25). OA de 91.6 % en IP con 1 % de etiquetas, frente a 66.8 % de la GCN original (resumen).
+- **Claridad:**
+Concisa, pero con detalles experimentales escasos (por ser una carta) y erratas en las ecuaciones (Ec. 11).
+- **Superpíxeles (F / A / —; si A, ¿con qué pérdida?):**
+—. No usa superpíxeles: cada nodo es un píxel y la información espacial entra por una ventana de 5 × 5 en la adyacencia.
+- **¿Amenaza tu originalidad? (sí / no / parcial):**
+No. Grafo de píxeles, sin segmentación. Es un antecedente histórico de la GCN semi-supervisada en HSI, no un competidor.
+- **Prioridad final (A / B / C) y por qué:**
+C (baja de B). Basta con un dato: es una de las primeras GCN semi-supervisadas para HSI y muestra que añadir información espacial al grafo de píxeles sube la OA en IP de 66.8 % a 91.6 % con 1 % de etiquetas. Su limitación de costo (un nodo por píxel) es la que motivó a MDGCN a usar superpíxeles.
+
+## wang2026mixed · Prioridad inicial C
+
+Wang et al. (2026). Mixed KAN Convolutional Network With Superpixel-Based Multihead Graph Learning for Hyperspectral Image Classification. *IEEE Transactions on Geoscience and Remote Sensing*. <http://dx.doi.org/10.1109/TGRS.2026.3705787>
+
+> 2026: grafos multicabeza sobre superpíxeles; muestra que el tema sigue activo.
+
+- **Fecha:**
+- **Categoría:**
+Método nuevo: red de dos ramas (MGL-MKCNet) que combina una GCN multicabeza sobre superpíxeles con convoluciones KAN (Kolmogorov–Arnold) y atención espectral–espacial a nivel de píxel.
+- **Contexto:**
+Sigue el esquema híbrido CNN + GCN de CEGCN: el codificador y el decodificador píxel–superpíxel con una matriz de asociación binaria (Ecs. 15–16 y 20) son los de CEGCN. Incorpora las redes KAN y FastKAN. Se compara con CEGCN, WFCG, FDGC, SSFTT, DSGSF, GSC-ViT, MambaHSI y S2VNet (Sec. IV-B).
+- **Corrección:**
+Razonable, con un protocolo de pocas etiquetas por porcentaje: 1 % en IP y Augsburg, 0.1 % en PU y WHU-Hi-LongKou, 10 repeticiones con muestreo aleatorio, y un barrido de 1 % a 5 % (Fig. 8). Reservas: el tamaño de los superpíxeles (25) se fija igual para todos los conjuntos sin analizarlo, y la GCN multicabeza es una suma de GCN estándar con pesos distintos, sin un mecanismo que justifique llamarla «aprendizaje de grafos».
+- **Contribución:**
+(1) Un módulo de grafo multicabeza sobre superpíxeles (SMHG, Ecs. 18–19); (2) un módulo de atención espectral–espacial (SSCA); y (3) una convolución KAN mixta con núcleos de 1 × 1 y 3 × 3 (MKConv). OA de 90.24 % en IP con 1 % de etiquetas (Sec. IV-B1).
+- **Claridad:**
+Clara y con hiperparámetros explícitos (Sec. IV-A).
+- **Superpíxeles (F / A / —; si A, ¿con qué pérdida?):**
+F. SLIC con tamaño 25 sobre 30 componentes principales (PCA), igual para todos los conjuntos (Sec. IV-A). Entrena con entropía cruzada; la segmentación no se aprende.
+- **¿Amenaza tu originalidad? (sí / no / parcial):**
+No. Segmentación fija sobre PCA.
+- **Prioridad final (A / B / C) y por qué:**
+C. Dato que citarás: en 2026, un método reciente publicado en TGRS sigue construyendo el grafo con SLIC fijo sobre PCA (30 componentes, tamaño 25 para todas las escenas; Sec. IV-A) y reutiliza el codificador y decodificador de CEGCN. Muestra que la GCN sobre superpíxeles sigue activa y que la segmentación fija sobre PCA sigue siendo la práctica estándar.
+
+## yang2024dual · Prioridad inicial C
+
+Yang y Zhang (2024). A Dual-Branch Fusion of a Graph Convolutional Network and a Convolutional Neural Network for Hyperspectral Image Classification. *Sensors*. <http://dx.doi.org/10.3390/s24144760>
+
+> Fusión de GCN y CNN en dos ramas (MDPI Sensors 2024).
+
+- **Fecha:**
+- **Categoría:**
+Método nuevo: red de dos ramas (DFGCN) que fusiona una GCN semi-supervisada sobre superpíxeles en tres escalas con una CNN con atención a nivel de píxel.
+- **Contexto:**
+Sigue la línea de las GCN semi-supervisadas sobre superpíxeles (GCN, S²GCN, MDGCN) y de SGML (Li et al.), de la que toma la segmentación multiescala adaptativa (Sec. 2.2). Se compara con RBF-SVM, 2-D-CNN, 3-D-CNN, GCN, S²GCN, MDGCN y SGML (Sec. 4.2).
+- **Corrección:**
+Débil. (1) Usa muchas etiquetas: 50 por clase en IP (15 en las clases pequeñas; Tabla 1), sin barrido con pocas etiquetas; (2) cada superpíxel recibe la etiqueta por voto mayoritario de sus píxeles etiquetados (Sec. 2.3), la misma fuga espacial que GiGCN y SGL; (3) no dice cuántas repeticiones promedia; (4) incoherencias: en la Tabla 1 Alfalfa suma 54 muestras (son 46), en KSC la κ (99.79) supera a la OA (99.71), y la Sec. 4.1 asigna dos tasas de aprendizaje distintas a KSC.
+- **Contribución:**
+(1) Una matriz de adyacencia que combina una similitud por distancia euclidiana y el coeficiente de correlación de Pearson, con peso 0.5 entre ambas (Sec. 2.3, Fig. 8); (2) un módulo de realce espectral entre las dos capas de GCN (SFEM); y (3) la fusión con una rama CNN con atención SE. OA de 97.77 % en IP con unas 50 etiquetas por clase (Tabla 4).
+- **Claridad:**
+Aceptable, pero el PDF repite párrafos y figuras (versión de revisión mezclada con la final) y hay erratas en las ecuaciones y en la descripción de los parámetros.
+- **Superpíxeles (F / A / —; si A, ¿con qué pérdida?):**
+F. ERS (tasa de entropía) sobre la primera componente principal, en tres escalas (262, 525 y 1051 superpíxeles en IP; Fig. 2). La segmentación no se aprende.
+- **¿Amenaza tu originalidad? (sí / no / parcial):**
+No. Segmentación fija sobre una sola componente principal.
+- **Prioridad final (A / B / C) y por qué:**
+C. Dato que citarás: otro método reciente (2024) que segmenta con ERS sobre una sola componente principal (Fig. 2) y elige a mano tres escalas de superpíxeles, lo que ilustra la pérdida de información espectral que la propuesta evita al segmentar con el espectro completo. Su protocolo, con muchas etiquetas y fuga espacial, no sirve como referencia de exactitud.
+
+## zhao2023hyperspectral · Prioridad inicial C
+
+Zhao et al. (2023). Hyperspectral Image Classification With Multi-Attention Transformer and Adaptive Superpixel Segmentation-Based Active Learning. *IEEE Transactions on Image Processing*. <http://dx.doi.org/10.1109/TIP.2023.3287738>
+
+> Segmentación adaptativa en superpíxeles con aprendizaje activo (TIP 2023).
+
+- **Fecha:** 
+- **Categoría:** 
+Método nuevo: transformer con varias atenciones (MAT) entrenado con aprendizaje activo apoyado en una segmentación adaptativa en superpíxeles (ASS) para HSI.
+- **Contexto:** 
+La segmentación sigue a la segmentación bayesiana adaptativa BASS, que divide y fusiona superpíxeles; el aprendizaje activo usa el criterio break-ties. Se evalúa en PaviaU, Houston2013 y YRE.
+- **Corrección:** 
+Razonable. Ablación sobre la PCA: segmentar con el espectro original, con 99.8 % o con 95 % de la varianza cambia la clasificación menos de 0.3 %, pero segmentar con el espectro completo requiere 56.69 GB de memoria en Houston2013 (Tabla V, Sec. IV). La segmentación solo guía la selección de muestras, no el clasificador.
+- **Contribución:** 
+(1) MAT con autoatención y outlook-attention; (2) aprendizaje activo guiado por superpíxeles con pseudoetiquetas; y (3) ASS basada en BASS, que ajusta el número de superpíxeles a la imagen.
+- **Claridad:** 
+Clara.
+- **Superpíxeles (F / A / —; si A, ¿con qué pérdida?):** 
+F (adaptativa). BASS sobre componentes principales (99.8 % de la varianza), con número de superpíxeles ajustado por división y fusión; no se aprende con gradiente.
+- **¿Amenaza tu originalidad? (sí / no / parcial):** 
+No. Segmentación probabilística no diferenciable, usada para aprendizaje activo, no como nodos de una GCN.
+- **Prioridad final (A / B / C) y por qué:** 
+C. Dato que citarás: segmentar con el espectro completo puede ser prohibitivo en memoria (56.69 GB en Houston2013 con BASS; Tabla V), lo que motiva el objetivo de implementación en GPU y la caracterización del costo de la propuesta.
+
+## wang2023pixel · Prioridad inicial C
+
+Wang et al. (2023). Pixel-Superpixel Level Multiscale Graph and Spectral–Spatial Representation Fusion Network for Hyperspectral Image Classification. *IEEE Geoscience and Remote Sensing Letters*. <http://dx.doi.org/10.1109/LGRS.2023.3323706>
+
+> Grafos a nivel píxel y superpíxel combinados (GRSL 2023).
+
+- **Fecha:** 
+- **Categoría:** 
+Método nuevo (carta de 5 páginas): red que fusiona grafos a nivel de píxel y de superpíxel en varias escalas con representaciones espectral–espaciales (Ps-MGSRF).
+- **Contexto:** 
+Línea de GCN híbridas píxel–superpíxel (CEGCN, MSSGU). Se evalúa en IN, KSC y UP.
+- **Corrección:** 
+Débil: 10 % de entrenamiento y 10 % de validación en IN y KSC, cinco repeticiones; la escala de segmentación λ se elige mirando la exactitud (Fig. 8).
+- **Contribución:** 
+Bloques de GCN residuales de distintos órdenes y módulos de refiltrado multiescala, fusionados con pesos aprendibles.
+- **Claridad:** 
+Aceptable.
+- **Superpíxeles (F / A / —; si A, ¿con qué pérdida?):** 
+F. SLIC sobre la HSI reducida con PCA, con escala λ (Sec. II).
+- **¿Amenaza tu originalidad? (sí / no / parcial):** 
+No.
+- **Prioridad final (A / B / C) y por qué:** 
+C. Dato que citarás: otro ejemplo (2023) de SLIC sobre PCA con una escala de segmentación elegida mirando la exactitud (Fig. 8).
+
+## liu2023adaptive · Prioridad inicial C
+
+Liu et al. (2023). Adaptive Multi-Feature Fusion Graph Convolutional Network for Hyperspectral Image Classification. *Remote Sensing*. <http://dx.doi.org/10.3390/rs15235483>
+
+> GCN con fusión adaptativa de características (MDPI Remote Sensing 2023).
+
+- **Fecha:** 
+- **Categoría:** 
+Método nuevo: GCN de fusión adaptativa de varias características (espectrales y de textura LBP) sobre superpíxeles.
+- **Contexto:** 
+Línea de MDGCN y MSSGU. Se evalúa en Pavia University, Salinas y Houston 2013.
+- **Corrección:** 
+Aceptable; no evalúa en Indian Pines.
+- **Contribución:** 
+Fusión adaptativa de características espectrales y de textura (LBP invariante a la rotación) en grafos de superpíxeles.
+- **Claridad:** 
+Clara.
+- **Superpíxeles (F / A / —; si A, ¿con qué pérdida?):** 
+F. SLIC sobre la HSI reducida con PCA, con número de superpíxeles controlado por λ (Sec. 3).
+- **¿Amenaza tu originalidad? (sí / no / parcial):** 
+No.
+- **Prioridad final (A / B / C) y por qué:** 
+C. Dato que citarás: otro ejemplo (2023) de grafo construido con SLIC sobre PCA, en una revista MDPI.
+
+## ding2022graph · Prioridad inicial C
+
+Ding et al. (2022). Graph Sample and Aggregate-Attention Network for Hyperspectral Image Classification. *IEEE Geoscience and Remote Sensing Letters*. <http://dx.doi.org/10.1109/LGRS.2021.3062944>
+
+> GraphSAGE con atención para HSI.
+
+- **Fecha:** 
+- **Categoría:** 
+Método nuevo (carta): red GraphSAGE con atención (SAGE-A) sobre superpíxeles para HSI.
+- **Contexto:** 
+Mismos autores que la revisión de Zhao (2025) y que MFGCN. Usa GraphSAGE para entrenar por muestreo de vecinos. Compara con CAD-GCN, MDGCN y otros.
+- **Corrección:** 
+Razonable: 30 etiquetas por clase y un barrido de 5 a 30 por clase en PU y Houston 2013; no usa Indian Pines. La escala de segmentación se limita por memoria (hasta 30 000 superpíxeles).
+- **Contribución:** 
+Agregación de vecinos con atención sobre un grafo multiescala de superpíxeles, entrenable por muestreo.
+- **Claridad:** 
+Clara.
+- **Superpíxeles (F / A / —; si A, ¿con qué pérdida?):** 
+F. SLIC.
+- **¿Amenaza tu originalidad? (sí / no / parcial):** 
+No.
+- **Prioridad final (A / B / C) y por qué:** 
+C. Dato que citarás: GraphSAGE permite entrenar GCN sobre grafos de superpíxeles grandes por muestreo de vecinos, una alternativa al entrenamiento de lote completo.
+
+## ding2022multi · Prioridad inicial C
+
+Ding et al. (2022). Multi-feature fusion: Graph neural network and CNN combining for hyperspectral image classification. *Neurocomputing*. <http://dx.doi.org/10.1016/j.neucom.2022.06.031>
+
+> Fusión de GNN y CNN para HSI.
+
+- **Fecha:** 
+- **Categoría:** 
+Método nuevo: red de dos ramas (MFGCN) con una GCN multiescala sobre superpíxeles y una CNN multiescala.
+- **Contexto:** 
+Mismos autores que SAGE-A; sigue el esquema de CEGCN, incluida la segmentación LDA-SLIC. Se evalúa en Pavia University, Salinas y Houston 2013.
+- **Corrección:** 
+Aceptable; no evalúa en Indian Pines. Usa LDA, que requiere etiquetas, antes de SLIC.
+- **Contribución:** 
+Fusión de una GCN multiescala y una CNN multiescala.
+- **Claridad:** 
+Clara.
+- **Superpíxeles (F / A / —; si A, ¿con qué pérdida?):** 
+F. LDA-SLIC (Sec. 3), es decir, SLIC sobre una proyección supervisada.
+- **¿Amenaza tu originalidad? (sí / no / parcial):** 
+No.
+- **Prioridad final (A / B / C) y por qué:** 
+C. Dato que citarás: igual que CEGCN, segmenta con LDA-SLIC, de modo que la segmentación usa las etiquetas de entrenamiento a través de LDA.
+
+## wan2021hyperspectral · Prioridad inicial C
+
+Wan et al. (2021). Hyperspectral Image Classification With Context-Aware Dynamic Graph Convolutional Network. *IEEE Transactions on Geoscience and Remote Sensing*. <http://dx.doi.org/10.1109/TGRS.2020.2994205>
+
+> GCN dinámica sensible al contexto; mismo grupo que MDGCN.
+
+- **Fecha:** 
+- **Categoría:** 
+Método nuevo: GCN con asignación píxel–región aprendida y grafo dinámico (CAD-GCN). Nota: el PDF de Zotero es la versión de arXiv (1909.11953v1, 2019).
+- **Contexto:** 
+Mismos autores que MDGCN, a la que extiende. Toma la proyección de píxeles a un grafo de regiones de los trabajos de razonamiento con grafos [19]. Se compara con GCN, S²GCN, R-2D-CNN, CNN-PPF, MFL, JSDF y MDGCN (Sec. IV).
+- **Corrección:** 
+Razonable: 30 etiquetas por clase (15 en clases pequeñas), 10 % para validación, desviación estándar y un barrido de etiquetas por clase (Fig. 9). Reservas: la segmentación se inicializa con SLIC y los anclajes se aprenden solo con entropía cruzada; los autores advierten que la asignación puede colapsar a una sola región si la inicialización es mala (Sec. III-B).
+- **Contribución:** 
+(1) Asignación suave píxel–región aprendida: P_ij = exp(−γ‖z_i − v_j‖²) sobre la región del píxel y sus vecinas, con anclajes V aprendidos por descenso de gradiente e inicializados con SLIC (Ecs. 8–9); (2) una distancia de Mahalanobis aprendida y un filtro de aristas por capa (Ecs. 10–13); y (3) la proyección de vuelta a los píxeles con P (Ec. 15). Entrena con entropía cruzada (Ec. 16). OA de 94.06 ± 0.85 % en IP con 30 etiquetas por clase.
+- **Claridad:** 
+Clara.
+- **Superpíxeles (F / A / —; si A, ¿con qué pérdida?):** 
+A. Asignación suave aprendida, muy cercana a SSN: anclajes en el espacio espectral, inicializados con SLIC y entrenados solo con la entropía cruzada de los píxeles etiquetados.
+- **¿Amenaza tu originalidad? (sí / no / parcial):** 
+Parcial, como EMS-GCN. Ya aprende de forma diferenciable la asignación de píxeles a regiones dentro de una GCN para clasificar HSI, y es anterior a EMS-GCN (arXiv 2019). Lo hace con la señal de las etiquetas, sin ninguna pérdida sin etiquetas de tipo EV y con distancia euclidiana.
+- **Prioridad final (A / B / C) y por qué:** 
+A (sube de C). Es el antecedente más temprano de asignaciones píxel–región aprendidas dentro de una GCN para HSI y debe añadirse al veredicto y al cuadro comparativo, junto con EMS-GCN, FG-DGCN y MSGTN. Su advertencia sobre el colapso de la asignación es un riesgo a controlar en la propuesta.
+
+# Grupo 5 · Superpíxeles diferenciables y sin etiquetas
+
+## yang2020superpixel · Prioridad inicial A
+
+Yang et al. (2020). Superpixel Segmentation With Fully Convolutional Networks. *2020 IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)*. <http://dx.doi.org/10.1109/CVPR42600.2020.01398>
+
+> Superpixel FCN: una sola red sin iteraciones; principal alternativa a SSN.
+
+- **Fecha:**
+- **Categoría:**
+Método nuevo (visión por computadora, imágenes RGB): una red totalmente convolucional (FCN) que predice directamente la asociación suave entre cada píxel y las 9 celdas de una rejilla regular, más su uso para submuestrear y sobremuestrear dentro de una red de estéreo. Nota: el PDF de Zotero es la versión de arXiv (2003.12929v1).
+- **Contexto:**
+Parte de los algoritmos clásicos que inicializan los superpíxeles en una rejilla (SLIC, LSC, SEEDS, SNIC) y, sobre todo, de SSN (Jampani et al., 2018) [16], con la que se compara directamente (Sec. 3.1, Fig. 3): SSN extrae características con una CNN y luego agrupa con un k-means suave iterativo, mientras que FCN predice la asignación en un solo paso. Se evalúa con el protocolo y el código de Stutz et al. (2018) contra SLIC, SNIC, LSC, ERS, ETPS, SEAL y SSN (Sec. 3.4).
+- **Corrección:**
+Sólida. Evaluación estándar con ASA, BR–BP y compacidad (CO) en BSDS500 y generalización sin reentrenar a NYUv2 (Figs. 5–6); los autores reconocen el compromiso entre adherencia a bordes y compacidad y no afirman ganar en todo. Reservas para la tesis: (1) solo imágenes RGB; (2) en los experimentos de segmentación entrena con la pérdida semántica, que usa etiquetas (L_sem, Ec. 5; Sec. 3.4); (3) restringir cada píxel a 9 celdas impide superpíxeles largos, una limitación que los autores aceptan (Sec. 3.1).
+- **Contribución:**
+(1) Predecir con una FCN codificador–decodificador la matriz de asociación suave Q entre píxeles y celdas de la rejilla (Sec. 3.1–3.2), sin k-means iterativo y a unos 50 fps; (2) una pérdida general L(Q) = Σ dist(f(p), f′(p)) + (m/S)‖p − p′‖², donde f′ es la propiedad de cada píxel reconstruida a partir de los centros de sus superpíxeles (Ecs. 1–3), con dos versiones: L_SLIC, que reconstruye el color sin etiquetas (Ec. 4), y L_sem, que reconstruye las etiquetas (Ec. 5); y (3) usar Q para submuestrear y sobremuestrear en una red de estéreo (PSMNet), con entrenamiento conjunto L = pérdida de la tarea + λ·L_SLIC (Ec. 9). Código: https://github.com/fuy34/superpixel_fcn.
+- **Claridad:**
+Muy clara: la comparación con SSN (Fig. 3) y la formulación de la pérdida (Ecs. 1–5) se entienden sin ambigüedad.
+- **Superpíxeles (F / A / —; si A, ¿con qué pérdida?):**
+A. FCN que predice la asociación suave. Con etiquetas en el experimento de segmentación (L_sem: reconstrucción de etiquetas + compacidad, m = 0.003); sin etiquetas en la aplicación a estéreo (L_SLIC: reconstrucción del color CIELAB + compacidad, para el preentrenamiento y como término del entrenamiento conjunto, Ec. 9).
+- **¿Amenaza tu originalidad? (sí / no / parcial):**
+Parcial, en el diseño de la pérdida. L_SLIC (Ec. 4) es una reconstrucción sin etiquetas de la propiedad de cada píxel más compacidad: la misma forma que la pérdida de la propuesta, que equivale a maximizar la EV. Y la Ec. 9 ya combina esa pérdida sin etiquetas con la de una tarea posterior, como el objetivo VII. Lo que no hace: aplicarla al espectro completo de una HSI (de cientos de bandas, no 3 canales de color), usar una afinidad angular, alimentar una GCN semi-supervisada ni medir la EV. La aportación debe formularse sobre esas diferencias, no sobre la idea de una pérdida de reconstrucción sin etiquetas.
+- **Prioridad final (A / B / C) y por qué:**
+A. (1) Es la principal alternativa a SSN como segmentador diferenciable y conviene justificar en la metodología por qué se elige SSN (por ejemplo, la libertad de definir la afinidad, que en FCN es implícita en la red); (2) su L_SLIC es el antecedente directo de la pérdida de reconstrucción sin etiquetas que la propuesta lleva al espectro de la HSI, y debe citarse para no presentar esa forma como nueva; y (3) su esquema de entrenamiento conjunto (Ec. 9) es una referencia para el objetivo VII.
+
+## suzuki2020superpixel · Prioridad inicial A
+
+Suzuki (2020). Superpixel Segmentation Via Convolutional Neural Networks with Regularized Information Maximization. *ICASSP 2020 - 2020 IEEE International Conference on Acoustics, Speech and Signal Processing (ICASSP)*. <http://dx.doi.org/10.1109/ICASSP40776.2020.9054140>
+
+> Superpíxeles con CNN sin etiquetas: antecedente directo de tu entrenamiento no supervisado.
+
+- **Fecha:**
+- **Categoría:**
+Método nuevo (carta de ICASSP, imágenes RGB): segmentación en superpíxeles sin etiquetas, optimizando una CNN inicializada al azar sobre una sola imagen en el momento de la inferencia. Nota: el PDF de Zotero es la versión de arXiv (2002.06765v3).
+- **Contexto:**
+Toma el procedimiento de Deep Image Prior (DIP) [4], que optimiza una CNN aleatoria sobre una sola imagen, y la maximización regularizada de la información (RIM) [5, 6] para agrupar. Se distingue de la segmentación no supervisada de Kanezaki [7] (sin control del número de segmentos) y de SSN [8], a la que describe como supervisada y orientada a la tarea. Se compara con SLIC, SEEDS, FH y ETPS (Sec. 3).
+- **Corrección:**
+Razonable para una carta, pero limitada. Evalúa con ASA y BR en BSDS500 y SBD (Fig. 2); la ventaja aparece sobre todo con pocos superpíxeles (≤ 200). Reservas: (1) solo RGB; (2) los coeficientes (λ, α, β) se eligen «a grandes rasgos» con los datos de entrenamiento y validación, que tienen etiquetas (Sec. 3.1); (3) la descripción de SSN como necesariamente supervisada es una simplificación: SSN admite pérdidas de reconstrucción sin etiquetas; (4) los autores reconocen que el resultado depende de la inicialización de la CNN y que puede unir componentes no conexos en un mismo superpíxel (Sec. 4).
+- **Contribución:**
+(1) Una función objetivo sin etiquetas para superpíxeles: L = L_clustering + α·L_smoothness + β·R (Ec. 1), donde L_clustering es una entropía tipo RIM con un coeficiente λ que controla el número de superpíxeles (Ec. 2), L_smoothness penaliza cambios de asignación entre píxeles vecinos salvo en los bordes de la imagen (Ec. 3) y R es una reconstrucción de la imagen como tarea auxiliar (Ec. 4); (2) la adaptación del número de superpíxeles a cada imagen mediante λ (Fig. 1); y (3) la idea de superpíxeles «agnósticos a la tarea», que conservan la información de la imagen original (Sec. 1). Código: https://github.com/DensoITLab/ss-with-RIM.
+- **Claridad:**
+Clara y breve; el algoritmo (Alg. 1) y la pérdida (Ecs. 1–4) son fáciles de reproducir.
+- **Superpíxeles (F / A / —; si A, ¿con qué pérdida?):**
+A. CNN de 5 capas que recibe color y posición y produce la asignación suave P y una imagen reconstruida (Sec. 3.1). Sin etiquetas: entropía de agrupamiento (RIM) + suavidad espacial + reconstrucción del color (β = 10). Se optimiza imagen por imagen durante 1000 iteraciones.
+- **¿Amenaza tu originalidad? (sí / no / parcial):**
+Parcial. Ya aprende superpíxeles con una CNN sin etiquetas, que es el núcleo del entrenamiento de la propuesta. Diferencias: (1) su reconstrucción la hace una salida auxiliar de la red, no los centros de los superpíxeles, así que no mide la EV de la partición; (2) agrupa por entropía (RIM), no por varianza explicada; (3) trabaja con RGB, no con el espectro de una HSI; y (4) no alimenta ningún clasificador ni mide el efecto en una tarea posterior. Además, describe sus superpíxeles como «agnósticos a la tarea», mientras que la propuesta busca superpíxeles útiles para la GCN sin usar etiquetas.
+- **Prioridad final (A / B / C) y por qué:**
+A. Es el antecedente directo del aprendizaje de superpíxeles sin etiquetas y debe citarse en la sección de superpíxeles diferenciables: (1) muestra que una CNN puede segmentar sin etiquetas optimizando sobre una sola imagen, el mismo escenario transductivo de la HSI; (2) su término de reconstrucción es el punto de contraste para explicar por qué la EV (reconstruir cada píxel con la media de su superpíxel) es una señal más directa de la calidad espectral de la partición; y (3) su dependencia de la inicialización es un riesgo que la propuesta debe controlar con repeticiones.
+
+## jampani2018superpixel · Prioridad inicial A
+
+Jampani et al. (2018). Superpixel Sampling Networks. *Computer Vision – ECCV 2018*. <http://dx.doi.org/10.1007/978-3-030-01234-2_22>
+
+> SSN: tu punto de partida. Se lee tres veces: hoy las pasadas 1 y 2 y en diciembre la tercera.
+
+- **Fecha:**
+- **Categoría:**
+Método nuevo (visión por computadora, imágenes RGB): el primer algoritmo de superpíxeles entrenable de extremo a extremo (SSN), que convierte SLIC en un agrupamiento diferenciable y lo combina con una CNN que aprende las características de los píxeles.
+- **Contexto:**
+Parte de SLIC (k-means en el espacio XYLab; Sec. 3) y de sus variantes por agrupamiento (LSC, Manifold-SLIC, SNIC), y lo distingue de los métodos por grafos (normalized cuts, FH, ERS), cuya optimización discreta no es diferenciable (Sec. 2). Su antecedente más cercano es SEAL, que aprende características pero no es diferenciable de extremo a extremo. Se apoya en el agrupamiento profundo (neural EM, deep embedded clustering). Se compara con SLIC, SNIC, SEEDS, LSC, ERS, ETPS, SCALP y SEAL (Sec. 5).
+- **Corrección:**
+Sólida. Supuesto central: lo único no diferenciable de SLIC es la asignación al vecino más cercano, y relajarla a una asignación suave no degrada el resultado; lo demuestra SSN_pix, que sin parámetros entrenables iguala a SLIC (Fig. 5). Ablaciones claras (SSN_pix, SSN_linear y SSN_deep; Fig. 4), cuatro conjuntos de datos (BSDS500, Cityscapes, PascalVOC y MPI-Sintel) y tiempos de ejecución (Tabla 1). Reservas para la tesis: (1) solo imágenes RGB, con 5 canales de entrada (XYLab); (2) todos los experimentos aprenden los superpíxeles con etiquetas (segmentos de referencia, clases semánticas o flujo óptico en la reconstrucción; Secs. 5.1–5.3), aunque el marco admite otras pérdidas; (3) el modelo final se elige por exactitud en validación (Sec. 4.4).
+- **Contribución:**
+(1) SLIC diferenciable: la asociación suave Q_pi = exp(−‖F_p − S_i‖²) (Ec. 3) y la actualización de centros S = $\hat{Q}^{\top}F$ (Ec. 4), con cada píxel limitado a los 9 superpíxeles vecinos para que Q sea de tamaño n × 9 (Sec. 4.1, Fig. 2); (2) SSN: una CNN de 7 capas que produce k características por píxel (k = 20, incluidas XYLab) seguida de v iteraciones de SLIC diferenciable (5 al entrenar, 10 al probar; Alg. 1, Fig. 3); (3) mapeos diferenciables de píxeles a superpíxeles ($\hat{Q}^{\top}$) y de vuelta ($\tilde{Q}$), base de la pérdida y de la integración con otras redes (Sec. 4.1); (4) una pérdida flexible L = L_recon + λ·L_compact, con L_recon = L(R, $\tilde{Q}\hat{Q}^{\top}R$), que reconstruye una propiedad R de los píxeles a partir de sus superpíxeles (Ec. 5), y L_compact = ‖I_xy − $\bar{I}_{xy}$‖², calculada con la asignación dura (Ec. 6), con λ = 10⁻⁵. Mejora una red de segmentación semántica al sustituir SLIC por SSN (IoU de 74.1 a 75.3 en VOC; Tabla 2). Código: https://varunjampani.github.io/ssn/.
+- **Claridad:**
+Muy clara: el paso de SLIC a SLIC diferenciable (Secs. 3–4.1) y el algoritmo (Alg. 1) se siguen sin ambigüedad, y las ablaciones justifican cada decisión.
+- **Superpíxeles (F / A / —; si A, ¿con qué pérdida?):**
+A. SLIC diferenciable sobre características de una CNN, con distancia euclidiana al cuadrado (Ec. 3). Pérdida: reconstrucción de una propiedad de los píxeles a partir de sus superpíxeles + compacidad (Ecs. 5–6). En el artículo, la propiedad son siempre etiquetas: segmentos o clases (entropía cruzada) o flujo óptico (L1). Se entrena con un conjunto de imágenes y luego se aplica a imágenes nuevas.
+- **¿Amenaza tu originalidad? (sí / no / parcial):**
+No; es la base del método, pero acota la aportación. Si en L_recon = L(R, $\tilde{Q}\hat{Q}^{\top}R$) se toma como R el propio espectro de la HSI y como L el error cuadrático, la pérdida es la reconstrucción de cada píxel con la media (suave) de su superpíxel, es decir, la EV. El artículo no lo hace, pero deja abierto el uso de «muchas otras funciones de pérdida» (Sec. 4.3). Por tanto, la aportación de la propuesta no es la forma de la pérdida, sino: elegir el espectro completo de la HSI como R para aprender sin etiquetas, sustituir la distancia euclidiana de la Ec. 3 por una afinidad angular tipo SAM, y evaluar esos superpíxeles como nodos de una GCN semi-supervisada midiendo la EV.
+- **Prioridad final (A / B / C) y por qué:**
+A. Es el punto de partida técnico de la propuesta: (1) las Ecs. 3–6 son las que la propuesta modifica (la distancia de la Ec. 3 y la propiedad R de la Ec. 5); (2) los mapeos $\hat{Q}^{\top}$ y $\tilde{Q}$ son los mismos codificador y decodificador que usan CEGCN, EMS-GCN y la propuesta; (3) SSN_pix (sin entrenamiento) es una línea base natural para separar el efecto de aprender las características del efecto de la pérdida; y (4) sus hiperparámetros (k = 20, v = 5/10, λ = 10⁻⁵, η = 2.5) son el punto de partida de la configuración experimental.
+
+## eliasof2022rethinking · Prioridad inicial B
+
+Eliasof et al. (2022). Rethinking Unsupervised Neural Superpixel Segmentation. *2022 IEEE International Conference on Image Processing (ICIP)*. <http://dx.doi.org/10.1109/ICIP46576.2022.9897484>
+
+> Continúa a Suzuki; compara la imagen con su versión «superpixelada» suave, una idea muy parecida a tu pérdida EV.
+
+- **Fecha:**
+- **Categoría:**
+Método nuevo (carta de ICIP, imágenes RGB): mejora la segmentación en superpíxeles sin etiquetas con CNN de Suzuki (2020) añadiendo la comparación entre la imagen y su versión «superpixelada» suave, conciencia de bordes y convoluciones dilatadas. Nota: el PDF de Zotero es la versión de arXiv (2206.10213v1).
+- **Contexto:**
+Continúa directamente a Suzuki (2020) [8] (optimizar una CNN aleatoria sobre una sola imagen, con la pérdida RIM) y al método con conciencia de bordes (EA) [9]. Toma el módulo ASPP de DeepLabV3. Contrasta con los métodos supervisados como SSN, que requieren etiquetas (Sec. 1). Se compara con SLIC, SEEDS, ETPS, FH, LSC, RIM y EA en BSDS500 (Sec. 3).
+- **Corrección:**
+Débil en la evaluación. (1) Solo usa las 200 imágenes de prueba de BSDS500, y los coeficientes se eligen «con una búsqueda en rejilla ingenua» sin decir sobre qué datos, posiblemente las mismas de prueba (Sec. 3.2); (2) el aporte de cada componente solo se muestra con ejemplos visuales (Figs. 1–3), sin ablación cuantitativa; (3) la Ec. 2, tal como está escrita, suma sobre todos los superpíxeles y da la misma media para todos los píxeles; la versión correcta debe ponderar el centro de cada superpíxel por la asignación P del píxel; (4) da cuatro valores para tres coeficientes, «(λ, α, β) = (2, 2, 10, 1)» (falta η).
+- **Contribución:**
+(1) La imagen superpixelada suave Î_P, en la que cada píxel se reemplaza por la media ponderada de sus superpíxeles según la asignación suave P (Ec. 2), y su comparación con la imagen original por error cuadrático medio como parte de la reconstrucción: L_recons = MSE(I, $\tilde{I}$) + MSE(I, Î_P) (Ec. 7); (2) conciencia de bordes: mapas laplacianos como características y una pérdida de divergencia KL entre los bordes de la imagen, de su reconstrucción y de la imagen superpixelada (Ec. 8); y (3) un módulo ASPP con dilataciones 1, 2, 4 y 8 (Sec. 2.5). Pérdida total: RIM + suavidad + reconstrucción + bordes (Ec. 3).
+- **Claridad:**
+Clara en la idea (Figs. 1–3), pero con errores en las ecuaciones (Ec. 2, Ec. 5 con «I_{j,j}») y en los hiperparámetros.
+- **Superpíxeles (F / A / —; si A, ¿con qué pérdida?):**
+A. CNN con ASPP optimizada sobre una sola imagen, sin etiquetas, con color y posición como entrada. Pérdida: entropía RIM + suavidad + reconstrucción (auxiliar y de la imagen superpixelada suave) + bordes (Ecs. 3–8).
+- **¿Amenaza tu originalidad? (sí / no / parcial):**
+Parcial, y más cercana que Suzuki. El término MSE(I, Î_P) de la Ec. 7 es el error de reconstruir cada píxel con la media de su superpíxel, calculado con la asignación suave: equivale a 1 − EV salvo la normalización por la varianza total. Es decir, ya existe una pérdida sin etiquetas de tipo EV para aprender superpíxeles con una CNN, aunque en RGB. Diferencias: (1) RGB (3 canales), no el espectro completo de una HSI; (2) es un término más entre RIM, suavidad, bordes y reconstrucción auxiliar, no el criterio central; (3) no mide la EV ni la relaciona con una tarea; (4) usa distancia euclidiana; y (5) no alimenta ningún clasificador.
+- **Prioridad final (A / B / C) y por qué:**
+A (sube de B). Junto con Li et al. (2026), es el antecedente más cercano de la pérdida de la propuesta: muestra que comparar la imagen con su versión superpixelada suave mejora los superpíxeles sin etiquetas (Fig. 1). Debe citarse en el objetivo III y en el estado del arte, y el veredicto de originalidad debe incluirlo: la propuesta no es la primera en usar un término de tipo EV sin etiquetas, sino la primera en usarlo sobre el espectro de una HSI como criterio central para los nodos de una GCN.
+
+## zhu2021learning · Prioridad inicial B
+
+Zhu et al. (2021). Learning the Superpixel in a Non-iterative and Lifelong Manner. *2021 IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)*. <http://dx.doi.org/10.1109/CVPR46437.2021.00128>
+
+> LNSNet: superpíxeles sin etiquetas y sin iteraciones.
+
+- **Fecha:** 
+- **Categoría:** 
+Método nuevo (visión por computadora, imágenes RGB): red de superpíxeles sin etiquetas, sin iteraciones y con aprendizaje continuo (LNS-Net), que se entrena imagen por imagen. Nota: el PDF de Zotero es la versión de arXiv (2103.10681v2).
+- **Contexto:** 
+Critica a los métodos con CNN (SSN, SEAL) por depender de etiquetas y de mucha memoria, y a los que siguen actualizando centros de forma iterativa (Sec. 1). Toma la pérdida de agrupamiento de Deep Embedded Clustering (Xie et al. [29]) y la idea de aprendizaje continuo. Se compara con SLIC, SNIC, LSC, ERS, SEEDS, SSN y RIM (Suzuki) en BSDS500 y dos conjuntos médicos (DRIVE y DME).
+- **Corrección:** 
+Razonable. Mide ASA, BR y F en tres conjuntos y reporta costo (parámetros y tiempo); con un modelo entrenado en BSDS500 generaliza a imágenes médicas. Reservas: solo RGB; en ASA queda por debajo de SSN supervisada (0.962 frente a 0.970 con 100 superpíxeles); y su reconstrucción es de las características de entrada, no de la imagen superpixelada.
+- **Contribución:** 
+(1) Formular los superpíxeles como agrupamiento con aprendizaje continuo, para entrenar una sola red con una secuencia de imágenes sin guardarlas (Sec. 1); (2) un módulo que estima directamente los centros (semillas) y asigna los píxeles sin iterar (NCM); (3) un módulo que reescala los gradientes para evitar el olvido catastrófico (GRM); y (4) una pérdida sin etiquetas L = L_c + β·L_r (Ec. 13): agrupamiento tipo DEC limitado a las n semillas más cercanas (Ecs. 14–17) y reconstrucción del color y la posición de entrada (Ec. 18). Unas diez veces menos costosa que otros métodos con CNN. Código: https://github.com/zh460045050/LNSNet.
+- **Claridad:** 
+Clara en la idea; la notación de algunos módulos es densa.
+- **Superpíxeles (F / A / —; si A, ¿con qué pérdida?):** 
+A. Red ligera sin etiquetas que estima semillas y asigna píxeles en un paso. Pérdida: agrupamiento KL tipo DEC con máscara de rango + reconstrucción de las características de entrada (color y posición).
+- **¿Amenaza tu originalidad? (sí / no / parcial):** 
+No. Superpíxeles sin etiquetas, pero en RGB, sin pérdida de tipo EV (su reconstrucción no pasa por los superpíxeles) y sin clasificador posterior.
+- **Prioridad final (A / B / C) y por qué:** 
+B. Es otro antecedente de superpíxeles aprendidos sin etiquetas, útil para el estado del arte junto con Suzuki y Eliasof, y su diseño sin iteraciones es una alternativa a considerar si el costo de SSN con cientos de bandas resulta alto.
+
+## wang2021ainet · Prioridad inicial C
+
+Wang et al. (2021). AINet: Association Implantation for Superpixel Segmentation. *2021 IEEE/CVF International Conference on Computer Vision (ICCV)*. <http://dx.doi.org/10.1109/ICCV48922.2021.00699>
+
+> AINet: mejora de la asociación píxel-superpíxel.
+
+- **Fecha:** 
+- **Categoría:** 
+Método nuevo (visión por computadora, imágenes RGB): red de superpíxeles supervisada (AINet) que implanta las características de las celdas de la rejilla alrededor de cada píxel para predecir la asociación.
+- **Contexto:** 
+Sigue la línea de Superpixel FCN (asociación de cada píxel con las celdas vecinas de una rejilla) y la pérdida de reconstrucción de SSN. Se evalúa en BSDS500 y NYUv2.
+- **Corrección:** 
+Razonable para visión por computadora, pero supervisada: reconstruye etiquetas semánticas con entropía cruzada y añade una pérdida de bordes que usa las etiquetas.
+- **Contribución:** 
+(1) Un módulo de implantación de asociaciones (AI) que coloca las características de las 9 celdas vecinas alrededor de cada píxel y aplica una convolución sobre esa ventana; y (2) una pérdida que mejora la discriminación de píxeles cerca de los bordes. Código: https://github.com/wangyxxjtu/AINet-ICCV2021.
+- **Claridad:** 
+Clara.
+- **Superpíxeles (F / A / —; si A, ¿con qué pérdida?):** 
+A. FCN con asociación en rejilla. Pérdida supervisada: reconstrucción de etiquetas semánticas (entropía cruzada) + reconstrucción de la posición (L2) + pérdida de bordes.
+- **¿Amenaza tu originalidad? (sí / no / parcial):** 
+No. Supervisada, en RGB y sin clasificador posterior.
+- **Prioridad final (A / B / C) y por qué:** 
+C. Dato que citarás: AINet (2021) mejora la predicción de la asociación píxel–celda de Superpixel FCN, pero sigue necesitando etiquetas semánticas para entrenar, como la mayoría de las redes de superpíxeles.
+
+## tu2018learning · Prioridad inicial C
+
+Tu et al. (2018). Learning Superpixels with Segmentation-Aware Affinity Loss. *2018 IEEE/CVF Conference on Computer Vision and Pattern Recognition*. <http://dx.doi.org/10.1109/CVPR.2018.00066>
+
+> Afinidades aprendidas para superpíxeles (SEAL).
+
+- **Fecha:** 
+- **Categoría:** 
+Método nuevo (visión por computadora, imágenes RGB): aprendizaje de afinidades entre píxeles con una pérdida consciente de la segmentación (SEAL), para alimentar algoritmos de superpíxeles basados en grafos.
+- **Contexto:** 
+Mismo grupo que SSN (NVIDIA). Parte de ERS y SNIC; muestra que alimentarlos con características profundas genéricas (VGG16) no mejora los superpíxeles (Fig. 2). Precede a SSN, que lo cita como el antecedente no diferenciable.
+- **Corrección:** 
+Sólida en su contexto. Supervisada con la segmentación de referencia de BSDS500; el gradiente evita el algoritmo no diferenciable (ERS) mediante la pérdida SEAL.
+- **Contribución:** 
+(1) Mostrar que las características profundas genéricas no mejoran por sí solas a SLIC o ERS, porque no modelan la segmentación (Fig. 2); (2) una red que predice afinidades entre píxeles (PAN); y (3) la pérdida SEAL, que pondera los errores de afinidad según el error de la segmentación resultante.
+- **Claridad:** 
+Clara.
+- **Superpíxeles (F / A / —; si A, ¿con qué pérdida?):** 
+A (solo las afinidades). La segmentación la hace ERS, que no es diferenciable; las afinidades se aprenden con etiquetas de segmentación.
+- **¿Amenaza tu originalidad? (sí / no / parcial):** 
+No. Supervisada, en RGB, y la segmentación no es diferenciable.
+- **Prioridad final (A / B / C) y por qué:** 
+C. Dato que citarás: usar características profundas genéricas con algoritmos de superpíxeles clásicos no mejora la segmentación, porque esas características no se aprenden para segmentar (Fig. 2); hace falta entrenarlas con un criterio de segmentación, que en la propuesta es la EV.
+
+# Resumen de la pasada
+
+<!-- Llénala al final: es la vista rápida para decidir qué leer en la pasada 2. -->
+
+| Artículo | Inicial | Superp. | Pérdida (si A) | ¿Amenaza? | Final |
+|----------------------------|:---:|:---:|----------------------|:---:|:---:|
+| zhao2025review | A | — | No aplica | No | B |
+| hong2021graph | A | — | No aplica | No | B |
+| liu2021cnn | A | F (SLIC sobre LDA) | No aplica | No | A |
+| wan2020multiscale | A | F (SLIC) | No aplica | No | A |
+| jia2024graph | B | F (SLIC, ensamble de 4 escalas) | No aplica | No | B |
+| yang2024semi | B | F (SLIC) | No aplica | No | B |
+| yu2024dspg | B | F (no especifica el algoritmo) | No aplica | No | A |
+| zou2024psformer | B | F (Super Hierarchy, 4 niveles) | No aplica | No | B |
+| li2023multistage | B | F (Super Hierarchy sobre PCA) | No aplica | No | B |
+| liu2022multilevel | B | F (fusión de regiones sobre PCA) | No aplica | No | B |
+| sellars2020superpixel | B | F (HMS sobre PCA) | No aplica | No | A |
+| qin2019spectral | B | — (grafo de píxeles) | No aplica | No | C |
+| wang2026mixed | C | F (SLIC sobre PCA) | No aplica | No | C |
+| yang2024dual | C | F (ERS sobre la 1.ª componente principal) | No aplica | No | C |
+| zhao2023hyperspectral | C | F (BASS adaptativa sobre PCA) | No aplica | No | C |
+| wang2023pixel | C | F (SLIC sobre PCA) | No aplica | No | C |
+| liu2023adaptive | C | F (SLIC sobre PCA) | No aplica | No | C |
+| ding2022graph | C | F (SLIC) | No aplica | No | C |
+| ding2022multi | C | F (LDA-SLIC) | No aplica | No | C |
+| wan2021hyperspectral | C | A (asignación suave aprendida, iniciada con SLIC) | Entropía cruzada | Parcial | A |
+| yang2020superpixel | A | A (FCN, asociación en rejilla) | L_sem (etiquetas) o L_SLIC (color, sin etiquetas) + compacidad | Parcial | A |
+| suzuki2020superpixel | A | A (CNN por imagen, sin etiquetas) | Entropía RIM + suavidad + reconstrucción auxiliar | Parcial | A |
+| jampani2018superpixel | A | A (SLIC diferenciable + CNN) | Reconstrucción de una propiedad R (etiquetas en el artículo) + compacidad | No (es la base) | A |
+| eliasof2022rethinking | B | A (CNN por imagen, sin etiquetas) | RIM + suavidad + MSE(I, imagen superpixelada) + bordes | Parcial | A |
+| zhu2021learning | B | A (sin etiquetas, sin iteraciones) | Agrupamiento tipo DEC + reconstrucción de la entrada | No | B |
+| wang2021ainet | C | A (FCN, asociación en rejilla) | Reconstrucción de etiquetas + bordes | No | C |
+| tu2018learning | C | A (afinidades; segmenta ERS) | SEAL (etiquetas de segmentación) | No | C |
+
+: Resultado de la pasada 1 de los grupos 4 y 5 {#tbl-pasada1}
+
+Superp. = F (fijos), A (aprendidos) o — (no usa).

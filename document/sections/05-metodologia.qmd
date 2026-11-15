@@ -13,6 +13,7 @@ La presente investigación se ha pensado llevar a cabo de la siguiente manera:
 
 - Estudio de los fundamentos de aprendizaje profundo: retropropagación, optimización y regularización, así como su implementación en PyTorch.
 - Estudio de las redes neuronales de grafos y del modelo GCN de Kipf y Welling, y su implementación con PyTorch Geometric sobre conjuntos de datos de prueba.
+- Estudio de las extensiones de C++/CUDA para PyTorch (funciones con propagación hacia atrás propia) y del perfilado de núcleos con Nsight Compute.
 - Estudio de la tesis de referencia sobre PCNN-SAM y PCNN-GCN, de los algoritmos de superpíxeles clásicos (SLIC) y de los métodos de superpíxeles diferenciables (Superpixel Sampling Networks y variantes).
 - Revisión de los trabajos que acoplan superpíxeles y GCN en la clasificación de imágenes hiperespectrales, con énfasis en los que emplean matrices de asociación píxel-superpíxel.
 - Elaboración de un cuadro comparativo de los trabajos relacionados.
@@ -57,6 +58,15 @@ La presente investigación se ha pensado llevar a cabo de la siguiente manera:
 - Medición de la calidad de segmentación (ASA, BR, EV), de clasificación (OA, AA, $\kappa$) y del costo computacional (tiempo de entrenamiento e inferencia, memoria).
 - Estudio de ablación: superpíxeles aprendidos sin ajuste conjunto, sin pérdida de reconstrucción, sin término de compacidad y con distancia euclidiana en lugar de afinidad angular.
 - Pruebas de significancia estadística entre métodos sobre las diez ejecuciones.
+
+## Núcleo CUDA fusionado para la asociación píxel-superpíxel
+
+- Implementación de referencia en PyTorch de la asociación local: para cada píxel, reunir las características de sus 3 $\times$ 3 superpíxeles vecinos, calcular la similitud coseno y normalizarla con softmax, siguiendo la asignación local de SLIC en GPU [@ren2015gslicr] y el cálculo del ángulo espectral en GPU [@qu2013parallel].
+- Medición de la memoria pico y del tiempo por iteración de esa implementación en los seis conjuntos de datos, con la afinidad sobre las bandas originales y sobre las características aprendidas, para cuantificar el costo de materializar el tensor de características vecinas.
+- Implementación de un núcleo propio en CUDA C/C++, integrado como extensión de PyTorch [@paszke2019pytorch], que fusione la búsqueda de vecinos, el coseno y el softmax sin materializar ese tensor, a la manera de los núcleos que fusionan el softmax para reducir el tráfico de memoria [@dao2022flashattention; @hassani2024faster], con su propagación hacia atrás.
+- Verificación de la corrección: igualdad de salidas y gradientes frente a la implementación de referencia en doble precisión (`torch.autograd.gradcheck`), y diferencia en EV y ASA dentro de la desviación estándar de las diez ejecuciones.
+- Comparación de ambas implementaciones en tiempo y memoria pico, con ejecuciones de calentamiento, repeticiones, mediana e intervalo de confianza, y registro de la temperatura y la frecuencia de la GPU [@hoefler2015scientific].
+- Medición del tráfico de memoria y de la intensidad aritmética con Nsight Compute y ubicación de ambas implementaciones en un modelo *roofline* de la GPU, para determinar si la asociación está limitada por la memoria o por el cómputo y cuánto la acerca la fusión al límite del equipo [@williams2009roofline; @yang2019hierarchical].
 
 ## Análisis de la relación entre segmentación y clasificación
 

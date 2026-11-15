@@ -1,0 +1,219 @@
+---
+lang: es
+number-sections: false
+format:
+  pdf:
+    documentclass: article
+    fontsize: 11pt
+    papersize: letter
+    pdf-engine: pdflatex
+    fontenc: OT1
+    fontfamily: fix-cm
+    indent: false
+    colorlinks: false
+    boxlinks: true
+    geometry:
+      - left=53.24pt
+      - textwidth=469.8pt
+      - top=36.7pt
+      - textheight=636pt
+      - footskip=27pt
+    include-in-header:
+      - ../document/preamble.tex
+      - unicode-latex.tex
+---
+
+<!-- =====================================================================
+     RESUMEN PARA EL MARCO TEÓRICO · GRUPO 2 (pasada 2)
+     Solo SLIC, Stutz et al. (2018) y Barcelos et al. (2024), tomados de
+     los PDF de Zotero. Pensado para redactar «Marco teórico: superpíxeles,
+     SLIC, PCNN-SAM y las métricas ASA, BR y EV».
+     Para compilar: quarto render resumen-grupo-2.qmd
+     ===================================================================== -->
+
+```{=latex}
+\title{Centro de investigación y estudios avanzados del IPN\\
+       Departamento de Computación\\
+       \textbf{Resumen para el marco teórico: grupo 2}}
+\author{Tesista: Edgar Tobón Sosa}
+\date{SLIC, Stutz et al. (2018) y Barcelos et al. (2024)}
+\begingroup\setlength{\parskip}{0pt}
+\maketitle
+\endgroup
+\kern-15pt
+```
+
+**Cómo usar este documento.** Lee primero el mapa de abajo: dice qué tomar de cada artículo para cada punto del marco teórico. Las fichas de cada artículo traen solo lo que vas a citar (con sección, ecuación o tabla), y la sección final reúne los puntos en los que debes tener cuidado. Todo sale de los PDF de Zotero; lo que es interpretación mía está marcado como *[inferencia]*.
+
+# Mapa: qué tomar para cada punto del marco teórico
+
+| Punto de tu guía | Qué decir | De dónde |
+|---|---|---|
+| 1) Superpíxel: definición | Partición de la imagen en regiones de píxeles conectados y parecidos que sustituyen a la malla de píxeles; reducen el número de primitivas | Achanta, Sec. 1; Stutz, Sec. 1; Barcelos, resumen y Sec. 1 |
+| 1) Propiedades deseadas | Partición, conectividad, adherencia a bordes, compacidad, eficiencia y número controlable; hay un compromiso entre compacidad y adherencia | Stutz, Sec. 1; Barcelos, Sec. 1 y Fig. 1 |
+| 1) Para qué sirve en HSI | Barcelos cita la clasificación de HSI como aplicación (refs. [35] y [100]); para HSI usa además Fauvel y MDGCN (ver nota al final) | Barcelos, Sec. 1 |
+| 2) SLIC | *k*-means local en $2S \times 2S$, distancia de color + distancia espacial ponderada por $m$ (Ecs. 1--3), complejidad $O(N)$ | Achanta, Sec. 3 |
+| 2) Por qué PCA en HSI | Los algoritmos clásicos trabajan en RGB o Lab | Stutz, Sec. 3 (columna «Color»); Achanta, Sec. 3.2 |
+| 4) ASA, BR (y UE) | Ecuaciones y relación $\text{ASA} \approx 1 - \text{UE}$ | Stutz, Ecs. 1, 3, 4 y 7, Sec. 5.1 |
+| 4) EV | Ecuación, por qué no necesita verdad de terreno y sus límites | Stutz, Ec. 5 y Sec. 7.2; Barcelos, Apéndice B, Ec. 4 |
+| 4) Ecuaciones en tu notación | ASA (2.13), BR (2.14) y **EV (2.15)**, pp. 26--27 | Galarza (2026), Sec. 2.8 |
+| 3) PCNN-SAM | No está en estos tres artículos | Galarza (2026), Cap. 2 y 4 |
+
+\newpage
+
+# Achanta et al. (2012) · SLIC
+
+Achanta et al. (2012). SLIC Superpixels Compared to State-of-the-Art Superpixel Methods. *IEEE TPAMI*, 34(11). Clave: `achanta2012slic`.
+
+**Qué es.** Artículo corto que compara cinco métodos de superpíxeles y propone SLIC, una adaptación de *k*-means.
+
+**Definición de superpíxel (Sec. 1).** Los algoritmos de superpíxeles agrupan píxeles en regiones atómicas perceptualmente significativas que sustituyen la estructura rígida de la malla de píxeles. Capturan la redundancia de la imagen, dan una primitiva conveniente para calcular características y reducen mucho la complejidad de las tareas posteriores.
+
+**Propiedades deseables (Sec. 1).** (1) Adherirse bien a los bordes de la imagen; (2) si se usan para reducir el costo, ser rápidos, eficientes en memoria y fáciles de usar; (3) si se usan para segmentar, mejorar la velocidad y la calidad del resultado.
+
+**Categorías (Sec. 2).** Métodos basados en grafos (cada píxel es un nodo; se minimiza un costo sobre el grafo: NC05, GS04) y de ascenso por gradiente (se refina un agrupamiento inicial hasta converger: mean shift, quick shift, cuencas, TurboPixels).
+
+**Algoritmo (Sec. 3.1, Algoritmo 1).**
+
+1. *Inicialización*: $k$ centros $C_i = [l_i, a_i, b_i, x_i, y_i]^T$ en una rejilla regular con paso $S = \sqrt{N/k}$, donde $N$ es el número de píxeles. Cada centro se mueve al punto de menor gradiente en una vecindad de $3 \times 3$ para no caer en un borde ni en un píxel ruidoso.
+2. *Asignación*: cada píxel se asigna al centro más cercano, pero solo se buscan centros en una región de $2S \times 2S$. Esta es la clave de su velocidad.
+3. *Actualización*: cada centro pasa a ser la media $[l, a, b, x, y]^T$ de sus píxeles; se repite hasta que el error residual $E$ (norma L2 entre centros) converge. Bastan 10 iteraciones.
+4. *Posprocesamiento*: SLIC no garantiza conectividad; los píxeles huérfanos se reasignan al superpíxel vecino (Sec. 3.3).
+
+**La distancia (Sec. 3.2, Ecs. 1--3).** Usar la distancia euclidiana en las cinco dimensiones $labxy$ no sirve, porque la escala espacial depende del tamaño del superpíxel. Por eso se normalizan ambas distancias:
+$$
+d_c = \sqrt{(l_j-l_i)^2 + (a_j-a_i)^2 + (b_j-b_i)^2}, \qquad
+d_s = \sqrt{(x_j-x_i)^2 + (y_j-y_i)^2},
+$$
+$$
+D = \sqrt{d_c^2 + \left(\frac{d_s}{S}\right)^2 m^2}.
+$$
+La distancia máxima de color $N_c$ no se conoce, porque varía de un grupo a otro y de una imagen a otra, así que se fija en una constante $m$. Con $m$ grande pesa más la cercanía espacial y los superpíxeles son más compactos; con $m$ pequeño se adhieren más a los bordes pero son irregulares. En CIELAB, $m \in [1, 40]$, y el valor por defecto es 10 (Sec. 4.1). Para escala de grises basta $d_c = \sqrt{(l_j - l_i)^2}$; el artículo afirma que SLIC es fácil de extender a más dimensiones (Sec. 1 y Ec. 4).
+
+**Complejidad (Sec. 3.4).** $O(N)$, independiente de $k$, frente a $O(kNI)$ del *k*-means clásico ($I$ = iteraciones). Memoria: solo $N$ flotantes.
+
+**Métricas que usa (Sec. 4.1).** *Boundary recall*: fracción de bordes de la verdad de terreno que caen a menos de dos píxeles de un borde de superpíxel. *Error de subsegmentación*: cuánto «se derrama» cada superpíxel fuera del segmento de referencia (Ec. 5, con un umbral de 5 % del superpíxel).
+
+**Resultados (Sec. 4).** Es el más rápido (14.94 s para una imagen de $2048 \times 1536$) y el más eficiente en memoria; tiene el menor error de subsegmentación y es segundo en *boundary recall*, detrás de GS04, salvo si se reduce $m$ (Fig. 4). Da la mejor exactitud de segmentación en MSRC y PASCAL VOC (Tablas 1 y 2). Las distancias más complejas (adaptativa, ASLIC, y geodésica, GSLIC) no lo mejoraron (Sec. 4.5).
+
+**Dato útil para tu GCN (Sec. 4.4).** Los superpíxeles compactos y regulares, de tamaño acotado y con pocos vecinos, forman un grafo más interpretable; pero la compacidad se paga con adherencia a bordes, y SLIC es el único de los comparados que permite controlar ese compromiso (con $m$).
+
+**Para tu tesis.**
+
+- *[inferencia]* En HSI, $d_c$ sería una distancia entre vectores de cientos de bandas; como $m$ sustituye a la distancia máxima de color, su escala dejaría de valer y habría que reajustarla. Es una razón práctica para aplicar SLIC sobre pocas componentes principales.
+- *[inferencia]* SSN parte justo de este algoritmo (ver Barcelos), así que conviene presentar SLIC con detalle: tu segmentador cambia la asignación dura por una suave y $d_c$ por una afinidad angular.
+
+\newpage
+
+# Stutz et al. (2018) · Evaluación de 28 algoritmos
+
+Stutz, Hermans y Leibe (2018). Superpixels: An evaluation of the state-of-the-art. *Computer Vision and Image Understanding*, 166. Clave: `stutz2018superpixels`.
+
+**Qué es.** El banco de pruebas de referencia: 28 algoritmos en 5 conjuntos de datos (interiores, exteriores y personas), con parámetros optimizados en conjuntos de entrenamiento separados y conectividad forzada (Secs. 4--6).
+
+**Definición (Sec. 1).** Introducidos por Ren y Malik (2003), los superpíxeles agrupan píxeles similares en color y otras propiedades de bajo nivel. Resuelven dos problemas: los píxeles son solo un resultado de la discretización, y su gran número hace inviables muchos algoritmos. Convención del artículo: un algoritmo de superpíxeles permite controlar el número de regiones; una segmentación en «modo de sobresegmentación», no.
+
+**Requisitos aceptados por la mayoría de los autores (Sec. 1).**
+
+- *Partición*: regiones disjuntas que etiquetan todos los píxeles.
+- *Conectividad*: cada superpíxel es un conjunto conectado.
+- *Adherencia a bordes*: preservar los bordes de la imagen (cuáles importan depende de la aplicación).
+- *Compacidad, regularidad y suavidad*, donde no hay bordes.
+- *Eficiencia*.
+- *Número controlable*.
+
+Además, Liu et al. piden que los superpíxeles no reduzcan el desempeño alcanzable de los pasos posteriores, y Achanta et al., que lo mejoren.
+
+**Categorías (Sec. 3).** Cuencas (*watershed*), densidad, grafos, evolución de contornos, caminos, agrupamiento (*clustering*), optimización de energía y ondículas. Para tu tesis: **SLIC** y **LSC** son de agrupamiento (en Lab); **ERS** es de grafos (en RGB); **SEEDS** es de optimización de energía (en Lab). ERS y SEEDS no tienen parámetro de compacidad (en la implementación pública de SEEDS).
+
+**Métricas (Sec. 5).** Sean $S = \{S_j\}_{j=1}^{K}$ los superpíxeles, $G = \{G_i\}$ la verdad de terreno, $N$ el número de píxeles e $I$ la imagen.
+
+- *Boundary recall* (Ec. 1), más alto es mejor:
+$$\text{Rec}(G,S) = \frac{TP(G,S)}{TP(G,S) + FN(G,S)},$$
+donde un píxel de borde de $S$ cuenta si coincide con uno de $G$ en una vecindad de $(2r+1)\times(2r+1)$, con $r = 0.0025$ veces la diagonal.
+- *Error de subsegmentación*, más bajo es mejor. Tres versiones: Levinshtein (Ec. 2), Van den Bergh (Ec. 3) y Neubert y Protzel (Ec. 4, la que usan):
+$$\text{UE}_{\text{NP}}(G,S) = \frac{1}{N}\sum_{G_i}\ \sum_{S_j \cap G_i \neq \emptyset} \min\{|S_j \cap G_i|,\ |S_j - G_i|\}.$$
+- *Varianza explicada* (Ec. 5), más alta es mejor y **no necesita verdad de terreno**:
+$$\text{EV}(S) = \frac{\sum_{S_j} |S_j|\,(\mu(S_j) - \mu(I))^2}{\sum_{x_n} (I(x_n) - \mu(I))^2},$$
+donde $\mu(S_j)$ y $\mu(I)$ son el color medio del superpíxel y de la imagen. Mide la variación de la imagen explicada por los superpíxeles; se apoya en que los bordes suelen tener cambios fuertes de color.
+- *Exactitud de segmentación alcanzable* (Ec. 7):
+$$\text{ASA}(G,S) = \frac{1}{N}\sum_{S_j} \max_{G_i} |S_j \cap G_i|,$$
+la exactitud máxima de una segmentación construida a partir de los superpíxeles.
+- *Compacidad* (Ec. 6), $\text{CO} = \frac{1}{N}\sum_{S_j} |S_j|\,\frac{4\pi A(S_j)}{P(S_j)}$: compara cada superpíxel con un círculo del mismo perímetro.
+
+**Relaciones entre métricas (Sec. 5.1).** $\text{UE}_{\text{Bergh}} = 1 - \text{ASA}$ exactamente, y $\text{UE}_{\text{NP}}$ se parece mucho a $1 - \text{ASA}$; por eso UE y ASA están fuertemente correlacionadas. MDE no añade nada a Rec. La variación intracúmulo (ICV, Ec. 8) no correlaciona con la EV porque no está normalizada. Por eso se quedan con **Rec, UE y EV**.
+
+**Lo que dice de la EV (Sec. 7.2).** Es la única métrica independiente de la verdad de terreno y separa a los algoritmos incluso con muchos superpíxeles. Pero **no puede sustituir a Rec ni a UE**: QS, FH y CIS salen mucho mejor en EV que en Rec y UE. Sirve para detectar algoritmos malos, no para elegir el mejor, y **no debe usarse aislada**.
+
+**Otros resultados citables.**
+
+- Rec, UE y EV dan una buena visión general, pero no bastan para discriminar algoritmos de forma fiable; hay que mirar también mínimos, máximos y desviaciones (estabilidad) (Sec. 8).
+- Para resumir sin depender de $K$ proponen AMR $= 1-\text{Rec}$, AUE y AUV $= 1-\text{EV}$, promediadas en $K \in [200, 5200]$ (Sec. 5.2).
+- Recomiendan seis algoritmos: ETPS, SEEDS, ERS, CRS, ERGC y SLIC. Rango promedio (Tabla 3): ETPS 1, SEEDS 3.8, ERS 3.8, SLIC 6.2, LSC 9.2.
+- Con $K \approx 20\,000$ casi no se pierde información (Tabla 2): EV de 0.9570 (SLIC), 0.9564 (ERS) y 0.9729 (SEEDS).
+- Un parámetro de compacidad es útil para equilibrar adherencia y compacidad (Sec. 8).
+
+**Para tu tesis.**
+
+- Es la cita para las ecuaciones de BR, UE, ASA y EV, y para decir que ASA y UE miden lo mismo.
+- Su advertencia sobre la EV es una objeción directa a usarla como objetivo de entrenamiento. *[inferencia]* Tu respuesta es que tú no eliges el segmentador por la EV, sino que mides si la EV predice la exactitud de la GCN (el hallazgo de Galarza), y que reportas también ASA y BR.
+- *[inferencia]* La EV de Stutz usa el color medio (escalar o de tres canales); en HSI el cuadrado se convierte en la norma euclidiana al cuadrado del vector de bandas.
+
+\newpage
+
+# Barcelos et al. (2024) · Revisión y nueva taxonomía
+
+Barcelos et al. (2024). A Comprehensive Review and New Taxonomy on Superpixel Segmentation. *ACM Computing Surveys*, 56(8). Clave: `barcelos2024comprehensive`.
+
+**Qué es.** La revisión más reciente: una taxonomía de 59 métodos y un banco de pruebas con 23 métodos y una rejilla de referencia, en 5 conjuntos de datos (naturales, urbanos e interiores) y 9 criterios.
+
+**Definición (resumen y Sec. 1).** La segmentación en superpíxeles divide la imagen en regiones homogéneas de píxeles conectados, de modo que la unión de superpíxeles forme los objetos. Ventajas: reduce la carga de trabajo (de millones de píxeles a miles o cientos de superpíxeles), elimina información redundante y aporta información de más alto nivel que el píxel. Entre sus aplicaciones cita la clasificación de imágenes, con dos trabajos de HSI (refs. [35], Fang et al. 2015, y [100], Sellars et al. 2020), y una revisión de superpíxeles en HSI (ref. [46]).
+
+**Propiedades y compromiso (Sec. 1, Fig. 1).** Sin consenso total, la mayoría pide superpíxeles conectados, adheridos a los bordes, de contornos suaves y forma regular y compacta, además de eficiencia y número controlable. Los métodos suelen cumplir solo algunas, porque mejorar una empeora otra: más compacidad implica peor adherencia. Schick et al. mostraron una relación inversa y no lineal entre compacidad y adherencia, y comparan la adherencia excesiva con un sobreajuste a los bordes (Sec. 3.3.5).
+
+**Taxonomía (Sec. 2).** Clasifica cada método por sus pasos (procesamiento inicial, principal y final) y por el nivel de las características que usa (de píxel, intermedio o alto). En el paso principal, sustituye la categoría clásica de «agrupamiento» por dos:
+
+- *Basados en vecindad*: agrupan dentro de una distancia espacial máxima a un punto de referencia (**SLIC, LSC, SCALP**).
+- *Actualización dinámica de centros*: los centros se actualizan según una función objetivo (SNIC, DRW).
+
+Otras categorías: evolución de bordes (**SEEDS**, CRS, ETPS, IBIS), caminos, grafos (**ERS**), jerárquicos, densidad, distribución de datos (GMMSP) y profundos, que a su vez se dividen por el tipo de asignación píxel-superpíxel (suave o dura).
+
+**Resultados del banco de pruebas (Secs. 4 y 5).**
+
+- Los métodos por caminos tienen la mejor delineación y los superpíxeles más homogéneos, pero poca compacidad.
+- Entre los de vecindad, **LSC** logra excelente delineación y homogeneidad; **SLIC** es más compacto pero delinea peor.
+- Los de evolución de bordes (**SEEDS**, CRS) tienen la peor delineación y homogeneidad, pero mayor compacidad.
+- **ERS** tiene delineación similar, pero peor eficiencia, compacidad y homogeneidad.
+- Los profundos tienen delineación moderada o baja y son rápidos (cerca de 0.1 s por imagen).
+- Mejor homogeneidad de color: DISF, seguido de SH y LSC (Sec. 4.1.2).
+- Solo LNSNet, SEEDS, CRS y DRW pueden producir superpíxeles no conectados.
+- Si se busca compacidad a costa de delineación, recomiendan SCALP y SLIC; SLIC es más compacto y rápido, pero delinea peor y es menos homogéneo.
+
+**Sobre SSN (Sec. 2.3 y Apéndice A.10.1).** Es el primer método profundo entrenable de extremo a extremo que produce superpíxeles: una red totalmente convolucional extrae características y un SLIC diferenciable calcula una asociación píxel-superpíxel **suave** en lugar de dura. Se entrena de forma supervisada. Limitaciones: no produce superpíxeles conectados, por lo que necesita un posprocesamiento no diferenciable, y el número de superpíxeles depende del tamaño de la imagen, no es exacto. En general, las redes solo dan asignaciones suaves y dependen de un posprocesamiento para obtener la asignación dura (Sec. 5).
+
+**Métricas (Apéndice B).** Agrupa las medidas en tres tipos: delineación (BR, Ec. 1; UE de Neubert y Protzel, Ec. 2), forma (CO, Ec. 3) y homogeneidad de color (EV, Ec. 4; SIRS, Ecs. 5--7). Sobre la EV:
+
+- Compara la varianza de las medias de los superpíxeles con la varianza de los píxeles, ambas respecto a la media de la imagen; es una medida normalizada.
+- Es máxima cuando hay tantos superpíxeles como píxeles, o cuando cada píxel es igual a la media de su superpíxel.
+- Su límite: usa solo la media, que no basta para describir texturas perceptualmente homogéneas (por eso proponen SIRS).
+- Las medidas de delineación no penalizan la sobresegmentación ni evalúan la calidad dentro de las regiones (citando a Stutz).
+
+**Para tu tesis.**
+
+- Es la cita para la definición moderna, el compromiso compacidad-adherencia y para ubicar SLIC, LSC, ERS y SEEDS en una taxonomía actual.
+- Su descripción de SSN es la que necesitas para el puente hacia tu propuesta: asignación suave, entrenamiento supervisado y conectividad no garantizada. *[inferencia]* Tu propuesta cambia justamente la parte supervisada.
+- *[inferencia]* Que la EV sea máxima cuando cada píxel es su propio superpíxel explica por qué no puede optimizarse sola: necesita un término de compacidad o un número fijo de superpíxeles, como en tu objetivo.
+
+\newpage
+
+# Puntos de cuidado al redactar
+
+1. **Las definiciones de BR no son idénticas.** Achanta usa una tolerancia fija de dos píxeles; Stutz y Barcelos usan $r = 0.0025$ veces la diagonal; Galarza (Ec. 2.14) usa una tolerancia $\epsilon$. Elige una y dila explícitamente.
+2. **ASA y UE miden casi lo mismo** ($\text{UE}_{\text{Bergh}} = 1 - \text{ASA}$; Stutz, Sec. 5.1). Si reportas ASA, no necesitas UE.
+3. **La EV fue definida para color.** Stutz la escribe con el color medio y Barcelos con una norma del vector de color (la extracción del PDF no deja ver si es L1 o L2; revísalo en el PDF). Galarza (Ec. 2.15) ya la escribe con la firma espectral media. Usa la notación de Galarza y aclara que el cuadrado es la norma euclidiana al cuadrado sobre las bandas *[inferencia]*.
+4. **Dos objeciones a la EV que debes reconocer**: no debe usarse aislada porque no identifica a los mejores algoritmos (Stutz, Sec. 7.2), y solo mira la media, no la textura (Barcelos, Apéndice B).
+5. **La numeración de tu guía.** En Galarza, ASA es la Ec. 2.13, BR la 2.14 y **EV la 2.15** (Sec. 2.8, pp. 26--27); tu guía dice «2.13--2.14».
+6. **Lo que estos tres artículos no cubren.**
+   - *Para qué sirven en HSI*: `fang2015classification` y `jiang2018superpca` no tienen PDF en tu Zotero. En Zotero sí están Fauvel et al. (2013), donde las regiones de segmentación actúan como vecindades adaptativas, y MDGCN (Wan et al., 2020), que usa SLIC para reducir el costo del grafo.
+   - *Por qué PCA antes de SLIC en HSI*: sin `jiang2018superpca`, apóyate en Sellars et al. (2020) y Liu et al. (2022), que ya citaste en el planteamiento.
+   - *PCNN-SAM y la PCNN*: solo en Galarza (2026); `johnson1999pcnn` tampoco tiene PDF en Zotero.

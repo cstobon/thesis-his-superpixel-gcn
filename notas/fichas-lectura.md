@@ -142,8 +142,8 @@ Clasificación. L = CE + 0,1·L_recon + 0,001·L_compact (código: main.py). CE 
 - **Espectro completo o PCA:** 
 Espectro completo estandarizado (StandardScaler por banda), sin PCA; la CNN lo proyecta a 128 canales antes de segmentar (código).
 - **Distancia (euclidiana / angular / otra):** 
-Euclidiana al cuadrado entre características CNN + posición del píxel y del superpíxel (kernel calc_assoc). En el grafo: la adyacencia binaria entre superpíxeles vecinos se calcula una sola vez y los pesos de las aristas se aprenden como sigmoid(HHᵀ) con softmax, tipo atención (GCNLayer).
-- **Etiquetas por clase:** 30 por clase por defecto (15 si la clase tiene menos de 30), muestreo aleatorio y opción de muestreo disjunto; 5 repeticiones con semillas distintas (código). [Verificar en el PDF otros tamaños de entrenamiento.]
+Euclidiana al cuadrado entre características CNN + posición del píxel y del superpíxel (Ec. 1; kernel calc_assoc). En el grafo: la adyacencia binaria entre superpíxeles vecinos se calcula una sola vez y los pesos de las aristas se aprenden como sigmoid(HHᵀ) con softmax, tipo atención (GCNLayer).
+- **Etiquetas por clase:** 30 por clase por defecto (15 si la clase tiene menos de 30), muestreo aleatorio y opción de muestreo disjunto; 5 repeticiones con semillas distintas (código). El artículo evalúa de 5 a 30 por clase (Fig. 13), así que el régimen de 5 etiquetas por clase no es nuevo.
 - **Conjuntos de datos:** Indian Pines y Pavia University en el código. [Verificar en el PDF si hay más.]
 - **OA en Indian Pines (y con cuántas etiquetas):** [Verificar en el PDF, tabla de resultados; configuración por defecto: 30 por clase.]
 - **Código:** https://github.com/immortal13/EMS-GCN-hyperspectral-image-classification (basado en ESCNet y CEGCN; requiere CUDA).
@@ -1186,171 +1186,183 @@ Demšar (2006). Statistical Comparisons of Classifiers over Multiple Data Sets. 
 
 ## 8 · HPC y costo computacional
 
-*Objetivo 8 (TF1 de Galarza): «Trabajos relacionados D», la metodología de tiempos y la infraestructura.*
+*Objetivo 8: núcleo CUDA propio que fusiona la búsqueda de vecinos, el coseno y el softmax de la asociación píxel-superpíxel (hacia adelante y hacia atrás), comparado con PyTorch en tiempo, memoria pico y tráfico de memoria, con análisis roofline. Se cita en la metodología y la infraestructura.*
+
+### ren2015gslicr · Prioridad A
+
+Ren, Prisacariu y Reid (2015). gSLICr: SLIC superpixels at over 250Hz. *arXiv:1509.04232*. <https://doi.org/10.48550/arXiv.1509.04232>
+
+> Por qué está en la lista: SLIC en CUDA con código abierto (hasta 83× frente a la versión secuencial). Tu núcleo paraleliza la misma asignación local de 3 × 3 que SSN hereda de SLIC: revisa cómo organiza hilos y bloques.
+
+- **Pasada 1 (fecha):** 
+- **Pasada 2 (fecha):** 
+- **Problema que resuelve:** 
+- **Operación que acelera y cómo la organiza en la GPU (hilos, bloques, memoria compartida):** 
+- **¿Fusiona operaciones o evita materializar tensores intermedios? ¿Cómo hace la pasada hacia atrás?:** 
+- **Hardware y aceleración reportada (× frente a qué):** 
+- **Cómo midió tiempo, memoria o tráfico de memoria (repeticiones, perfilador, roofline):** 
+- **Relación con tu núcleo del objetivo 8:** 
+- **Para el protocolo (en qué sección lo citas y la idea en una oración):** 
+
+### qu2013parallel · Prioridad A
+
+Qu et al. (2013). Parallel Acceleration of SAM Algorithm and Performance Analysis. *IEEE JSTARS*. <https://doi.org/10.1109/jstars.2013.2239261>
+
+> Por qué está en la lista: El ángulo espectral (SAM) en CUDA: el cálculo central de tu núcleo. Balance de recursos por hilo y bloques activos, memoria fijada y flujos.
+
+- **Pasada 1 (fecha):** 
+- **Pasada 2 (fecha):** 
+- **Problema que resuelve:** 
+- **Operación que acelera y cómo la organiza en la GPU (hilos, bloques, memoria compartida):** 
+- **¿Fusiona operaciones o evita materializar tensores intermedios? ¿Cómo hace la pasada hacia atrás?:** 
+- **Hardware y aceleración reportada (× frente a qué):** 
+- **Cómo midió tiempo, memoria o tráfico de memoria (repeticiones, perfilador, roofline):** 
+- **Relación con tu núcleo del objetivo 8:** 
+- **Para el protocolo (en qué sección lo citas y la idea en una oración):** 
+
+### dao2022flashattention · Prioridad A
+
+Dao et al. (2022). FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness. *NeurIPS 35*. <https://doi.org/10.52202/068431-1189>
+
+> Por qué está en la lista: La referencia de núcleos «conscientes de la memoria»: fusiona similitud y softmax sin materializar la matriz intermedia, y recalcula en la pasada hacia atrás. Es el mismo principio de tu núcleo.
+
+- **Pasada 1 (fecha):** 
+- **Pasada 2 (fecha):** 
+- **Problema que resuelve:** 
+- **Operación que acelera y cómo la organiza en la GPU (hilos, bloques, memoria compartida):** 
+- **¿Fusiona operaciones o evita materializar tensores intermedios? ¿Cómo hace la pasada hacia atrás?:** 
+- **Hardware y aceleración reportada (× frente a qué):** 
+- **Cómo midió tiempo, memoria o tráfico de memoria (repeticiones, perfilador, roofline):** 
+- **Relación con tu núcleo del objetivo 8:** 
+- **Para el protocolo (en qué sección lo citas y la idea en una oración):** 
+
+### hassani2024faster · Prioridad A
+
+Hassani, Hwu y Shi (2024). Faster Neighborhood Attention: Reducing the O(n^2) Cost of Self Attention at the Threadblock Level. *arXiv:2403.04690*. <https://doi.org/10.48550/arXiv.2403.04690>
+
+> Por qué está en la lista: Núcleos CUDA fusionados para atención sobre una vecindad local: la operación más parecida a tu asociación de 3 × 3 (similitud con vecinos + softmax).
+
+- **Pasada 1 (fecha):** 
+- **Pasada 2 (fecha):** 
+- **Problema que resuelve:** 
+- **Operación que acelera y cómo la organiza en la GPU (hilos, bloques, memoria compartida):** 
+- **¿Fusiona operaciones o evita materializar tensores intermedios? ¿Cómo hace la pasada hacia atrás?:** 
+- **Hardware y aceleración reportada (× frente a qué):** 
+- **Cómo midió tiempo, memoria o tráfico de memoria (repeticiones, perfilador, roofline):** 
+- **Relación con tu núcleo del objetivo 8:** 
+- **Para el protocolo (en qué sección lo citas y la idea en una oración):** 
+
+### williams2009roofline · Prioridad A
+
+Williams, Waterman y Patterson (2009). Roofline: an insightful visual performance model for multicore architectures. *Communications of the ACM*. <https://doi.org/10.1145/1498765.1498785>
+
+> Por qué está en la lista: El modelo roofline original: intensidad aritmética, límite de memoria y límite de cómputo. Base del análisis del objetivo 8.
+
+- **Pasada 1 (fecha):** 
+- **Pasada 2 (fecha):** 
+- **Problema que resuelve:** 
+- **Operación que acelera y cómo la organiza en la GPU (hilos, bloques, memoria compartida):** 
+- **¿Fusiona operaciones o evita materializar tensores intermedios? ¿Cómo hace la pasada hacia atrás?:** 
+- **Hardware y aceleración reportada (× frente a qué):** 
+- **Cómo midió tiempo, memoria o tráfico de memoria (repeticiones, perfilador, roofline):** 
+- **Relación con tu núcleo del objetivo 8:** 
+- **Para el protocolo (en qué sección lo citas y la idea en una oración):** 
+
+### hoefler2015scientific · Prioridad A
+
+Hoefler y Belli (2015). Scientific benchmarking of parallel computing systems: twelve ways to tell the masses when reporting performance results. *Proceedings of SC15*. <https://doi.org/10.1145/2807591.2807644>
+
+> Por qué está en la lista: Cómo medir y reportar tiempos con rigor (calentamiento, repeticiones, mediana, intervalos). Base de la comparación entre tu núcleo y PyTorch.
+
+- **Pasada 1 (fecha):** 
+- **Pasada 2 (fecha):** 
+- **Problema que resuelve:** 
+- **Operación que acelera y cómo la organiza en la GPU (hilos, bloques, memoria compartida):** 
+- **¿Fusiona operaciones o evita materializar tensores intermedios? ¿Cómo hace la pasada hacia atrás?:** 
+- **Hardware y aceleración reportada (× frente a qué):** 
+- **Cómo midió tiempo, memoria o tráfico de memoria (repeticiones, perfilador, roofline):** 
+- **Relación con tu núcleo del objetivo 8:** 
+- **Para el protocolo (en qué sección lo citas y la idea en una oración):** 
 
 ### quesadabarriuso2021gpu · Prioridad A
 
 Quesada-Barriuso et al. (2021). GPU accelerated waterpixel algorithm for superpixel segmentation of hyperspectral images. *The Journal of Supercomputing*. <https://doi.org/10.1007/s11227-021-03666-y>
 
-> Por qué está en la lista: El más cercano a tu objetivo 8: superpíxeles para HSI implementados en GPU. Anota qué paraleliza y cuánto acelera.
+> Por qué está en la lista: Superpíxeles para HSI en CUDA usando todas las bandas: el antecedente de HPC más cercano a tu tema y modelo de cómo reportar resultados.
 
 - **Pasada 1 (fecha):** 
 - **Pasada 2 (fecha):** 
 - **Problema que resuelve:** 
-- **Componente que acelera (distancia espectral, segmentación, entrenamiento…):** 
-- **Plataforma (GPU, multinúcleo, clúster, nube) y modelo de hardware:** 
-- **Aceleración reportada (× frente a qué):** 
-- **Cómo midió los tiempos (repeticiones, qué reporta):** 
-- **Relación con tu objetivo 8:** 
+- **Operación que acelera y cómo la organiza en la GPU (hilos, bloques, memoria compartida):** 
+- **¿Fusiona operaciones o evita materializar tensores intermedios? ¿Cómo hace la pasada hacia atrás?:** 
+- **Hardware y aceleración reportada (× frente a qué):** 
+- **Cómo midió tiempo, memoria o tráfico de memoria (repeticiones, perfilador, roofline):** 
+- **Relación con tu núcleo del objetivo 8:** 
 - **Para el protocolo (en qué sección lo citas y la idea en una oración):** 
 
-### hoefler2015scientific · Prioridad A
+### yang2019hierarchical · Prioridad B
 
-Hoefler y Belli (2015). Scientific benchmarking of parallel computing systems: twelve ways to tell the masses when reporting performance results. *Proceedings of the International Conference for High Performance Computing, Networking, Storage and Analysis*. <https://doi.org/10.1145/2807591.2807644>
+Yang, Kurth y Williams (2019). Hierarchical Roofline analysis for GPUs: Accelerating performance optimization for the NERSC-9 Perlmutter system. *Concurrency and Computation: Practice and Experience*. <https://doi.org/10.1002/cpe.5547>
 
-> Por qué está en la lista: Cómo medir tiempos y aceleración correctamente: repeticiones, mediana e intervalos. Va a la metodología del objetivo 8.
+> Por qué está en la lista: Cómo construir un roofline de GPU por niveles de memoria (L1, L2, memoria global) con métricas de Nsight Compute: la receta práctica de tu análisis.
 
 - **Pasada 1 (fecha):** 
 - **Pasada 2 (fecha):** 
 - **Problema que resuelve:** 
-- **Componente que acelera (distancia espectral, segmentación, entrenamiento…):** 
-- **Plataforma (GPU, multinúcleo, clúster, nube) y modelo de hardware:** 
-- **Aceleración reportada (× frente a qué):** 
-- **Cómo midió los tiempos (repeticiones, qué reporta):** 
-- **Relación con tu objetivo 8:** 
+- **Operación que acelera y cómo la organiza en la GPU (hilos, bloques, memoria compartida):** 
+- **¿Fusiona operaciones o evita materializar tensores intermedios? ¿Cómo hace la pasada hacia atrás?:** 
+- **Hardware y aceleración reportada (× frente a qué):** 
+- **Cómo midió tiempo, memoria o tráfico de memoria (repeticiones, perfilador, roofline):** 
+- **Relación con tu núcleo del objetivo 8:** 
 - **Para el protocolo (en qué sección lo citas y la idea en una oración):** 
 
-### plaza2011high · Prioridad A
+### paszke2019pytorch · Prioridad B
 
-Plaza et al. (2011). High Performance Computing for Hyperspectral Remote Sensing. *IEEE Journal of Selected Topics in Applied Earth Observations and Remote Sensing*. <https://doi.org/10.1109/jstars.2010.2095495>
+Paszke et al. (2019). PyTorch: An Imperative Style, High-Performance Deep Learning Library. *arXiv:1912.01703* (NeurIPS 2019). <https://doi.org/10.48550/arXiv.1912.01703>
 
-> Por qué está en la lista: Fundamento: por qué el análisis hiperespectral necesita HPC (GPU, clústeres). Cita principal de «Trabajos relacionados D».
+> Por qué está en la lista: El marco donde se integra tu núcleo: diferenciación automática, extensiones de C++/CUDA y gestión de memoria. Cita para la implementación de referencia y la infraestructura.
 
 - **Pasada 1 (fecha):** 
 - **Pasada 2 (fecha):** 
 - **Problema que resuelve:** 
-- **Componente que acelera (distancia espectral, segmentación, entrenamiento…):** 
-- **Plataforma (GPU, multinúcleo, clúster, nube) y modelo de hardware:** 
-- **Aceleración reportada (× frente a qué):** 
-- **Cómo midió los tiempos (repeticiones, qué reporta):** 
-- **Relación con tu objetivo 8:** 
+- **Operación que acelera y cómo la organiza en la GPU (hilos, bloques, memoria compartida):** 
+- **¿Fusiona operaciones o evita materializar tensores intermedios? ¿Cómo hace la pasada hacia atrás?:** 
+- **Hardware y aceleración reportada (× frente a qué):** 
+- **Cómo midió tiempo, memoria o tráfico de memoria (repeticiones, perfilador, roofline):** 
+- **Relación con tu núcleo del objetivo 8:** 
 - **Para el protocolo (en qué sección lo citas y la idea en una oración):** 
 
-### wang2023cloud · Prioridad B
+### plaza2011high · Prioridad B
 
-Wang et al. (2023). Cloud-Based Fine-Grained Parallel Optimization on CPU-GPU Heterogeneous Hyperspectral Image Superpixel Space-Spectrum Fusion Classification Algorithms. *IGARSS 2023 - 2023 IEEE International Geoscience and Remote Sensing Symposium*. <https://doi.org/10.1109/igarss52108.2023.10281686>
+Plaza et al. (2011). High Performance Computing for Hyperspectral Remote Sensing. *IEEE JSTARS*. <https://doi.org/10.1109/jstars.2010.2095495>
 
-> Por qué está en la lista: Superpíxeles y clasificación de HSI paralelizados en CPU+GPU: antecedente directo del objetivo 8.
+> Por qué está en la lista: Motivación general: por qué el análisis hiperespectral necesita HPC. Cita para el marco teórico.
 
 - **Pasada 1 (fecha):** 
 - **Pasada 2 (fecha):** 
 - **Problema que resuelve:** 
-- **Componente que acelera (distancia espectral, segmentación, entrenamiento…):** 
-- **Plataforma (GPU, multinúcleo, clúster, nube) y modelo de hardware:** 
-- **Aceleración reportada (× frente a qué):** 
-- **Cómo midió los tiempos (repeticiones, qué reporta):** 
-- **Relación con tu objetivo 8:** 
+- **Operación que acelera y cómo la organiza en la GPU (hilos, bloques, memoria compartida):** 
+- **¿Fusiona operaciones o evita materializar tensores intermedios? ¿Cómo hace la pasada hacia atrás?:** 
+- **Hardware y aceleración reportada (× frente a qué):** 
+- **Cómo midió tiempo, memoria o tráfico de memoria (repeticiones, perfilador, roofline):** 
+- **Relación con tu núcleo del objetivo 8:** 
 - **Para el protocolo (en qué sección lo citas y la idea en una oración):** 
 
-### haut2021distributed · Prioridad B
+### hassani2022neighborhood · Prioridad C
 
-Haut et al. (2021). Distributed Deep Learning for Remote Sensing Data Interpretation. *Proceedings of the IEEE*. <https://doi.org/10.1109/jproc.2021.3063258>
+Hassani et al. (2022). Neighborhood Attention Transformer. *arXiv:2204.07143*. <https://doi.org/10.48550/arXiv.2204.07143>
 
-> Por qué está en la lista: Aprendizaje profundo distribuido en percepción remota (grupo de Plaza).
-
-- **Pasada 1 (fecha):** 
-- **Pasada 2 (fecha):** 
-- **Problema que resuelve:** 
-- **Componente que acelera (distancia espectral, segmentación, entrenamiento…):** 
-- **Plataforma (GPU, multinúcleo, clúster, nube) y modelo de hardware:** 
-- **Aceleración reportada (× frente a qué):** 
-- **Cómo midió los tiempos (repeticiones, qué reporta):** 
-- **Relación con tu objetivo 8:** 
-- **Para el protocolo (en qué sección lo citas y la idea en una oración):** 
-
-### lu2021mtfc · Prioridad B
-
-Lu et al. (2021). MTFC: A Multi-GPU Training Framework for Cube-CNN-Based Hyperspectral Image Classification. *IEEE Transactions on Emerging Topics in Computing*. <https://doi.org/10.1109/tetc.2020.3016978>
-
-> Por qué está en la lista: Entrenamiento de clasificadores HSI con varias GPU.
-
-- **Pasada 1 (fecha):** 
-- **Pasada 2 (fecha):** 
-- **Problema que resuelve:** 
-- **Componente que acelera (distancia espectral, segmentación, entrenamiento…):** 
-- **Plataforma (GPU, multinúcleo, clúster, nube) y modelo de hardware:** 
-- **Aceleración reportada (× frente a qué):** 
-- **Cómo midió los tiempos (repeticiones, qué reporta):** 
-- **Relación con tu objetivo 8:** 
-- **Para el protocolo (en qué sección lo citas y la idea en una oración):** 
-
-### bennun2019demystifying · Prioridad B
-
-Ben-Nun y Hoefler (2019). Demystifying Parallel and Distributed Deep Learning: An In-depth Concurrency Analysis. *ACM Computing Surveys*. <https://doi.org/10.1145/3320060>
-
-> Por qué está en la lista: Teoría: paralelismo de datos y de modelo en aprendizaje profundo. Para el marco teórico del objetivo 8.
-
-- **Pasada 1 (fecha):** 
-- **Pasada 2 (fecha):** 
-- **Problema que resuelve:** 
-- **Componente que acelera (distancia espectral, segmentación, entrenamiento…):** 
-- **Plataforma (GPU, multinúcleo, clúster, nube) y modelo de hardware:** 
-- **Aceleración reportada (× frente a qué):** 
-- **Cómo midió los tiempos (repeticiones, qué reporta):** 
-- **Relación con tu objetivo 8:** 
-- **Para el protocolo (en qué sección lo citas y la idea en una oración):** 
-
-### lee2011recent · Prioridad B
-
-Lee et al. (2011). Recent Developments in High Performance Computing for Remote Sensing: A Review. *IEEE Journal of Selected Topics in Applied Earth Observations and Remote Sensing*. <https://doi.org/10.1109/jstars.2011.2162643>
-
-> Por qué está en la lista: Revisión de HPC en percepción remota: una cita para los antecedentes.
-
-- **Pasada 1 (fecha):** 
-- **Pasada 2 (fecha):** 
-- **Problema que resuelve:** 
-- **Componente que acelera (distancia espectral, segmentación, entrenamiento…):** 
-- **Plataforma (GPU, multinúcleo, clúster, nube) y modelo de hardware:** 
-- **Aceleración reportada (× frente a qué):** 
-- **Cómo midió los tiempos (repeticiones, qué reporta):** 
-- **Relación con tu objetivo 8:** 
-- **Para el protocolo (en qué sección lo citas y la idea en una oración):** 
-
-### li2020pytorch · Prioridad C
-
-Li et al. (2020). PyTorch distributed: experiences on accelerating data parallel training. *Proceedings of the VLDB Endowment*. <https://doi.org/10.14778/3415478.3415530>
-
-> Por qué está en la lista: PyTorch Distributed: la herramienta si usas varias GPU. Publicado en PVLDB (ACM).
+> Por qué está en la lista: Define la atención sobre una vecindad local y su primera implementación CUDA; contexto de hassani2024faster.
 
 - **Pasada 1 (fecha):** 
 - **Dato que citarás (con página o tabla):** 
 - **Para el protocolo (sección):** 
 
-### chiang2019cluster · Prioridad C
+### delgado2016fast · Prioridad C
 
-Chiang et al. (2019). Cluster-GCN: An Efficient Algorithm for Training Deep and Large Graph Convolutional Networks. *Proceedings of the 25th ACM SIGKDD International Conference on Knowledge Discovery &amp; Data Mining*. <https://doi.org/10.1145/3292500.3330925>
+Delgado et al. (2016). Fast Spatial Preprocessing for Spectral Unmixing of Hyperspectral Data on Graphics Processing Units. *IEEE JSTARS*. <https://doi.org/10.1109/jstars.2015.2495128>
 
-> Por qué está en la lista: Escalado de GCN a grafos grandes; sirve para justificar que tu grafo de superpíxeles no lo necesita.
-
-- **Pasada 1 (fecha):** 
-- **Dato que citarás (con página o tabla):** 
-- **Para el protocolo (sección):** 
-
-### wu2016parallel · Prioridad C
-
-Wu et al. (2016). Parallel and Distributed Dimensionality Reduction of Hyperspectral Data on Cloud Computing Architectures. *IEEE Journal of Selected Topics in Applied Earth Observations and Remote Sensing*. <https://doi.org/10.1109/jstars.2016.2542193>
-
-> Por qué está en la lista: Reducción de dimensión de HSI en la nube (cómputo distribuido).
-
-- **Pasada 1 (fecha):** 
-- **Dato que citarás (con página o tabla):** 
-- **Para el protocolo (sección):** 
-
-### bernabe2013hyperspectral · Prioridad C
-
-Bernabé et al. (2013). Hyperspectral Unmixing on GPUs and Multi-Core Processors: A Comparison. *IEEE Journal of Selected Topics in Applied Earth Observations and Remote Sensing*. <https://doi.org/10.1109/jstars.2013.2254470>
-
-> Por qué está en la lista: Ejemplo clásico de comparación GPU contra CPU multinúcleo en HSI.
+> Por qué está en la lista: HSI en GPU con optimización del acceso a memoria en un cálculo de vecindad espacial.
 
 - **Pasada 1 (fecha):** 
 - **Dato que citarás (con página o tabla):** 

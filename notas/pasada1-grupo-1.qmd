@@ -1,0 +1,388 @@
+---
+lang: es
+number-sections: false
+format:
+  pdf:
+    documentclass: article
+    fontsize: 11pt
+    papersize: letter
+    pdf-engine: pdflatex
+    fontenc: OT1
+    fontfamily: fix-cm
+    indent: false
+    colorlinks: false
+    boxlinks: true
+    geometry:
+      - left=53.24pt
+      - textwidth=469.8pt
+      - top=36.7pt
+      - textheight=636pt
+      - footskip=27pt
+    include-in-header:
+      - ../document/preamble.tex
+      - unicode-latex.tex
+---
+
+<!-- =====================================================================
+     PASADA 1 · GRUPO 1 (Keshav, «How to Read a Paper», 2007)
+     Por artículo, 5-10 minutos: título, resumen, introducción, encabezados
+     de sección y conclusiones. NO leas el método.
+     - Responde cada «C» en UNA línea, después de los dos puntos.
+     - Decide la prioridad (A, B o C). Si amenaza tu originalidad, súbelo
+       a A y léelo antes de escribir.
+     - Pregunta clave: ¿superpíxeles fijos (F) o aprendidos (A)? Si son
+       aprendidos, ¿con qué pérdida?
+     - Al terminar, copia lo esencial a la tabla resumen del final y a
+       fichas-lectura.md.
+     Para compilar: quarto render pasada1-grupo-1.qmd
+     ===================================================================== -->
+
+```{=latex}
+\title{Centro de investigación y estudios avanzados del IPN\\
+       Departamento de Computación\\
+       \textbf{Pasada 1: grupo 1}}
+\author{Tesista: Edgar Tobón Sosa}
+\date{[fecha]}
+\begingroup\setlength{\parskip}{0pt}
+\maketitle
+\endgroup
+\kern-15pt
+```
+
+**Las 5 C.** *Categoría*: qué tipo de artículo es (método nuevo, revisión, análisis, base de datos…). *Contexto*: con qué trabajos se relaciona y en qué teoría se apoya. *Corrección*: si sus supuestos parecen razonables. *Contribución*: qué aporta. *Claridad*: si está bien escrito.
+
+# Grupo 1 · HSI y pocas etiquetas
+
+## li2019deep · Prioridad inicial A
+
+Li et al. (2019). Deep Learning for Hyperspectral Image Classification: An Overview. *IEEE Transactions on Geoscience and Remote Sensing*. <http://dx.doi.org/10.1109/TGRS.2019.2907932>
+
+> Panorama del aprendizaje profundo en HSI; marco general para el capítulo de antecedentes.
+
+- **Fecha:**
+- **Categoría:**
+Revisión del aprendizaje profundo para clasificar HSI, con una comparación experimental propia de cuatro métodos clásicos y seis profundos (Sec. V). El PDF de Zotero es la versión de arXiv (1910.12861).
+- **Contexto:**
+Parte de la clasificación clásica, espectral (SVM, regresión logística, PCA, ICA, LDA) y espectral-espacial con descriptores hechos a mano (perfiles morfológicos, núcleos compuestos, filtrado que preserva bordes, representación dispersa y superpíxeles; Sec. I, refs. [28]–[30]). Presenta los modelos profundos de base: SAE, DBN, CNN, RNN y GAN (Sec. II). No trata redes de grafos.
+- **Corrección:**
+Supuestos razonables, con límites en la evaluación. (1) Plantea dos retos de la clasificación de HSI: la gran variabilidad espacial de las firmas espectrales y el desbalance entre pocas muestras etiquetadas y la alta dimensionalidad (Sec. I). (2) En Pavia University y Salinas toma 200 muestras por clase al azar (Tablas II y III), es decir, unos 4 % y 6 % del total, y no reporta desviación estándar (Tablas V y VI, promedio de 10 corridas). Con un muestreo aleatorio así, los parches de entrenamiento y de prueba pueden solaparse, y las OA cercanas al 99 % lo reflejan. (3) Solo Houston usa la partición fija del concurso GRSS 2013 (Tabla I), que está separada espacialmente; ahí todas las OA bajan a 77–85 % (Tabla IV). (4) Afirma que el aprendizaje profundo supera a los métodos clásicos, pero en Houston la diferencia entre SVM y DFFN es de solo 7.7 puntos de OA. Hay erratas menores («99,53» en la Tabla VI; «Hyperspctral» en los términos índice).
+- **Contribución:**
+(1) Una taxonomía por tipo de característica: redes de características espectrales, espaciales y espectral-espaciales; estas últimas se dividen en tres grupos según cuándo fusionan la información: preprocesamiento, integradas y posprocesamiento (Sec. III, Fig. 9). (2) Un catálogo de estrategias para pocas muestras: aumento de datos, transferencia, aprendizaje no supervisado o semisupervisado, y optimización de la red (Sec. IV). (3) Una comparación de 10 métodos en Houston, Pavia University y Salinas; DFFN obtiene la mejor OA en los tres (Tablas IV–VI). (4) Un experimento con 5 a 30 muestras por clase en Salinas: aumento de datos, transferencia desde Indian Pines y aprendizaje residual mejoran a la CNN base. Con 5 muestras por clase, la transferencia gana cerca de 1 % (Sec. V-E, Fig. 22).
+- **Claridad:**
+Clara y ordenada, con figuras esquemáticas útiles (Figs. 9 y 12). Las secciones III y IV son más un catálogo de referencias que un análisis crítico. La Fig. 22 solo da las OA en una gráfica, sin tabla.
+- **Superpíxeles (F / A / —; si A, ¿con qué pérdida?):**
+— (es una revisión). Solo menciona los superpíxeles como un método espectral-espacial clásico, basado en la similitud de intensidad o textura (Sec. I, refs. [28]–[30]), dentro de los enfoques que dependen de descriptores hechos a mano y de parámetros ajustados por expertos.
+- **¿Amenaza tu originalidad? (sí / no / parcial):**
+No. No trata GCN ni superpíxeles aprendidos.
+- **Prioridad final (A / B / C) y por qué:**
+B. Sirve como referencia general, pero no trata GCN ni superpíxeles aprendidos, y su régimen principal (200 por clase al azar en Pavia University y Salinas; partición fija del concurso en Houston) está lejos de las 5 etiquetas por clase de la tesis; lo único cercano es la Fig. 22 (5–30 por clase en Salinas, sin desviación estándar). Útil en tres puntos: (1) en el planteamiento, para citar los dos retos de la clasificación de HSI y la dependencia de los métodos clásicos, superpíxeles incluidos, de descriptores hechos a mano (Sec. I); (2) en el marco teórico, para la taxonomía espectral, espacial y espectral-espacial y las estrategias para pocas muestras (Sec. IV), donde la propuesta entra como aprendizaje semisupervisado; y (3) en la evaluación, porque la caída de OA en Houston (partición espacial) frente a las particiones aleatorias apoya reportar con partición espacial o advertir el sesgo.
+
+## jia2021survey · Prioridad inicial A
+
+Jia et al. (2021). A survey: Deep learning for hyperspectral image classification with few labeled samples. *Neurocomputing*. <http://dx.doi.org/10.1016/j.neucom.2021.03.035>
+
+> Revisión centrada en pocas etiquetas: el régimen exacto de la tesis.
+
+- **Fecha:**
+- **Categoría:**
+Revisión del aprendizaje profundo para clasificar HSI con pocas muestras etiquetadas, con una comparación experimental propia de ocho modelos y código público (Sec. 4). El PDF de Zotero es la versión de arXiv (2112.01800).
+- **Contexto:**
+Parte de la división espectral, espacial y espectral-espacial de Li et al. (2019, su ref. [12]) y de los modelos de base: autocodificadores, CNN y RNN (Sec. 2). A diferencia de esa revisión, organiza los métodos por paradigma de aprendizaje: transferencia, aprendizaje activo y aprendizaje de pocos ejemplos (*few-shot*: redes prototípicas, de relación y siamesas; Sec. 3, Fig. 2). Los autocodificadores representan el aprendizaje no supervisado. Las GCN solo aparecen como línea futura (Sec. 5), citando MDGCN, una GCN semisupervisada y CAD-GCN (refs. [124]–[126]).
+- **Corrección:**
+Supuestos razonables y un protocolo más justo que el habitual, con límites. (1) Motiva bien el problema: hay una brecha entre las muestras que exige el aprendizaje profundo y las que se pueden etiquetar (Fig. 1, KSC con 10 por clase frente a 50 %), y señala que cada artículo usa particiones distintas, por lo que reentrena todos los modelos con la misma (Sec. 4). (2) El muestreo es aleatorio por píxel («picked randomly based on pixels», Sec. 4.2), con vecindades de hasta 42 × 42 (SSDL) y 64 × 64 (SSLstm en KSC). Que los parches de entrenamiento y de prueba se solapen es una inferencia mía, pero la partición no es espacial. (3) Reporta el promedio de 10 corridas sin desviación estándar (Tablas 5–7), y los mapas se obtienen por votación de las 10 corridas (Sec. 4.3). (4) Concluye que los autocodificadores no supervisados rinden peor porque, sin restricciones, «podrían no aprender nada» y sus características no tienen relación con la tarea (Sec. 4.3). Lo prueba con pocos modelos, y 3DCAE entrena su autocodificador con 90 % de las muestras (Sec. 4.2). (5) La mayoría de los modelos son reimplementaciones propias (Tabla 4), así que sus resultados pueden diferir de los originales.
+- **Contribución:**
+(1) Una taxonomía de métodos para pocas muestras por paradigma de aprendizaje, combinable con cualquier arquitectura (Fig. 2, Sec. 3). (2) Una comparación de ocho modelos (S-DMM, 3DCAE, SSDL, TwoCnn, 3DVSCNN, SSLstm, CNN HSI y SAE LR) con 10, 50 y 100 muestras por clase en Pavia University, Salinas y KSC, con código en GitHub (Tablas 5–7). Con 10 por clase en Pavia University gana S-DMM, una red de relación (*few-shot*), con 84.45 % de OA y 91.08 % de AA. (3) Un análisis de parámetros entrenables y de convergencia: los modelos ligeros (S-DMM, CNN HSI) son los más estables con pocas muestras (Tabla 8, Figs. 20–22). (4) Cinco líneas futuras, entre ellas combinar paradigmas, usar transformadores y usar GCN (Sec. 5).
+- **Claridad:**
+Bien organizada y fácil de leer, con un esquema general útil (Fig. 2). Tiene incoherencias: la introducción anuncia «cuatro paradigmas» y enumera tres (Sec. 1); la Sec. 4 suma autocodificadores y aumento de datos como si fueran paradigmas; hay erratas («HIS», «activate learning», «decision boarder»). No trata el aprendizaje semisupervisado como paradigma propio.
+- **Superpíxeles (F / A / —; si A, ¿con qué pérdida?):**
+— (es una revisión). Solo menciona la segmentación en superpíxeles como posprocesamiento para regularizar los bordes del mapa de clasificación (Sec. 2.1, refs. [45]–[46]). Ningún modelo comparado usa superpíxeles.
+- **¿Amenaza tu originalidad? (sí / no / parcial):**
+No. No trata GCN con superpíxeles ni segmentación aprendida. Su conclusión sobre los autocodificadores (aprender sin etiquetas puede dar características sin relación con la tarea) es una objeción que la tesis debe responder: en la propuesta, el criterio sin etiquetas (EV) se usa para segmentar, no para extraer las características del clasificador, y su relación con la tarea se mide con ASA y OA.
+- **Prioridad final (A / B / C) y por qué:**
+A. Es la referencia del régimen de pocas etiquetas de la tesis y sirve en cuatro puntos: (1) en el planteamiento, para citar la brecha entre las muestras que pide el aprendizaje profundo y las disponibles (Fig. 1) y que las GCN son una línea abierta en ese régimen (Sec. 5); (2) en el marco teórico, para la taxonomía de paradigmas (Fig. 2), donde la propuesta entra como aprendizaje semisupervisado, que la revisión no cubre; (3) en la evaluación, para justificar reentrenar todos los métodos con la misma partición y como referencia de OA con 10 por clase (Tablas 5–7); y (4) para anticipar la objeción a los criterios sin etiquetas (Sec. 4.3).
+
+## bioucasdias2013hyperspectral · Prioridad inicial B
+
+Bioucas-Dias et al. (2013). Hyperspectral Remote Sensing Data Analysis and Future Challenges. *IEEE Geoscience and Remote Sensing Magazine*. <http://dx.doi.org/10.1109/MGRS.2013.2244672>
+
+> Tutorial clásico de análisis de HSI (mezcla espectral, clasificación, retos).
+
+- **Fecha:**
+- **Categoría:**
+Tutorial y revisión (27 pp.) del análisis de datos hiperespectrales en seis temas: fusión de datos, desmezclado, clasificación, detección de blancos, estimación de parámetros físicos y cómputo rápido. Incluye ejemplos con datos reales, pero no una comparación experimental sistemática.
+- **Contexto:**
+Previo al aprendizaje profundo: se apoya en el procesamiento de señales e imágenes, la inferencia estadística y el aprendizaje automático (Sec. VIII). En clasificación (Sec. IV) cubre la extracción y selección de características (PCA, MNF, NWFE), los clasificadores supervisados (LDA, QDA, SVM, MLR), los métodos espectral-espaciales (perfiles morfológicos, núcleos compuestos, campos aleatorios de Markov, posprocesamiento con cuencas o con la segmentación RHSEG, representación dispersa) y los métodos semisupervisados (SVM transductivas, métodos basados en grafos con Laplaciano, autoaprendizaje).
+- **Corrección:**
+Supuestos razonables y bien fundamentados. (1) Describe la HSI como espectralmente suave y espacialmente suave por partes, con espectros que viven en una variedad de baja dimensión (Sec. I, Fig. 2). (2) Los retos de la clasificación que señala son el desbalance entre alta dimensionalidad y pocas muestras de entrenamiento, los píxeles mezclados, la integración espectral-espacial, la geometría no lineal de los datos y el alto costo de cómputo (Sec. IV-E). (3) Sus ejemplos en Pavia University usan el conjunto de entrenamiento fijo de 3921 muestras (Fig. 11c), no un régimen de pocas etiquetas. (4) Hay valores dudosos en las tablas: en la Tabla 2, MLRsub tiene κ = 0.703 con OA = 67.08 %, y LDA y QDA comparten OA (77.95 %) con κ muy distintas (0.606 y 0.770); en la Tabla 3, SVM-CK tiene κ = 0.872 por encima de su OA (87.04 %). (5) Los propios autores advierten que su selección de técnicas es pequeña y «algo subjetiva» (Sec. IV-E).
+- **Contribución:**
+(1) Un panorama de referencia de todo el análisis de HSI, con tablas de sensores (Tabla 1). (2) En clasificación, una organización en extracción de características, clasificación supervisada, espectral-espacial y semisupervisada, con resultados en Pavia University (Tablas 2 y 3): incorporar información espacial sube la OA de alrededor de 80 % a 98.09 % (MLR-GCK). (3) Una discusión de los requisitos del aprendizaje semisupervisado: las muestras sin etiqueta deben obtenerse sin costo, su número no debe disparar el cómputo y, si se eligen mal, pueden bajar la exactitud (Sec. IV-D). (4) Una sección sobre cómputo de alto desempeño (clústeres, GPU, FPGA; Sec. VII).
+- **Claridad:**
+Muy clara y didáctica, con figuras esquemáticas y ejemplos. Por su amplitud, cada tema se trata de forma breve, y la extracción de texto del formato de revista es difícil.
+- **Superpíxeles (F / A / —; si A, ¿con qué pérdida?):**
+— (es un tutorial). No menciona superpíxeles. Sí trata la segmentación como forma de agrupamiento espacial (Sec. I) y como posprocesamiento de un clasificador por píxel (SVM con cuencas, SVM-RHSEG; Sec. IV-C, Tabla 3).
+- **¿Amenaza tu originalidad? (sí / no / parcial):**
+No. Es anterior al aprendizaje profundo y a las GCN.
+- **Prioridad final (A / B / C) y por qué:**
+B. No compite con la propuesta, pero es útil en cuatro puntos: (1) en el marco teórico, para justificar los superpíxeles con la suavidad espacial por partes de la HSI y la baja dimensión de sus espectros (Sec. I); (2) en el planteamiento, para citar los retos de la clasificación (Sec. IV-E); (3) en el marco teórico, como antecedente del aprendizaje semisupervisado basado en grafos en HSI, anterior a las GCN (Sec. IV-D, refs. [107], [111]), y de sus riesgos; y (4) en el objetivo de HPC, para motivar el uso de GPU por el volumen de los datos (Secs. I y VII). Basta leer las Secs. I, IV y VII.
+
+## ahmad2022hyperspectral · Prioridad inicial B
+
+Ahmad et al. (2022). Hyperspectral Image Classification—Traditional to Deep Models: A Survey for Future Prospects. *IEEE JSTARS*. <http://dx.doi.org/10.1109/JSTARS.2021.3133021>
+
+> Revisión de métodos tradicionales a profundos, con comparación experimental.
+
+- **Fecha:**
+- **Categoría:**
+Revisión (32 pp.) de la clasificación de HSI, del aprendizaje automático tradicional a los modelos profundos, con una comparación experimental propia en cinco escenas con muestras de entrenamiento y prueba espacialmente disjuntas (Sec. XI).
+- **Contexto:**
+Sigue la división en características espectrales, espaciales y espectral-espaciales (Sec. III) y repasa CNN, GCN, autocodificadores, DBN y RNN (Secs. VI–IX). En GCN (Sec. VI-D) cita la GCN de segundo orden, MDGCN de Wan et al. como la primera en usar superpíxeles como nodos, y miniGCN de Hong et al. Para pocas etiquetas cubre aumento de datos, aprendizaje semisupervisado (coentrenamiento, autoentrenamiento, GAN, métodos basados en grafos y SVM semisupervisadas), GAN, transferencia y, con más detalle, aprendizaje activo (Sec. X).
+- **Corrección:**
+Su protocolo es su punto fuerte, pero tiene inconsistencias. (1) Critica dos prácticas comunes: cada artículo elige muestras distintas al azar, y muchos evalúan sobre toda la imagen, incluidas las muestras de entrenamiento, lo que sesga la exactitud hacia arriba (Sec. XI). Para evitarlo usa muestras de entrenamiento y prueba espacialmente disjuntas, iguales para todos los métodos (Figs. 15–19, Tabla II). (2) Concluye que los autocodificadores rinden peor porque «sin restricciones podrían no aprender nada» y sus características no se relacionan con la tarea (Sec. XI-B), pero su comparación no incluye ningún autocodificador. El párrafo repite casi palabra por palabra la conclusión de Jia et al. (2021, Sec. 4.3), igual que las frases sobre aprendizaje activo, pocos ejemplos, transferencia y aumento de datos. (3) Afirma que MorphCNN y CNN-2D son estables con menos muestras, pero en el texto no encuentro experimentos con distinto número de muestras por clase. (4) Hay errores en los datos: dice «cuatro» escenas y enumera cinco, con «University of Toronto» por Trento; da 2.5 m de resolución a Pavia University (es 1.3 m) y 340 × 1905 píxeles a Houston (es 349 × 1905); en Pavia University, MorphCNN tiene κ = 93.95, idéntica a su OA. Las tablas de resultados son gráficos vectoriales que no pude extraer del PDF; no verifiqué el número de muestras de la Tabla II.
+- **Contribución:**
+(1) Un repaso amplio de modelos profundos desde 2017, con líneas futuras para cada familia (CNN, autocodificadores, DBN, RNN). (2) Una revisión de estrategias para pocas etiquetas, centrada en el aprendizaje activo (Sec. X). (3) Una comparación de 12 métodos (RF, MLR, SVM, MLP, RNN, LSTM, GRU, CNN-1D, CNN-2D, CNN-3D, HybridSN y MorphCNN) con particiones espacialmente disjuntas en IP, PU, Houston, KSC y Trento (Tablas III–VII); en PU gana MorphCNN con 93.95 % de OA. (4) Una comparación de extractores convolucionales con gradiente centralizado (G2C-Conv3D; Tabla VIII). (5) Señala como líneas futuras preservar la información espectral en lugar de reducir dimensión, usar GPU y FPGA para el costo de cómputo, y combinar CNN con GCN (Secs. VI-E y XII).
+- **Claridad:**
+Extensa y desigual: las secciones de modelos son en buena parte listas de referencias, hay erratas frecuentes y datos de las escenas mal transcritos. Las tablas y figuras de la Sec. XI son útiles, pero el texto que las comenta no siempre coincide con lo que se evaluó.
+- **Superpíxeles (F / A / —; si A, ¿con qué pérdida?):**
+— (es una revisión). Los menciona en tres lugares: MDGCN como la primera GCN con superpíxeles como nodos (Sec. VI-D) y tres métodos de aprendizaje activo que usan información de superpíxeles (Sec. X-E, refs. [300], [301] y [308]). Ningún método de su comparación usa superpíxeles.
+- **¿Amenaza tu originalidad? (sí / no / parcial):**
+No. Trata las GCN en un párrafo y no menciona superpíxeles aprendidos.
+- **Prioridad final (A / B / C) y por qué:**
+B. No compite con la propuesta y su análisis repite el de Jia et al. (2021), pero es útil en tres puntos: (1) en la evaluación, como referencia para usar particiones espacialmente disjuntas y para criticar la práctica de evaluar con muestras ya vistas (Sec. XI); (2) en el planteamiento, porque pide métodos que preserven la información espectral en lugar de reducir dimensión, apoyados en GPU (Sec. VI-E), lo que respalda segmentar con el espectro completo; y (3) en el marco teórico, para el párrafo de GCN en HSI (Sec. VI-D) y la clasificación de métodos semisupervisados, que incluye los basados en grafos (Sec. X-B). Si se cita la objeción a los métodos sin etiquetas, conviene citar a Jia et al. (2021), que sí la sostiene con experimentos.
+
+## fauvel2013advances · Prioridad inicial B
+
+Fauvel et al. (2013). Advances in Spectral-Spatial Classification of Hyperspectral Images. *Proceedings of the IEEE*. <http://dx.doi.org/10.1109/JPROC.2012.2197589>
+
+> Clasificación espectral-espacial previa al aprendizaje profundo, incluida la segmentación.
+
+- **Fecha:**
+- **Categoría:**
+Artículo invitado de revisión (24 pp.) que reúne los métodos espectral-espaciales de los propios autores, con experimentos en Pavia University, Pavia Centro e Indian Pines.
+- **Contexto:**
+Previo al aprendizaje profundo. Parte de dos retos: la dimensionalidad espectral (maldición de la dimensión, fenómeno de Hughes) y la necesidad de clasificadores espectral-espaciales (Sec. I). Revisa ECHO, los campos aleatorios de Markov y la textura con ventanas fijas, y propone vecindades adaptativas a nivel de objeto mediante morfología matemática (perfiles morfológicos, vecindad morfológica; Sec. IV) y segmentación (cuencas sobre un gradiente multibanda, agrupamiento EM y segmentación jerárquica HSeg; Sec. V). Todo se clasifica con SVM.
+- **Corrección:**
+Supuestos razonables y evaluación cuidadosa para su época, con límites. (1) Usa los conjuntos de entrenamiento fijos de Pavia, disjuntos del de prueba (Tablas 3 y 4), y 50 muestras por clase al azar en Indian Pines (15 en las tres clases pequeñas, Sec. II). (2) Compara métodos con la prueba de McNemar (Apéndice I), algo poco común. (3) Su mejor método, MSSC-MSF, usa marcadores elegidos por un sistema de varios clasificadores, es decir, la segmentación depende de las etiquetas (Sec. VI). (4) Los parámetros se fijan a mano por escena: número de componentes, tamaño del área (30 o 20), número de grupos de EM y peso Swght de HSeg (Secs. IV-E y VI-D). (5) EM necesita reducir dimensión antes de segmentar porque el número de parámetros crece con d² (Sec. V-B). Las tablas son imágenes en el PDF y no pude extraer sus valores.
+- **Contribución:**
+(1) Una organización de la clasificación espectral-espacial en extracción de características espaciales a nivel de objeto, combinación durante la clasificación (fusión de características, núcleos compuestos) y regularización posterior (voto mayoritario por región, bosque de expansión mínima con marcadores; Fig. 4). (2) Muestra que añadir información espacial mejora la OA cerca de 20 puntos en Pavia University (Sec. IV-E). (3) Muestra que la segmentación con voto mayoritario conserva todo el espectro sin aumentar la dimensión (Sec. V-D), y que HSeg da la segmentación más precisa de las tres (Sec. VII). (4) Una guía final: varios clasificadores, robustez a la dimensión y regularización con una presegmentación (Sec. VII).
+- **Claridad:**
+Muy clara y didáctica, con ecuaciones completas (gradiente multibanda, EM, SAM) y esquemas útiles (Figs. 4 y 12). Tiene erratas menores («spatial–spatial classification», «salt-and-paper»).
+- **Superpíxeles (F / A / —; si A, ¿con qué pérdida?):**
+— (no usa el término). Usa regiones de segmentación como vecindades adaptativas, el antecedente directo de los superpíxeles en HSI: cuencas, EM y HSeg, fijas y sin aprendizaje (Sec. V). HSeg mide la disimilitud entre regiones con SAM (Ec. 19).
+- **¿Amenaza tu originalidad? (sí / no / parcial):**
+No. Es anterior al aprendizaje profundo y la segmentación no se aprende.
+- **Prioridad final (A / B / C) y por qué:**
+B. No compite con la propuesta, pero tiene tres datos que la tesis debe usar: (1) la calidad de la segmentación depende de la medida de homogeneidad y de los parámetros, que son específicos de la aplicación (Secs. I y VI), lo que motiva aprender la segmentación; (2) representar cada región solo por su vector medio pierde información espectral y de textura (Sec. V-D, refs. [103] y [104]), justo lo que hace una GCN con superpíxeles como nodos, y la EV mide precisamente esa pérdida; y (3) en escenas urbanas con sombras, las normas vectoriales dieron mejores resultados que SAM (Sec. VI-D), un riesgo para la afinidad angular en Pavia University que conviene anticipar. Leer las Secs. V y VI.
+
+## sahu2026hyperspectral · Prioridad inicial B
+
+Sahu y Panda (2026). Hyperspectral image classification: A systematic survey of traditional methods, deep networks, and emerging paradigms. *Signal Processing: Image Communication*. <http://dx.doi.org/10.1016/j.image.2026.117682>
+
+> Revisión sistemática reciente; útil para comprobar que no falte nada de 2024–2026.
+
+- **Fecha:**
+- **Categoría:**
+Revisión (25 pp.) de la clasificación de HSI, de los descriptores hechos a mano al aprendizaje profundo, sin experimentos propios: su comparación es una tabla de resultados tomados de cada artículo (Tabla 10).
+- **Contexto:**
+Búsqueda en IEEE Xplore, SpringerLink, Elsevier y Google Scholar, con artículos elegidos por «novedad, relevancia, citas y revista de alto impacto» (Sec. 2.2). Organiza los métodos en descriptores hechos a mano, aprendizaje automático (supervisado, no supervisado, semisupervisado) y aprendizaje profundo (transferencia, autosupervisado, variantes de CNN, GCN, atención y arquitecturas emergentes como Mamba; Secs. 4–6). En GCN (Sec. 5.2.4) revisa miniGCN, CEGCN, MSAGE-CAL, AF2GNN, GiGCN, DHMG, GLMBG y dos métodos más.
+- **Corrección:**
+Útil como lista de títulos recientes, pero poco fiable como análisis. (1) La Tabla 10 compara OA de cada artículo sin indicar el número de muestras ni el tipo de partición; mezcla, por ejemplo, miniGCN con 79.89 % en IP y CEGCN con 99.12 %, que vienen de protocolos distintos. (2) La misma tabla incluye un método de los propios autores como «Proposed Method» con los mejores valores, algo impropio de una revisión, y tiene errores: Ahmad et al. [123] tiene los mismos valores en PU y en IP (92.82, 83.26, 91.79), y la κ de Ding et al. [116] en PU (97.00) supera su OA (96.14). (3) La Sec. 8 se refiere a «los artículos subidos» («the uploaded papers») y atribuye GCN a redes de atención que no las usan (Deep Spectral–Spatial Residual Attention Network, Hybrid Dense Network with Attention). Esto sugiere un texto generado o poco revisado. (4) Describe las GCN en HSI como grafos de píxeles (Sec. 5.2.4), aunque casi todos los métodos que cita usan superpíxeles.
+- **Contribución:**
+(1) Un repaso amplio y actualizado hasta 2025, incluidos Mamba y transformadores (Secs. 5.2.6 y 6, Tabla 11). (2) En GCN, una lista de limitaciones por método: alto costo, dependencia de la construcción del grafo y sensibilidad a la segmentación en superpíxeles, cuyos parámetros hay que ajustar con cuidado (CEGCN, AF2GNN), y riesgo de sobresegmentar o representar mal los objetos (GiGCN; Sec. 5.2.4). (3) Una lista de huecos: escalar a escenas grandes, depender de etiquetas, interpretabilidad e integración con la segmentación (Sec. 8).
+- **Claridad:**
+Redacción genérica y repetitiva, con erratas («HIS», «Quin», «aapproaches»). Las tablas resumen por familia son útiles para ubicar trabajos, pero el análisis crítico es superficial.
+- **Superpíxeles (F / A / —; si A, ¿con qué pérdida?):**
+— (es una revisión). Los superpíxeles solo aparecen en las GCN que revisa (CEGCN, AF2GNN, GiGCN), todos fijos, y su sensibilidad a la segmentación se señala como limitación (Sec. 5.2.4). No menciona superpíxeles aprendidos.
+- **¿Amenaza tu originalidad? (sí / no / parcial):**
+No. Es la revisión más reciente de la lista y no menciona superpíxeles aprendidos ni segmentación sin etiquetas, lo que respalda que el hueco sigue abierto en 2026.
+- **Prioridad final (A / B / C) y por qué:**
+C. Su calidad es baja y no aporta datos propios. Sirve en dos puntos: (1) en el planteamiento, para citar que la sensibilidad de las GCN a la segmentación en superpíxeles es una limitación reconocida (Sec. 5.2.4); y (2) para completar lecturas con tres GCN que no están en mi lista: AF2GNN (Ding et al., 2022, *Information Sciences*), DHMG (Yao et al., 2023) y GLMBG (Cao et al., 2024). No usar sus tablas como referencia de OA.
+
+## paoletti2019deep · Prioridad inicial C
+
+Paoletti et al. (2019). Deep learning classifiers for hyperspectral imaging: A review. *ISPRS Journal of Photogrammetry and Remote Sensing*. <http://dx.doi.org/10.1016/j.isprsjprs.2019.09.006>
+
+> Revisión de clasificadores profundos en HSI con experimentos comparativos.
+
+- **Fecha:**
+- **Categoría:**
+Revisión extensa (130 pp. en la versión del PDF, un preprint) del aprendizaje profundo para clasificar HSI, con una comparación experimental propia en seis experimentos y código público (Sec. 7).
+- **Contexto:**
+Parte de los retos de la HSI (alta dimensionalidad, pocas muestras, variabilidad intraclase y similitud interclase; Sec. 2) y repasa las redes profundas (Secs. 3–4): totalmente conectadas, autocodificadores, DBN, RNN y CNN espectrales, espaciales y espectral-espaciales. Dedica una sección a las estrategias contra sus limitaciones (aumento de datos, aprendizaje activo, transferencia, residuales; Sec. 5). No trata GCN.
+- **Corrección:**
+Evaluación amplia y, en un punto, autocrítica. (1) Sus cinco primeros experimentos muestrean el entrenamiento al azar (1–25 % por clase en IP, UP y Salinas; Sec. 7.2), con OA de hasta 99.9 % (Figs. 12–14). (2) El sexto experimento repite la comparación con las particiones espacialmente disjuntas del GRSS DASE y muestra caídas grandes (Tabla 13): en IP, CNN2D baja de 99.77 % a 56.66 % y CNN3D de 99.96 % a 79.58 %; en UP casi todos los métodos pierden más de 10 puntos, incluidos los espectrales. (3) Atribuye la caída de los métodos espaciales al solapamiento de parches y la de los espectrales a la variabilidad intraclase (sombras, ruido) entre zonas de entrenamiento y prueba (Sec. 7.3.6). (4) Por eso, los resultados de sus otros cinco experimentos están inflados por el muestreo aleatorio, cosa que los autores reconocen.
+- **Contribución:**
+(1) Un repaso detallado de arquitecturas profundas para HSI hasta 2019. (2) Una comparación de 11 clasificadores con distintos porcentajes de entrenamiento, cinco repeticiones y su desviación estándar (Fig. 11). (3) La Tabla 13: la comparación directa entre partición aleatoria y espacialmente disjunta, con las mismas muestras por clase. (4) Experimentos de transferencia y aprendizaje activo. (5) Código público en GitHub. (6) Como línea futura propone métodos de selección de muestras que eviten el solapamiento entre entrenamiento y prueba causado por el tamaño de parche (Sec. 8).
+- **Claridad:**
+Clara pero muy extensa; la parte de modelos es más un tutorial que un análisis. Las tablas de resultados son completas.
+- **Superpíxeles (F / A / —; si A, ¿con qué pérdida?):**
+— (es una revisión). Solo menciona superpíxeles de pasada, en un método que los usa como restricción espacial (Sec. 4).
+- **¿Amenaza tu originalidad? (sí / no / parcial):**
+No.
+- **Prioridad final (A / B / C) y por qué:**
+B (sube de C). No compite con la propuesta, pero su Tabla 13 es la evidencia más directa de cuánto infla la exactitud el muestreo aleatorio en IP y UP, y muestra que la caída afecta también a los métodos espectrales. Sirve en la evaluación para justificar las particiones disjuntas; si se usan particiones aleatorias, para advertir el sesgo. Basta leer la Sec. 7.3.6.
+
+## audebert2019deep · Prioridad inicial C
+
+Audebert et al. (2019). Deep Learning for Classification of Hyperspectral Data: A Comparative Review. *IEEE Geoscience and Remote Sensing Magazine*. <http://dx.doi.org/10.1109/MGRS.2019.2912563>
+
+> Revisión comparativa; discute particiones de entrenamiento y prueba.
+
+- **Fecha:**
+- **Categoría:**
+Revisión comparativa (13 pp.) del aprendizaje profundo para clasificar HSI, con experimentos propios y una caja de herramientas pública (DeepHyperX).
+- **Contexto:**
+Repasa los principios de la HSI y los conjuntos de datos públicos (Tabla I), los métodos clásicos (normalización con el ángulo espectral, SVM, regularización espacial, presegmentación; Sec. III) y los profundos (Sec. IV). Se apoya en las particiones estándar del GRSS DASE.
+- **Corrección:**
+Es la revisión más rigurosa del grupo en cuanto a evaluación. (1) Señala cuatro prácticas que hacen incomparables los artículos: muestreo aleatorio sobre toda la imagen, subconjuntos de clases, distinto número de muestras y ajuste de hiperparámetros sobre el conjunto de prueba (Sec. IV-D). (2) Argumenta que el muestreo aleatorio no es realista porque los píxeles vecinos están muy correlacionados, y que el campo receptivo de una CNN puede incluir píxeles de prueba durante el entrenamiento (Fig. 9). (3) Lo demuestra: con un vecino más cercano, UP baja de 89.99 % (aleatorio) a 57.77 % (disjunto); la 3D CNN baja de 96.87 % a 75.47 % en IP y de 96.71 % a 84.32 % en UP (Tabla III). (4) Usa las particiones del DASE, que dividen la verdad de terreno por componentes conexas, y ajusta hiperparámetros con 5 % del entrenamiento como validación. (5) Límites: solo compara seis modelos, con 5 repeticiones (una en DFC2018), y las particiones del DASE no son de pocas etiquetas.
+- **Contribución:**
+(1) La demostración cuantitativa del sesgo del muestreo aleatorio (Tablas II y III) y la explicación por el campo receptivo (Fig. 9). (2) DeepHyperX, caja de herramientas en PyTorch con modelos reimplementados. (3) Muestra que en IP (20 m por píxel) añadir información espacial empeora a las CNN, y lo atribuye a que cada píxel ya es una mezcla (Sec. IV-D). (4) Señala que reproducir resultados sin el código original es muy difícil (nota 6). (5) Propone como líneas futuras los modelos no supervisados y semisupervisados.
+- **Claridad:**
+Muy clara y concisa, pensada para científicos de datos y expertos en percepción remota.
+- **Superpíxeles (F / A / —; si A, ¿con qué pérdida?):**
+— (es una revisión). Menciona la presegmentación como forma no supervisada de regularización espacial: segmentar y luego agregar las características por región (Sec. III-C).
+- **¿Amenaza tu originalidad? (sí / no / parcial):**
+No.
+- **Prioridad final (A / B / C) y por qué:**
+A (sube de C). Es la referencia central para el diseño de la evaluación: (1) justifica usar particiones espacialmente disjuntas y separar un conjunto de validación; (2) el argumento del campo receptivo se traslada a la propuesta, porque un superpíxel o una arista del grafo que une píxeles de entrenamiento y de prueba produce la misma fuga; y (3) su Tabla III da cifras de cuánto se infla la OA. Leer completa la Sec. IV-D.
+
+## khan2018modern · Prioridad inicial C
+
+Khan et al. (2018). Modern Trends in Hyperspectral Image Analysis: A Review. *IEEE Access*. <http://dx.doi.org/10.1109/ACCESS.2018.2812999>
+
+> Revisión general de tendencias en análisis de HSI.
+
+- **Fecha:**
+- **Categoría:**
+Revisión (12 pp.) de las aplicaciones de las imágenes hiperespectrales, sin experimentos comparativos.
+- **Contexto:**
+Explica la resolución espacial, espectral y temporal y las firmas espectrales (Sec. II) y recorre aplicaciones: calidad de alimentos, diagnóstico médico, agricultura de precisión, recursos hídricos, examen forense de documentos, autenticación de obras de arte y defensa (Sec. III). Los autores incluyen su propio trabajo de detección de falsificaciones con HSI y aprendizaje profundo.
+- **Corrección:**
+Descriptiva y sin análisis crítico. No trata la clasificación de escenas de percepción remota con pocas etiquetas, ni la evaluación, ni los superpíxeles. La parte de aprendizaje profundo se limita a su aplicación forense. Hay erratas («This human eye», «sig-nature»).
+- **Contribución:**
+Un panorama de aplicaciones de la HSI fuera de la percepción remota y una tabla de sensores aerotransportados y satelitales (Tabla 1).
+- **Claridad:**
+Clara y fácil de leer, pero superficial.
+- **Superpíxeles (F / A / —; si A, ¿con qué pérdida?):**
+— (no los menciona).
+- **¿Amenaza tu originalidad? (sí / no / parcial):**
+No.
+- **Prioridad final (A / B / C) y por qué:**
+C. No aporta nada a la propuesta más allá de una cita para la motivación general (aplicaciones de la HSI) en la introducción. Puede omitirse.
+
+## hughes1968mean · Prioridad inicial C
+
+Hughes (1968). On the mean accuracy of statistical pattern recognizers. *IEEE Transactions on Information Theory*. <http://dx.doi.org/10.1109/TIT.1968.1054102>
+
+> Origen del fenómeno de Hughes (muchas bandas, pocas muestras).
+
+- **Fecha:**
+- **Categoría:**
+Artículo teórico (9 pp.) sobre la exactitud media de un clasificador estadístico en función de la complejidad de la medición y del tamaño de la muestra de diseño.
+- **Contexto:**
+Modelo probabilístico de dos clases con mediciones discretas, sin suponer normalidad ni independencia (Secs. I–II). Usa la regla de Bayes de mínimo error con probabilidades estimadas por frecuencias relativas, y promedia su exactitud sobre todos los problemas posibles con n, m y p_c fijos (Sec. IV).
+- **Corrección:**
+El resultado es correcto dentro de su modelo, pero se cita mal con frecuencia. (1) n no es el número de bandas: es la complejidad de la medición, el número total de valores discretos (celdas) que puede tomar el patrón (Sec. I, Ec. 21). (2) El resultado es un promedio sobre todos los problemas posibles; un problema concreto puede estar por encima o por debajo (resumen). (3) Solo trata dos clases. (4) Su único experimento es un caso de fotografía aérea con 32 valores y 315 muestras (Sec. VII).
+- **Contribución:**
+Muestra que, con m muestras fijas, la exactitud media primero sube y luego baja al aumentar la complejidad de la medición, y que existe un valor óptimo n_opt (17 para m = 500, 23 para m = 1000; Fig. 3, Tabla I). Concluye que hay que transformar las mediciones a pocas variables significativas antes de diseñar el clasificador (Sec. VIII). Es el origen del llamado fenómeno de Hughes.
+- **Claridad:**
+Clara y breve para un artículo teórico; el escaneo dificulta leer las ecuaciones.
+- **Superpíxeles (F / A / —; si A, ¿con qué pérdida?):**
+— (no aplica).
+- **¿Amenaza tu originalidad? (sí / no / parcial):**
+No.
+- **Prioridad final (A / B / C) y por qué:**
+C. Se cita solo para el fenómeno de Hughes en la introducción. Al citarlo conviene ser preciso: Hughes no habla de «bandas» sino de la complejidad de la medición, y su curva es un promedio sobre problemas. La lectura de las Secs. I, V y VIII basta.
+
+## kruse1993spectral · Prioridad inicial C
+
+Kruse et al. (1993). The spectral image processing system (SIPS)—interactive visualization and analysis of imaging spectrometer data. *Remote Sensing of Environment*. <http://dx.doi.org/10.1016/0034-4257(93)90013-N>
+
+> Referencia original del ángulo espectral (SAM).
+
+- **Fecha:**
+- **Categoría:**
+Artículo de sistema (19 pp.): presenta SIPS, un programa interactivo en IDL para visualizar y analizar datos de espectrómetros de imagen.
+- **Contexto:**
+Grupo de la Universidad de Colorado (CSES), con datos AVIRIS, GERIS y GEOSCAN. Cubre el flujo completo: lectura de datos, calibración a reflectancia aparente (ganancias y desplazamientos), visualización espectral, bibliotecas espectrales, el Spectral Angle Mapper (SAM) y desmezclado lineal.
+- **Corrección:**
+Correcto, con un supuesto que importa para la tesis. (1) Atribuye el algoritmo SAM a Boardman (1993a); Kruse et al. (1993) es la referencia que se suele citar, pero no la original. (2) SAM supone datos en reflectancia aparente, con la corriente oscura y la radiancia de trayecto (los desplazamientos aditivos) ya eliminadas. Bajo ese supuesto es invariante a factores de ganancia, como la iluminación topográfica, porque el ángulo no depende de la longitud de los vectores (Fig. 6). No es invariante a desplazamientos aditivos. (3) No hay evaluación cuantitativa: el SAM se muestra con un ejemplo de dolomita (Fig. 7).
+- **Contribución:**
+(1) La definición del SAM como arccos del producto punto normalizado (ecuación de la Sec. «The Spectral Angle Mapper») y su interpretación geométrica en el espacio de nb dimensiones (Fig. 6). (2) Un sistema de análisis interactivo, con calibración y desmezclado lineal.
+- **Claridad:**
+Muy clara, con figuras de la interfaz. Las ecuaciones del SAM salen mal en la extracción del PDF.
+- **Superpíxeles (F / A / —; si A, ¿con qué pérdida?):**
+— (no aplica).
+- **¿Amenaza tu originalidad? (sí / no / parcial):**
+No.
+- **Prioridad final (A / B / C) y por qué:**
+B (sube de C). La afinidad angular de la propuesta se basa en el SAM, así que hay que citarlo bien y respetar su supuesto. (1) Citar a Kruse et al. (1993) junto con Boardman (1993a) como origen. (2) Justificar la afinidad angular por su invariancia a la ganancia (iluminación, sombras suaves). (3) Revisar el preprocesamiento: la metodología normaliza min-max por banda, lo que resta un desplazamiento y cambia la escala de cada banda por separado; eso altera los ángulos entre espectros y rompe la invariancia que motiva usar SAM. Conviene calcular la afinidad sobre el espectro sin normalizar por banda, o justificar la normalización.
+
+## zhong2020whu · Prioridad inicial C
+
+Zhong et al. (2020). WHU-Hi: UAV-borne hyperspectral with high spatial resolution (H2) benchmark datasets and classifier for precise crop identification based on deep convolutional neural network with CRF. *Remote Sensing of Environment*. <http://dx.doi.org/10.1016/j.rse.2020.112012>
+
+> Conjuntos de datos WHU-Hi (LongKou, HanChuan, HongHu).
+
+- **Fecha:**
+- **Categoría:**
+Método nuevo y conjunto de datos (18 pp.): presenta WHU-Hi, tres escenas hiperespectrales de dron con muy alta resolución espacial, y CNNCRF, una CNN con un campo aleatorio condicional para clasificar cultivos.
+- **Contexto:**
+Agricultura de minifundio en Hubei, China (Sec. 2.1). Se compara con SVM, clasificación orientada a objetos (segmentación multirresolución FNEA de eCognition con voto mayoritario), SVRFMC (un CRF con SVM) y la CNN base (Sec. 4.2.1).
+- **Corrección:**
+Datos sólidos, evaluación con límites. (1) Las escenas están en radiancia, no en reflectancia: solo se convirtieron de números digitales a radiancia con la calibración del fabricante (Ec. 1). (2) Entrena con 100 muestras por clase al azar (0.44–0.62 % del total; Sec. 4.1.2) y estudia de 25 a 300 por clase (Fig. 17), sin particiones espacialmente disjuntas. (3) La escala de segmentación de FNEA se eligió como la que dio el mejor resultado de clasificación (de 3 a 15), es decir, ajustada con el conjunto de prueba (Sec. 4.2.1). (4) HanChuan se adquirió con el sol bajo y tiene muchas sombras (Sec. 2.2.2).
+- **Contribución:**
+(1) El conjunto WHU-Hi: LongKou (550 × 400 px, 270 bandas, 0.463 m, 9 clases), HanChuan (1217 × 303 px, 274 bandas, 0.109 m, 16 clases) y HongHu (940 × 475 px, 270 bandas, 0.043 m, 22 clases), de 400 a 1000 nm (Sec. 2.2). (2) CNNCRF, con aumento de datos basado en el proceso de formación de la imagen (Sec. 3.2), que logra OA de 98.91 % (LongKou), 93.95 % (HanChuan) y 93.74 % (HongHu). (3) Tiempos de entrenamiento y prueba (Tabla 9).
+- **Claridad:**
+Clara y bien documentada, con mapas y tablas por clase.
+- **Superpíxeles (F / A / —; si A, ¿con qué pérdida?):**
+— (no usa superpíxeles). El método de comparación FNEA-OO usa segmentación orientada a objetos fija, con la escala elegida por el resultado de clasificación.
+- **¿Amenaza tu originalidad? (sí / no / parcial):**
+No.
+- **Prioridad final (A / B / C) y por qué:**
+B (sube de C). La metodología usa las tres escenas WHU-Hi, así que es la cita obligatoria del conjunto de datos. Datos que hay que tener en cuenta: (1) son escenas de 220 000 a 450 000 píxeles, mucho mayores que IP, lo que importa para el costo de la segmentación y del grafo; (2) están en radiancia y HanChuan tiene muchas sombras, dos condiciones que afectan a la afinidad angular (ver kruse1993spectral y fauvel2013advances); y (3) su FNEA-OO es otro ejemplo de escala de segmentación ajustada a mano. Sus OA con 100 por clase no sirven de referencia directa para 5 por clase.
+
+## congalton1991review · Prioridad inicial C
+
+Congalton (1991). A review of assessing the accuracy of classifications of remotely sensed data. *Remote Sensing of Environment*. <http://dx.doi.org/10.1016/0034-4257(91)90048-B>
+
+> Matriz de confusión, exactitud global y κ en percepción remota.
+
+- **Fecha:**
+- **Categoría:**
+Revisión metodológica (12 pp.) sobre cómo evaluar la exactitud de clasificaciones de percepción remota.
+- **Contexto:**
+Percepción remota de los años ochenta (Landsat MSS y TM). Cubre el esquema de clasificación, el esquema de muestreo, el tamaño de muestra, la autocorrelación espacial y las técnicas de evaluación, todo a partir de la matriz de error (de confusión).
+- **Corrección:**
+Sólida y vigente en lo esencial. (1) Critica dos prácticas que siguen apareciendo: evaluar con los mismos datos de entrenamiento, que sobreestima la exactitud, y reportar exactitud sin localización (Sec. «Techniques»). (2) Advierte que la autocorrelación espacial viola el supuesto de independencia de las muestras; en sus datos, los errores se correlacionan hasta 30 píxeles de distancia (Sec. «Spatial Autocorrelation»). (3) El tamaño de muestra que propone (al menos 50 por clase) es una regla práctica de su experiencia, no un resultado estadístico (Sec. «Sample Size»). (4) Su varianza de κ supone muestreo multinomial.
+- **Contribución:**
+(1) Establece la matriz de error como forma estándar de reportar. (2) Define la exactitud global, la del productor (errores de omisión) y la del usuario (errores de comisión). (3) Presenta el coeficiente κ (KHAT) con su varianza y una prueba Z para comparar dos matrices de error (Tablas 7–9). (4) Recomienda muestreo aleatorio estratificado con un mínimo por clase y concluye que el tamaño de muestra, el esquema de muestreo y la autocorrelación espacial son problemas abiertos.
+- **Claridad:**
+Muy clara y didáctica, con ejemplos numéricos de matrices.
+- **Superpíxeles (F / A / —; si A, ¿con qué pérdida?):**
+— (no aplica).
+- **¿Amenaza tu originalidad? (sí / no / parcial):**
+No.
+- **Prioridad final (A / B / C) y por qué:**
+B (sube de C). La propuesta reporta OA, AA y κ, así que es la cita de base para las métricas de clasificación. Además, (1) su advertencia sobre la autocorrelación espacial y la independencia de las muestras apoya usar particiones espacialmente disjuntas, junto con audebert2019deep; y (2) su prueba Z sobre κ es una opción, junto con la prueba de McNemar (fauvel2013advances), para comparar métodos con significancia estadística.
+
+# Resumen de la pasada
+
+| Artículo | Inicial | Superp. | Pérdida (si A) | ¿Amenaza? | Final |
+|----------------------------|:---:|:---:|----------------------|:---:|:---:|
+| li2019deep | A | — | No aplica | No | B |
+| jia2021survey | A | — | No aplica | No | A |
+| bioucasdias2013hyperspectral | B | — | No aplica | No | B |
+| ahmad2022hyperspectral | B | — | No aplica | No | B |
+| fauvel2013advances | B | — (regiones fijas: cuencas, EM, HSeg) | No aplica | No | B |
+| sahu2026hyperspectral | B | — | No aplica | No | C |
+| paoletti2019deep | C | — | No aplica | No | B |
+| audebert2019deep | C | — | No aplica | No | A |
+| khan2018modern | C | — | No aplica | No | C |
+| hughes1968mean | C | — | No aplica | No | C |
+| kruse1993spectral | C | — | No aplica | No | B |
+| zhong2020whu | C | — | No aplica | No | B |
+| congalton1991review | C | — | No aplica | No | B |
+
+: Resultado de la pasada 1 del grupo 1 {#tbl-pasada1-g1}
+
+Superp. = F (fijos), A (aprendidos) o — (no usa).

@@ -1,0 +1,127 @@
+---
+lang: es
+number-sections: false
+format:
+  pdf:
+    documentclass: article
+    fontsize: 11pt
+    papersize: letter
+    pdf-engine: pdflatex
+    fontenc: OT1
+    fontfamily: fix-cm
+    indent: false
+    colorlinks: false
+    boxlinks: true
+    geometry:
+      - left=53.24pt
+      - textwidth=469.8pt
+      - top=36.7pt
+      - textheight=636pt
+      - footskip=27pt
+    include-in-header:
+      - ../document/preamble.tex
+      - unicode-latex.tex
+---
+
+<!-- =====================================================================
+     PASADA 1 · GRUPO 3 · Redes neuronales de grafos (Keshav, 2007)
+     Versión condensada, tomada solo de los PDF de Zotero (título, resumen,
+     introducción, encabezados y conclusiones; secciones puntuales para
+     verificar datos). Lo marcado como [inferencia] es interpretación.
+     Kipf y Welling (2017) tiene pasada 2 en resumen-grupo-3.pdf.
+     Para compilar: quarto render pasada1-grupo-3.qmd
+     ===================================================================== -->
+
+```{=latex}
+\title{Centro de investigación y estudios avanzados del IPN\\
+       Departamento de Computación\\
+       \textbf{Pasada 1: grupo 3 (redes neuronales de grafos)}}
+\author{Tesista: Edgar Tobón Sosa}
+\date{[fecha]}
+\begingroup\setlength{\parskip}{0pt}
+\maketitle
+\endgroup
+\kern-15pt
+```
+
+**Las 5 C.** *Categoría*: qué tipo de artículo es. *Contexto*: con qué trabajos se relaciona. *Corrección*: si sus supuestos parecen razonables. *Contribución*: qué aporta. *Claridad*: si está bien escrito.
+
+# Lo esencial del grupo
+
+1. **Ninguno amenaza tu originalidad.** Son el fundamento de la GCN y dos revisiones generales; ninguno trata superpíxeles ni imágenes hiperespectrales.
+2. **La GCN es a la vez espectral y espacial.** Kipf la deriva desde los filtros espectrales. Wu et al. (Sec. V-A) y Bronstein et al. (Sec. VI) coinciden en que, al final, se reduce a una agregación sobre los vecinos inmediatos, sin eigendescomposición. Wu et al. dicen que la GCN «tendió el puente» entre los dos enfoques.
+3. **El sobresuavizado (*over-smoothing*).** Wu et al. (Sec. IX) señalan que la exactitud de una GCN cae al apilar muchas capas, porque las representaciones de nodos vecinos se acercan hasta converger a un solo punto. Coincide con el Apéndice B de Kipf, donde 2 o 3 capas es lo mejor. *[inferencia]* Justifica que tu GCN sea poco profunda.
+4. **Cómo evaluar.** Wu et al. (Sec. VIII-B) citan a Shchur et al.: usar siempre la misma partición subestima el error de generalización, y las diferencias de entrenamiento entre métodos (hiperparámetros, inicialización, paro temprano) confunden las comparaciones. *[inferencia]* Con 5 etiquetas por clase: varias selecciones aleatorias y la misma configuración para todas las variantes.
+5. **El grafo como espacio no euclidiano.** Wu et al. (Fig. 1) y Bronstein et al. (Sec. I) presentan la imagen como un caso particular de grafo en malla. *[inferencia]* Tu grafo de superpíxeles es irregular: número variable de vecinos y sin orden. Por eso no basta una CNN y se usa una GNN.
+
+# Fundamento
+
+## kipf2017semisupervised · Prioridad inicial A
+
+Kipf y Welling (2017). Semi-Supervised Classification with Graph Convolutional Networks. *ICLR*. Ya tiene pasada 2 (ver `resumen-grupo-3.pdf`).
+
+- **Fecha:**
+- **Categoría:** Método nuevo (GCN), con derivación teórica y experimentos.
+- **Contexto:** Aprendizaje semi-supervisado con regularización laplaciana (LP, ManiReg, SemiEmb), *embeddings* de grafos (DeepWalk, Planetoid) y redes espectrales de grafos (Bruna et al., 2014; Defferrard et al., 2016) (Sec. 4).
+- **Corrección:** Razonable. Las aproximaciones ($K = 1$, $\lambda_{\max} \approx 2$, un solo parámetro) se justifican empíricamente con la ablación (Tabla 3). Los hiperparámetros se eligen con 500 nodos de validación etiquetados (Sec. 5.2).
+- **Contribución:** La regla $\tilde D^{-1/2} \tilde A \tilde D^{-1/2} H W$ (Ec. 2); costo lineal en aristas; 81.5 % en Cora frente a 75.7 % de Planetoid (Tabla 2).
+- **Claridad:** Muy clara.
+- **Superpíxeles:** —
+- **¿Amenaza?:** No.
+- **Prioridad final:** A. Es la GCN de tu tesis.
+
+# Revisiones generales
+
+## wu2021comprehensive · Prioridad inicial B
+
+Wu et al. (2021). A Comprehensive Survey on Graph Neural Networks. *IEEE TNNLS*. El PDF de Zotero es la versión arXiv:1901.00596v4 (diciembre de 2019); las secciones citadas son las de esa versión.
+
+- **Fecha:**
+- **Categoría:** Revisión con nueva taxonomía de las GNN.
+- **Contexto:** Revisiones anteriores más acotadas: Bronstein et al. (aprendizaje profundo geométrico, sobre todo GNN convolucionales), Hamilton et al. (*embedding* de redes), Battaglia et al. y Lee et al. (atención) (Sec. I).
+- **Corrección:** Razonable para una revisión. Advierte que los resultados reportados de clasificación de nodos «no representan necesariamente una comparación rigurosa» (Sec. VIII-B).
+- **Contribución:**
+  - *Taxonomía de cuatro categorías* (Sec. III, Tabla II): recurrentes (RecGNN), convolucionales (ConvGNN, espectrales y espaciales), autocodificadores de grafos (GAE) y espacio-temporales (STGNN).
+  - *Tres niveles de salida* (Sec. III-B): nodo, arista y grafo. La clasificación semi-supervisada de nodos es el primer marco de entrenamiento que describe, con la GCN como referencia [22].
+  - *Derivación de la GCN* desde ChebNet (Ecs. 10--12) y su lectura espacial (Ec. 13) (Sec. V-A).
+  - *GCN contra GAT* (Fig. 4): la GCN asigna a cada vecino un peso fijo $1/\sqrt{\deg(v_i)\deg(v_j)}$; GAT lo aprende con atención y un softmax sobre los vecinos (Ecs. 25 y 26).
+  - *Espaciales sobre espectrales* (Sec. V-B, «Comparison between spectral and spatial models»): los espaciales se prefieren por eficiencia, generalidad y flexibilidad, porque los espectrales necesitan eigenvectores o el grafo completo y no generalizan a grafos nuevos.
+  - *Cuatro direcciones futuras* (Sec. IX): profundidad (sobresuavizado), escalabilidad frente a la integridad del grafo, heterogeneidad y dinamicidad.
+  - *Recursos*: PyTorch Geometric y DGL (Sec. VIII-B).
+- **Claridad:** Clara y bien organizada; muy extensa.
+- **Superpíxeles:** — No menciona imágenes hiperespectrales. En visión por computadora cita nubes de puntos convertidas en grafos de *k* vecinos o de «superpuntos» y la segmentación semántica (Sec. VIII-C).
+- **Señal:** No aplica.
+- **¿Amenaza?:** No.
+- **Para el protocolo:** Una o dos oraciones de contexto general de las GNN en el marco teórico. Cita la taxonomía y que la GCN une los enfoques espectral y espacial. *[inferencia]* También sirve para justificar una GCN poco profunda (sobresuavizado) y para mencionar PyTorch Geometric en la infraestructura.
+- **Prioridad final:** B.
+
+## bronstein2017geometric · Prioridad inicial C
+
+Bronstein, Bruna, LeCun, Szlam y Vandergheynst (2017). Geometric Deep Learning: Going beyond Euclidean data. *IEEE Signal Processing Magazine*.
+
+- **Fecha:**
+- **Categoría:** Revisión tutorial del aprendizaje profundo sobre grafos y variedades («aprendizaje profundo geométrico»).
+- **Contexto:** Éxito de las CNN en datos con estructura de malla gracias a la estacionariedad y la composicionalidad (Secs. I y III).
+- **Corrección:** Razonable. Es anterior a la explosión de las GNN; Wu et al. la llaman la primera revisión del tema.
+- **Contribución:**
+  - *Organización de los métodos* en espectrales (Sec. V), libres de espectro (Sec. VI), basados en cartas locales (Sec. VII) y combinados (Sec. VIII).
+  - *La GCN como método libre de espectro* (Sec. VI, Ecs. 48--50): ChebNet y la GCN, aunque nacen en el dominio espectral, se reducen a filtros sobre la vecindad de 1 o $r$ saltos.
+  - *Inestabilidad de los eigenvectores* (Sec. IV): una pequeña perturbación del dominio puede cambiar mucho los eigenvectores del laplaciano.
+  - *Generalización entre dominios* (Sec. X): un modelo espectral aprendido en un grafo no se aplica directamente a otro.
+- **Claridad:** Densa y matemática, con recuadros explicativos útiles.
+- **Dato que citarás:** En Cora, la GCN obtuvo 81.6 % frente a 75.7 % del mejor resultado previo (recuadro IN6, p. 16). *Ojo:* Kipf reporta 81.5 %; cita a Kipf. Para el marco teórico, lo útil es la Sec. VI: la GCN, aunque se deriva espectralmente, opera solo sobre los vecinos inmediatos.
+- **¿Amenaza?:** No.
+- **Para el protocolo:** Opcional. Una cita de contexto en el marco teórico para la noción de datos no euclidianos; Wu et al. ya cubre ese papel.
+- **Prioridad final:** C.
+
+# Resumen de la pasada
+
+| Artículo | Inicial | Tipo | Qué tomar | ¿Amenaza? | Final |
+|---|---|---|---|---|---|
+| kipf2017semisupervised | A | Método (GCN) | Ecs. 2, 9 y 10; Tablas 2 y 3 | No | A |
+| wu2021comprehensive | B | Revisión | Taxonomía; GCN espectral y espacial; sobresuavizado; evaluación | No | B |
+| bronstein2017geometric | C | Revisión tutorial | La GCN como filtro sobre la vecindad (Sec. VI) | No | C |
+
+: Resultado de la pasada 1 del grupo 3 {#tbl-pasada1-g3}
+
+Ninguno amenaza la originalidad: ninguno construye el grafo a partir de una imagen ni trata superpíxeles. Los tres dan el grafo por hecho, que es justamente lo que tu tesis estudia.

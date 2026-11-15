@@ -15,6 +15,8 @@ Revisión del estado del arte.
  & \X & \X & \X & \X & \X & \X & \Xc & \Xc & \Xc & \Xc & \\ \hline
 Estudio de fundamentos de aprendizaje profundo, redes de grafos y superpíxeles diferenciables.
  & \X & \X & \X & \X & & & & & & & \\ \hline
+Estudiar las extensiones CUDA para PyTorch y las herramientas de perfilado (Nsight Compute).
+ & & & & \X & & & & & & & \\ \hline
 Redacción y entrega del protocolo de tesis.
  & \X & \X & \X\hito & & & & & & & & \\ \hline
 Reproducir las líneas base SLIC-GCN y PCNN-GCN sobre seis conjuntos de datos bajo el protocolo de referencia.
@@ -28,6 +30,8 @@ Formular la función de pérdida no supervisada (EV + compacidad) y entrenar el 
 Integrar los superpíxeles en la GCN semi-supervisada y realizar la evaluación preliminar.
  & & & & & & \X\hito & & & & & \\ \hline
 Explorar el entrenamiento de extremo a extremo del segmentador con la GCN.
+ & & & & & & & \X & \X & & & \\ \hline
+Implementar el núcleo CUDA fusionado de la asociación, verificar sus gradientes y compararlo con PyTorch (tiempo, memoria y \textit{roofline}).
  & & & & & & & \X & \X & & & \\ \hline
 Evaluar la arquitectura propuesta frente a SLIC, LSC, ERS, SEEDS y PCNN-SAM, incluyendo el estudio de ablación.
  & & & & & & & & \X & & & \\ \hline

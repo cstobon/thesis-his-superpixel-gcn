@@ -7,7 +7,7 @@
 La infraestructura mínima necesaria para el desarrollo del proyecto de tesis es:
 
 Hardware
-:   [Equipo de cómputo]
+:   Computadora portátil con GPU NVIDIA GeForce RTX [modelo] (arquitectura [ ], capacidad de cómputo [ ]) con [X] GB de memoria, procesador [modelo] de [X] núcleos y [X] GB de RAM, con sistema operativo [ ]. Todas las mediciones de tiempo, memoria y tráfico de memoria del objetivo 8 se realizarán en este mismo equipo.
 
 Software
-:   [Herramientas, lenguajes, plataformas]
+:   Python con PyTorch [@paszke2019pytorch] sobre CUDA para el segmentador; CUDA Toolkit (compilador `nvcc`) y las extensiones de C++/CUDA de PyTorch para el núcleo fusionado; Nsight Compute, el perfilador de PyTorch y `nvidia-smi` para medir tiempo, memoria, tráfico de memoria, temperatura y frecuencia; PyTorch Geometric para la GCN; y NumPy y SciPy para la carga de los datos y el cálculo de métricas. El código de la tesis de referencia (PCNN-SAM y PCNN-GCN) y las implementaciones públicas de SLIC, LSC, ERS y SEEDS para las líneas base.

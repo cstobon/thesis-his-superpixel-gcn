@@ -1,0 +1,262 @@
+---
+lang: es
+number-sections: false
+format:
+  pdf:
+    documentclass: article
+    fontsize: 11pt
+    papersize: letter
+    pdf-engine: pdflatex
+    fontenc: OT1
+    fontfamily: fix-cm
+    indent: false
+    colorlinks: false
+    boxlinks: true
+    geometry:
+      - left=53.24pt
+      - textwidth=469.8pt
+      - top=36.7pt
+      - textheight=636pt
+      - footskip=27pt
+    include-in-header:
+      - ../document/preamble.tex
+      - unicode-latex.tex
+---
+
+<!-- =====================================================================
+     PASADA 1 · GRUPO 2 (Keshav, «How to Read a Paper», 2007)
+     Versión condensada: solo lo importante de cada artículo, tomado de los
+     PDF de Zotero (título, resumen, introducción, encabezados y
+     conclusiones; se consultaron secciones puntuales para verificar datos).
+     Lo marcado como [inferencia] es interpretación, no del artículo.
+     Para compilar: quarto render pasada1-grupo-2.qmd
+     ===================================================================== -->
+
+```{=latex}
+\title{Centro de investigación y estudios avanzados del IPN\\
+       Departamento de Computación\\
+       \textbf{Pasada 1: grupo 2}}
+\author{Tesista: Edgar Tobón Sosa}
+\date{[fecha]}
+\begingroup\setlength{\parskip}{0pt}
+\maketitle
+\endgroup
+\kern-15pt
+```
+
+**Las 5 C.** *Categoría*: qué tipo de artículo es. *Contexto*: con qué trabajos se relaciona. *Corrección*: si sus supuestos parecen razonables. *Contribución*: qué aporta. *Claridad*: si está bien escrito.
+
+# Lo esencial del grupo
+
+1. **Ninguno amenaza tu originalidad.** Todos los métodos forman superpíxeles fijos (por reglas o sobre características fijas); ninguno los aprende con la EV.
+2. **El más cercano es Chen et al. (2023)**: hace SLIC sobre características de un autocodificador entrenado *sin etiquetas* (pérdida de reconstrucción espectral) y lo usa en una GNN. Su ablación muestra que segmentar sobre PCA es peor que sobre el espectro completo (Tabla 1). Debe entrar en «Trabajos relacionados».
+3. **Ayres et al. (2024)** es el otro antecedente directo: superpíxeles específicos para HSI, guiados por homogeneidad espectral, dentro de una GCN (CEGCN) con 5 a 15 etiquetas por clase. En datos reales, las diferencias con SLIC quedan dentro de la desviación estándar (Tablas 10--12). Es un **riesgo** para tu hipótesis que conviene anticipar.
+4. **Giraud y Clément (2026)** discuten tus métricas: BR debe reportarse junto con la densidad de contornos (CD) o la precisión, porque segmentaciones ruidosas inflan BR; y la EV suele estar *anticorrelacionada* con la exactitud de segmentación de objetos (Sec. IV).
+5. **Por qué PCA antes de segmentar**: Fang et al. (2015) y SuperPCA (Jiang et al., 2018) lo justifican por costo y porque la información principal está en las primeras componentes. Esto llena el hueco que tenía el marco teórico.
+6. **ASA y BR**: la forma de ASA que usa Galarza (Ec. 2.13) es la Ec. 14 de ERS (Liu et al., 2011), con BR a $\epsilon = 2$ píxeles. Wang et al. (2017) muestran que ASA se satura (cerca de 1 por encima de 400 superpíxeles), lo que apoya mirar también la EV.
+
+# Superpíxeles clásicos y su evaluación
+
+## achanta2012slic · Prioridad inicial A
+
+Achanta et al. (2012). SLIC Superpixels Compared to State-of-the-Art Superpixel Methods. *IEEE TPAMI*. Ya tiene pasada 2 (ver `resumen-grupo-2.pdf`).
+
+- **Fecha:**
+- **Categoría:** Método nuevo (SLIC) con comparación de cinco métodos previos.
+- **Contexto:** Métodos basados en grafos (NC05, GS04) y de ascenso por gradiente (mean shift, quick shift, cuencas, TurboPixels) (Sec. 2).
+- **Corrección:** Razonable. Diseñado para CIELAB; fija la distancia máxima de color en una constante $m$ porque varía entre imágenes (Sec. 3.2). Solo compara cinco métodos.
+- **Contribución:** *k*-means local en $2S \times 2S$ con distancia color + espacio ponderada por $m$ (Ec. 3); complejidad $O(N)$; mejor error de subsegmentación y el más rápido (Sec. 4).
+- **Claridad:** Muy clara y corta.
+- **Superpíxeles:** F (SLIC).
+- **¿Amenaza?:** No.
+- **Prioridad final:** A. Base del marco teórico y de SSN.
+
+## stutz2018superpixels · Prioridad inicial A
+
+Stutz, Hermans y Leibe (2018). Superpixels: An evaluation of the state-of-the-art. *CVIU*. Ya tiene pasada 2.
+
+- **Fecha:**
+- **Categoría:** Banco de pruebas: 28 algoritmos, 5 conjuntos de datos.
+- **Contexto:** Benchmarks previos (Achanta, Neubert y Protzel, Schick); métricas Rec, UE, EV, ASA, CO.
+- **Corrección:** Comparación justa: parámetros optimizados en conjuntos de entrenamiento separados y conectividad forzada (Sec. 6). Anterior a los métodos profundos.
+- **Contribución:** Ecuaciones de las métricas (Ecs. 1--7); $\text{ASA} \approx 1 - \text{UE}$ (Sec. 5.1); la EV «no debe usarse aislada» (Sec. 7.2); recomienda ETPS, SEEDS, ERS, CRS, ERGC y SLIC (Tabla 3).
+- **Claridad:** Clara pero extensa.
+- **Superpíxeles:** — (evaluación).
+- **¿Amenaza?:** No.
+- **Prioridad final:** A. Cita para las métricas.
+
+## barcelos2024comprehensive · Prioridad inicial A
+
+Barcelos et al. (2024). A Comprehensive Review and New Taxonomy on Superpixel Segmentation. *ACM Computing Surveys*. Ya tiene pasada 2.
+
+- **Fecha:**
+- **Categoría:** Revisión con taxonomía (59 métodos) y banco de pruebas (23 métodos, 9 criterios).
+- **Contexto:** Actualiza a Stutz e incluye métodos profundos (SSN, AINET, SSFCN, LNSNet).
+- **Corrección:** Razonable; solo imágenes RGB y RGB-D, ninguna HSI.
+- **Contribución:** Definición moderna; compromiso compacidad-adherencia; SLIC y LSC como «basados en vecindad»; SSN usa asignación suave, es supervisada y no garantiza conectividad (Apéndice A.10.1); la EV es máxima si cada píxel es su propio superpíxel (Apéndice B).
+- **Claridad:** Clara; muy extensa (54 pp.).
+- **Superpíxeles:** — (revisión).
+- **¿Amenaza?:** No.
+- **Prioridad final:** A. Definición y puente hacia SSN.
+
+## giraud2026superpixel · Prioridad inicial B
+
+Giraud y Clément (2026). Superpixel segmentation: A long-lasting ill-posed problem. *CVIU*.
+
+- **Fecha:**
+- **Categoría:** Análisis crítico de la evaluación de superpíxeles, con una propuesta basada en *Segment Anything* (SAM, el modelo de segmentación; no confundir con el ángulo espectral).
+- **Contexto:** Benchmarks de Stutz, Barcelos y otros; métodos profundos (SSN, SEAL, SFCN, LNSNet, AINet).
+- **Corrección:** Argumento sólido. Sostiene que la segmentación en superpíxeles está mal planteada por la restricción implícita de regularidad, y que la literatura evalúa solo algunos aspectos, a veces con métricas inadecuadas o redundantes (Secs. II y III).
+- **Contribución:** Recomienda **una métrica por propiedad**: ASA (objetos), BR junto con CD o precisión (contornos), EV (homogeneidad de color) y GR (regularidad) (Sec. III-A). Señala que CUE y ASA contienen casi la misma información; que BR sola favorece segmentaciones ruidosas; que la EV es la propiedad menos evaluada y suele estar anticorrelacionada con la exactitud de objetos (Sec. IV); y que los métodos profundos sacrifican la regularidad.
+- **Claridad:** Clara y bien argumentada.
+- **Superpíxeles:** — (análisis); su propuesta usa un modelo preentrenado sin entrenamiento específico.
+- **¿Amenaza?:** No, pero cuestiona cómo evalúas.
+- **Prioridad final:** A (sube de B). *[inferencia]* Conviene añadir CD o la precisión de bordes a tu evaluación (hoy reportas BR sola) y citar su observación sobre la EV al discutir la relación EV--exactitud.
+
+## chen2023local · Prioridad inicial B
+
+Chen et al. (2023). Local aggregation and global attention network for hyperspectral image classification with spectral-induced aligned superpixel segmentation. *Expert Systems with Applications*.
+
+- **Fecha:**
+- **Categoría:** Método nuevo: segmentación SIAS² + red LAGAN (GraphSAGE + transformer de grafos).
+- **Contexto:** Las GNN para HSI segmentan en superpíxeles, casi siempre con SLIC sobre el espectro o sobre PCA, lo que limita la precisión (Sec. 2).
+- **Corrección:** Razonable, con límites. El autocodificador se entrena **sin etiquetas** con error cuadrático de reconstrucción (Ec. 5), pero la segmentación sigue siendo SLIC, no aprendida; fusiona dos mapas (sobre el espectro y sobre las características latentes) con reglas de mínimo o máximo. Entrena con 30 muestras por clase (y estudia de 5 a 30, Fig. 15).
+- **Contribución:** Ablación (Tabla 1): SLIC sobre PCA da la peor OA (por ejemplo, 83.69 % en Salinas, frente a 96.54 % sobre el espectro completo y 98.05 % sobre las características del autocodificador). SIAS² funciona como módulo enchufable en otras GNN.
+- **Claridad:** Aceptable; muchas siglas.
+- **Superpíxeles:** F (SLIC sobre características aprendidas sin etiquetas, sin entrenar la segmentación).
+- **¿Amenaza?:** Parcial y baja. Usa una señal sin etiquetas (reconstrucción espectral) para mejorar los superpíxeles de una GNN, pero no aprende la segmentación ni usa la EV ni mide su calidad.
+- **Prioridad final:** A (sube de B). Debe entrar en «Trabajos relacionados» y en el cuadro comparativo; su Tabla 1 apoya el argumento contra PCA.
+
+## jiang2018superpca · Prioridad inicial B
+
+Jiang et al. (2018). SuperPCA: A Superpixelwise PCA Approach for Unsupervised Feature Extraction of Hyperspectral Imagery. *IEEE TGRS*.
+
+- **Fecha:**
+- **Categoría:** Método nuevo de reducción de dimensión no supervisada.
+- **Contexto:** PCA global para HSI; segmentación ERS; clasificación con SVM.
+- **Corrección:** Razonable. Segmenta con ERS sobre la **primera componente principal** porque «captura la información principal» y reduce el costo (Sec. III-A); aclara que SLIC podría usarse en su lugar.
+- **Contribución:** PCA por superpíxel en lugar de global; versión multiescala con voto mayoritario. Con 5 muestras por clase supera a métodos supervisados (Sec. I). Señala que no hay un tamaño de región único adecuado para HSI (Sec. III-B).
+- **Claridad:** Clara.
+- **Superpíxeles:** F (ERS sobre la primera componente).
+- **¿Amenaza?:** No.
+- **Prioridad final:** B. Cita para «en HSI se segmenta sobre PCA».
+
+## wang2017superpixel · Prioridad inicial C
+
+Wang et al. (2017). Superpixel segmentation: A benchmark. *Signal Processing: Image Communication*.
+
+- **Fecha:**
+- **Categoría:** Banco de pruebas: 15 algoritmos, 13 métricas, y una métrica nueva de regularidad.
+- **Contexto:** Clasifica los métodos en basados en grafos y en agrupamiento.
+- **Corrección:** Hay una contradicción: el resumen dice que los de agrupamiento son más eficientes, y la conclusión, que los de grafos son más exactos (ambas pueden ser ciertas, pero no se explica).
+- **Contribución:** LSC, ERS y SEEDS tienen el mayor *boundary recall*; LSC segmenta mejor que SLIC; los de agrupamiento ganan en EV; **ASA supera 0.8 en todos y se acerca a 1 por encima de 400 superpíxeles**, de modo que «puede ignorarse» por encima de 1000 (Sec. 5.2).
+- **Claridad:** Aceptable.
+- **Superpíxeles:** — (evaluación).
+- **¿Amenaza?:** No.
+- **Prioridad final:** B (sube de C). Su observación de que ASA se satura apoya reportar también la EV.
+
+## liu2011entropy · Prioridad inicial C
+
+Liu et al. (2011). Entropy Rate Superpixel Segmentation. *CVPR*.
+
+- **Fecha:**
+- **Categoría:** Método nuevo (ERS).
+- **Contexto:** Segmentación sobre grafos (NCut, FH, GraphCut, TurboPixels).
+- **Corrección:** Sólida: función objetivo submodular con cota de aproximación de 1/2 (resumen).
+- **Contribución:** Objetivo = tasa de entropía de un paseo aleatorio (regiones compactas y homogéneas) + término de equilibrio (tamaños similares); algoritmo voraz. Define ASA (Ec. 14) y usa BR con $\epsilon = 2$ (Sec. 5); con 100 superpíxeles logra ASA de 95 %.
+- **Claridad:** Clara.
+- **Superpíxeles:** F (ERS).
+- **¿Amenaza?:** No.
+- **Prioridad final:** C. Cita para ERS y para la forma de ASA que usa Galarza.
+
+## chen2017linear · Prioridad inicial C
+
+Chen, Li y Huang (2017). Linear Spectral Clustering Superpixel. *IEEE TIP*.
+
+- **Fecha:**
+- **Categoría:** Método nuevo (LSC).
+- **Contexto:** *Normalized cuts* y *k*-means ponderado.
+- **Corrección:** Sólida: demuestra que, con un núcleo que mapea color y posición a un espacio de alta dimensión, el óptimo del *k*-means ponderado coincide con el de *normalized cuts*.
+- **Contribución:** Superpíxeles con buena adherencia y compacidad en tiempo lineal, sin descomponer la matriz de afinidad. Propone como trabajo futuro estudiar otras medidas de similitud y elegir automáticamente el número de superpíxeles (Sec. V).
+- **Claridad:** Clara.
+- **Superpíxeles:** F (LSC).
+- **¿Amenaza?:** No.
+- **Prioridad final:** C. Cita para LSC como método de referencia.
+
+## vandenbergh2014seeds · Prioridad inicial C
+
+Van den Bergh et al. (2014). SEEDS: Superpixels Extracted Via Energy-Driven Sampling. *IJCV*.
+
+- **Fecha:**
+- **Categoría:** Método nuevo (SEEDS).
+- **Contexto:** Métodos que añaden cortes o hacen crecer regiones, demasiado lentos para tiempo real.
+- **Corrección:** Razonable; probado solo en imágenes de color.
+- **Contribución:** Parte de una rejilla y mueve bloques y píxeles entre superpíxeles vecinos por ascenso de colina, maximizando la homogeneidad del histograma de color; corre en tiempo real en una CPU.
+- **Claridad:** Clara.
+- **Superpíxeles:** F (SEEDS).
+- **¿Amenaza?:** No.
+- **Prioridad final:** C. Cita para SEEDS.
+
+## fang2015classification · Prioridad inicial C
+
+Fang et al. (2015). Classification of Hyperspectral Images by Exploiting Spectral–Spatial Information of Superpixel via Multiple Kernels. *IEEE TGRS*.
+
+- **Fecha:**
+- **Categoría:** Método nuevo (SC-MK): superpíxeles + núcleos múltiples + SVM.
+- **Contexto:** Clasificación espectral-espacial con ventanas fijas, perfiles morfológicos y núcleos compuestos.
+- **Corrección:** Razonable. Usa entre 1 % y 10 % de muestras etiquetadas (Sec. IV), lejos de 5 por clase. Los pesos de los núcleos se fijan a mano (Sec. V).
+- **Contribución:** Define el superpíxel en HSI como una **región de forma adaptativa** de píxeles vecinos con características espectrales muy parecidas (resumen). Para segmentar aplica ERS sobre las **tres primeras componentes principales**, «para mejorar la eficiencia» y porque «la información importante está en ellas» (Sec. III-A); elige el número de superpíxeles según la textura.
+- **Claridad:** Clara.
+- **Superpíxeles:** F (ERS sobre tres componentes principales).
+- **¿Amenaza?:** No.
+- **Prioridad final:** B (sube de C). Cita para «para qué sirven en HSI» y para la justificación de PCA.
+
+## ayres2024hierarchical · Prioridad inicial C
+
+Ayres et al. (2024). Hierarchical homogeneity-based superpixel segmentation: application to hyperspectral image analysis. *International Journal of Remote Sensing*.
+
+- **Fecha:**
+- **Categoría:** Método nuevo (H²BO) aplicado a desmezclado y a clasificación con GCN.
+- **Contexto:** SLIC; desmezclado multiescala (MUA); la GCN CEGCN de Liu et al. (2021).
+- **Corrección:** Honesta. En datos reales, las OA de CEGCN con SLIC, con *waterpixels* y con H²BO quedan dentro de la desviación estándar (Tablas 10--12; por ejemplo, Indian Pines: 88.6, 89.5 y 88.7 %); los autores lo atribuyen a que la verdad de terreno no es espacialmente contigua (Sec. 4). No reporta ASA, BR ni EV.
+- **Contribución:** Superpíxeles específicos para HSI: aplica SLIC jerárquicamente y subdivide los superpíxeles que no pasan una prueba robusta de homogeneidad (distancia euclidiana a la mediana). Sustituye la reducción LDA de CEGCN y trabaja con 15, 5 y 10 muestras por clase en Indian Pines, Salinas y Pavia University.
+- **Claridad:** Clara; extensa.
+- **Superpíxeles:** F (SLIC jerárquico con prueba de homogeneidad).
+- **¿Amenaza?:** No (reglas fijas), pero es el antecedente más cercano de «superpíxeles guiados por homogeneidad espectral para una GCN».
+- **Prioridad final:** A (sube de C). *[inferencia]* Su resultado es un riesgo para tu hipótesis: mejorar la homogeneidad no se tradujo en mejor OA con pocas etiquetas. Conviene citarlo en «Trabajos relacionados» y en la discusión de riesgos.
+
+## johnson1999pcnn · Prioridad inicial C
+
+Johnson y Padgett (1999). PCNN models and applications. *IEEE Transactions on Neural Networks*.
+
+- **Fecha:**
+- **Categoría:** Revisión de modelos y aplicaciones de la PCNN.
+- **Contexto:** Modelo de campo de enlace de Eckhorn (1990), inspirado en las ráfagas sincronizadas de la corteza visual del gato (Sec. I).
+- **Corrección:** Razonable para su época; sin evaluación cuantitativa.
+- **Contribución:** Describe el modelo básico (campos receptivos, modulación multiplicativa y generador de pulsos; Sec. III-A). La modulación multiplicativa impide que una neurona sin entrada primaria se active por acoplamiento. La **fuerza de enlace** controla la escala de las regiones: grande produce una sola región y muy pequeña, sobrefragmentación (Sec. III-D). El modelo no se entrena: interesa su dinámica no adaptativa.
+- **Claridad:** Densa; muchas variantes.
+- **Superpíxeles:** — (la PCNN segmenta, pero no produce superpíxeles por sí misma).
+- **¿Amenaza?:** No.
+- **Prioridad final:** C. Cita para la PCNN en el párrafo de PCNN-SAM.
+
+# Resumen de la pasada
+
+| Artículo | Inicial | Superp. | Pérdida (si A) | ¿Amenaza? | Final |
+|---|---|---|---|---|---|
+| achanta2012slic | A | F (SLIC) | No aplica | No | A |
+| stutz2018superpixels | A | — | No aplica | No | A |
+| barcelos2024comprehensive | A | — | No aplica | No | A |
+| giraud2026superpixel | B | — | No aplica | No | A |
+| chen2023local | B | F (SLIC sobre autocodificador) | No aplica | Parcial (baja) | A |
+| jiang2018superpca | B | F (ERS sobre 1.ª componente) | No aplica | No | B |
+| wang2017superpixel | C | — | No aplica | No | B |
+| liu2011entropy | C | F (ERS) | No aplica | No | C |
+| chen2017linear | C | F (LSC) | No aplica | No | C |
+| vandenbergh2014seeds | C | F (SEEDS) | No aplica | No | C |
+| fang2015classification | C | F (ERS sobre PCA) | No aplica | No | B |
+| ayres2024hierarchical | C | F (SLIC jerárquico) | No aplica | No | A |
+| johnson1999pcnn | C | — | No aplica | No | C |
+
+: Resultado de la pasada 1 del grupo 2 {#tbl-pasada1-g2}
+
+Superp. = F (fijos), A (aprendidos) o — (no usa).

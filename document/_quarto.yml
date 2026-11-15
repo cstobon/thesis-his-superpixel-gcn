@@ -3,6 +3,7 @@ project:
 
 lang: es
 number-sections: true
+bibliography: lecturas-verificadas.bib
 format:
   pdf:
     documentclass: article

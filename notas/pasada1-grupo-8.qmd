@@ -1,0 +1,273 @@
+---
+lang: es
+number-sections: false
+format:
+  pdf:
+    documentclass: article
+    fontsize: 11pt
+    papersize: letter
+    pdf-engine: pdflatex
+    fontenc: OT1
+    fontfamily: fix-cm
+    indent: false
+    colorlinks: false
+    boxlinks: true
+    geometry:
+      - left=53.24pt
+      - textwidth=469.8pt
+      - top=36.7pt
+      - textheight=636pt
+      - footskip=27pt
+    include-in-header:
+      - ../document/preamble.tex
+      - unicode-latex.tex
+---
+
+<!-- =====================================================================
+     PASADA 1 · GRUPO 8 · HPC (Keshav, «How to Read a Paper», 2007)
+     Versión condensada, tomada solo de los PDF de Zotero (título, resumen,
+     introducción, encabezados y conclusiones; secciones puntuales para
+     verificar datos). Lo marcado como [inferencia] es interpretación.
+     Pregunta clave del grupo: ¿qué operación acelera, cómo la organiza en
+     la GPU y fusiona operaciones para no materializar intermedios?
+     Para compilar: quarto render pasada1-grupo-8.qmd
+     ===================================================================== -->
+
+```{=latex}
+\title{Centro de investigación y estudios avanzados del IPN\\
+       Departamento de Computación\\
+       \textbf{Pasada 1: grupo 8 (HPC)}}
+\author{Tesista: Edgar Tobón Sosa}
+\date{[fecha]}
+\begingroup\setlength{\parskip}{0pt}
+\maketitle
+\endgroup
+\kern-15pt
+```
+
+**Las 5 C.** *Categoría*, *contexto*, *corrección*, *contribución* y *claridad*. Los campos de HPC siguen la guía del plan: operación acelerada y su organización en la GPU, si fusiona operaciones y cómo hace la pasada hacia atrás, hardware y aceleración, y cómo midió.
+
+# Lo esencial del grupo
+
+1. **Ninguno amenaza tu originalidad.** Ninguno implementa en GPU la asociación suave y diferenciable de un segmentador de superpíxeles: gSLICr hace la asignación dura de SLIC (sin pasada hacia atrás) y los núcleos fusionados (FlashAttention, Hassani) son de atención en *transformers*.
+2. **Tu operación es, en estructura, una atención de vecindad con 9 vecinos.** Para cada píxel, similitud con sus 9 superpíxeles vecinos y un softmax. Hassani et al. (2024, Sec. 3.5) muestran que en la atención de vecindad fusionada la intensidad aritmética tiende a $\ell / s_{\text{dtype}}$ ($\ell$ = tamaño de la ventana). *[inferencia]* Con $\ell = 9$ y FP32 son unas 2 FLOP por byte: tu núcleo casi seguro estará **limitado por memoria**, y lo que la fusión gana es reducir bytes, no FLOPs. Eso es lo que el *roofline* debe mostrar.
+3. **La estrategia de la pasada hacia atrás ya existe.** FlashAttention guarda solo los factores de normalización del softmax y **recalcula** en la pasada hacia atrás en lugar de leer la matriz intermedia (Sec. 1). *[inferencia]* Es la misma idea para no guardar el tensor $N \times 9 \times d$ de tus vecinos.
+4. **La organización de hilos ya existe.** gSLICr usa un hilo por píxel que revisa sus 9 centros vecinos, y actualiza los centros con sumas parciales por bloque más una reducción (Sec. 3). Delgado et al. (2016) comparan tres estrategias (un píxel por bloque, varios píxeles por bloque y con memoria compartida) en una **GPU de laptop** (GTX 870M), como la tuya.
+5. **Cómo medir.** Hoefler y Belli dan 12 reglas: decir cuál es la línea base de la aceleración (regla 1), reportar intervalos de confianza (5), documentar todo el entorno (9) y **mostrar cotas superiores de rendimiento** (11), que es justo lo que da el *roofline*. Yang et al. (2019) dan la receta del *roofline* en GPU: picos medidos con ERT y FLOPs y bytes por nivel de memoria con el perfilador.
+6. **Dos trampas al medir en PyTorch** (del artículo de PyTorch, Secs. 5.2--5.3). Ejecuta los operadores de GPU de forma **asíncrona** y usa un **asignador de memoria con caché**. *[inferencia]* Hay que sincronizar antes de detener el cronómetro, y medir la memoria con las funciones de PyTorch, porque `nvidia-smi` muestra también la caché.
+
+# Núcleo fusionado y superpíxeles en GPU
+
+## ren2015gslicr · Prioridad inicial A
+
+Ren, Prisacariu y Reid (2015). gSLICr: SLIC superpixels at over 250Hz. *arXiv:1509.04232*.
+
+- **Fecha:**
+- **Categoría:** Reporte técnico corto (6 pp.) de una implementación de SLIC en CUDA, con código abierto.
+- **Contexto:** SLIC de Achanta et al. (2012); la versión secuencial tarda 300--400 ms en una imagen de 640 × 480 (Sec. 1).
+- **Corrección:** Afirma ser compatible con la versión secuencial y hasta 83× más rápido, pero **no reporta el modelo de GPU ni de CPU, ni repeticiones, ni las unidades de la Tabla 1** (se infiere que son segundos). Usa la distancia $D_s = d_{lab} + \frac{m}{S} d_{xy}$ (Ec. 1), no la de raíz cuadrada del artículo original de SLIC.
+- **Contribución:** Lleva todo SLIC a la GPU (Fig. 2): conversión a CIELAB con un hilo por píxel; **asociación con un hilo por píxel que examina como máximo 9 centros**; actualización de centros en dos núcleos (sumas parciales en un arreglo $n_{sr} \times n_{sc} \times n_{bl}$ y luego una reducción, con bloques de 16); conectividad con un núcleo de un hilo por píxel (Sec. 3).
+- **Claridad:** Clara pero escueta.
+- **Operación acelerada / organización en GPU:** Asignación local de SLIC; un hilo por píxel y un hilo por centro.
+- **¿Fusiona? ¿Pasada hacia atrás?:** No fusiona de forma explícita; no es diferenciable (asignación dura), sin pasada hacia atrás.
+- **Hardware y aceleración:** Hasta 83× frente al SLIC secuencial; hardware no reportado.
+- **Cómo midió:** Tabla de tiempos por tamaño de imagen; sin repeticiones ni dispersión. *[inferencia]* Es un ejemplo de lo que Hoefler critica.
+- **Relación con tu núcleo:** Es la estructura base: tu núcleo hace lo mismo que su «búsqueda de asociación», pero con coseno, softmax suave y pasada hacia atrás.
+- **¿Amenaza?:** No.
+- **Prioridad final:** A.
+
+## qu2013parallel · Prioridad inicial A
+
+Qu et al. (2013). Parallel Acceleration of SAM Algorithm and Performance Analysis. *IEEE JSTARS*.
+
+- **Fecha:**
+- **Categoría:** Implementación paralela del ángulo espectral (SAM) en GPU y en clúster, con análisis de rendimiento.
+- **Contexto:** Trabajos del grupo de Plaza sobre HPC en HSI; un SAM previo en CUDA sin transferencias asíncronas (Sec. I).
+- **Corrección:** Razonable para su época (CUDA 4.0, GTX 560 y Tesla S2050). La configuración de hilos se elige por búsqueda empírica (rejilla de 140 bloques de 8 hilos; Sec. III-B). Promedia 5 ejecuciones en las pruebas de MATLAB. Compara CUDA con MATLAB y con C en CPU.
+- **Contribución:** SAM con varias muestras de entrenamiento por clase. Usa memoria fijada (*page-locked*), que casi duplica la velocidad de transferencia, y flujos de CUDA para ocultar la transferencia (Sec. II-C). Estudia el balance entre los recursos de cada hilo y los bloques activos. Aceleración de 63.9× con 24 espectros de referencia y de 141.6× con 128 (Sec. IV).
+- **Claridad:** Aceptable; varias tablas con abreviaturas poco claras.
+- **Operación acelerada / organización en GPU:** Ángulo entre cada píxel y las firmas de referencia; datos divididos en rebanadas del cubo por flujo.
+- **¿Fusiona? ¿Pasada hacia atrás?:** No aplica (no es diferenciable).
+- **Hardware y aceleración:** GTX 560 y Tesla S2050; hasta 141.6× frente a la CPU.
+- **Cómo midió:** Tiempos con eventos de CUDA, separando cálculo y transferencia; promedio de 5 ejecuciones (MATLAB).
+- **Relación con tu núcleo:** Mismo cálculo central (producto punto normalizado sobre el espectro). Su conclusión importa: **el cuello de botella fue la entrada/salida**, y la GPU conviene cuando hay mucho cálculo y poca E/S (Sec. IV). Coincide con el punto 2 de arriba.
+- **¿Amenaza?:** No.
+- **Prioridad final:** A.
+
+## dao2022flashattention · Prioridad inicial A
+
+Dao et al. (2022). FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness. *NeurIPS 35*.
+
+- **Fecha:**
+- **Categoría:** Algoritmo y núcleo CUDA nuevos para la atención exacta, con análisis de complejidad de E/S.
+- **Contexto:** Las atenciones aproximadas reducen FLOPs pero no siempre el tiempo real, porque ignoran el acceso a memoria (Sec. 1).
+- **Corrección:** Sólida: análisis de complejidad de E/S con optimalidad para un rango de tamaños de memoria SRAM (Sec. 3.2). Sus limitaciones (Sec. 5): requiere escribir un núcleo CUDA nuevo por variante y puede no transferirse entre arquitecturas de GPU.
+- **Contribución:** Fusiona toda la atención en un núcleo y procesa por bloques en la SRAM, sin escribir la matriz $N \times N$ en la memoria principal de la GPU. En la pasada hacia atrás **recalcula** la atención con los factores de normalización guardados, en vez de leerla. Logra hasta 7.6× en la atención de GPT-2 y memoria lineal en la longitud (Fig. 1, Sec. 1). Clasifica las operaciones en limitadas por cómputo y **limitadas por memoria (el softmax y las reducciones)**, y presenta la fusión de núcleos como la forma de acelerar estas últimas (Sec. 2.1).
+- **Claridad:** Muy clara.
+- **Operación acelerada / organización en GPU:** Similitud + softmax + suma ponderada, por bloques en SRAM.
+- **¿Fusiona? ¿Pasada hacia atrás?:** Sí y sí (con recálculo).
+- **Hardware y aceleración:** A100; hasta 7.6× en la atención y 3× de extremo a extremo en GPT-2.
+- **Cómo midió:** Tiempo y memoria según la longitud de secuencia (Sec. 4.3, detalles en el Apéndice E).
+- **Relación con tu núcleo:** Es el principio que aplicas: no materializar el intermedio y recalcular en la pasada hacia atrás. Su marco (accesos a la memoria principal, operaciones limitadas por memoria) es el lenguaje de tu análisis.
+- **¿Amenaza?:** No.
+- **Prioridad final:** A.
+
+## hassani2024faster · Prioridad inicial A
+
+Hassani, Hwu y Shi (2024). Faster Neighborhood Attention: Reducing the O(n²) Cost of Self Attention at the Threadblock Level. *NeurIPS 2024* (el PDF de Zotero es la versión de arXiv).
+
+- **Fecha:**
+- **Categoría:** Núcleos CUDA nuevos (basados en GEMM y fusionados) para la atención de vecindad en 1-D, 2-D y 3-D.
+- **Contexto:** Los núcleos simples de NATTEN (Hassani et al., 2022) y la atención fusionada tipo FlashAttention (Sec. 2).
+- **Corrección:** Sólida. Las mejoras son promedios frente a los núcleos simples previos, medidas en A100 y sobre todo en FP16. En precisión completa (FP32) solo reporta los núcleos basados en GEMM (resumen).
+- **Contribución:** Muestra que las implementaciones sin fusionar están **muy limitadas por el ancho de banda de memoria** y tienen ineficiencias que anulan su ventaja teórica. Su núcleo fusionado mejora a los simples en 1759 % (1-D) y 958 % (2-D) en la pasada hacia adelante, y en 844 % y 385 % incluyendo la pasada hacia atrás (Fig. 1). Analiza la intensidad aritmética (Sec. 3.5): sin fusionar tiende a una constante; fusionada, en la atención de vecindad tiende a $\ell / s_{\text{dtype}}$, así que el tamaño de la ventana decide si queda limitada por memoria o por cómputo.
+- **Claridad:** Clara; densa en detalles de CUTLASS.
+- **Operación acelerada / organización en GPU:** Similitud con los vecinos + softmax + suma ponderada, organizada por bloques de hilos.
+- **¿Fusiona? ¿Pasada hacia atrás?:** Sí y sí.
+- **Hardware y aceleración:** A100; mejoras en porcentaje frente a los núcleos simples.
+- **Cómo midió:** Promedios sobre muchos tamaños de problema; pasada hacia adelante y completa por separado.
+- **Relación con tu núcleo:** **La operación más parecida a la tuya.** *[inferencia]* Con tu ventana de 9 vecinos (más pequeña que las de sus experimentos), su Ec. 4 predice que tu núcleo quedará limitado por memoria; la mejora se medirá en bytes movidos y en memoria pico. Diferencia: en SSN las «llaves» son los centros de superpíxel (muchos menos que píxeles), no los píxeles vecinos.
+- **¿Amenaza?:** No.
+- **Prioridad final:** A.
+
+## quesadabarriuso2021gpu · Prioridad inicial A
+
+Quesada-Barriuso, Blanco Heras y Argüello (2021). GPU accelerated waterpixel algorithm for superpixel segmentation of hyperspectral images. *The Journal of Supercomputing*.
+
+- **Fecha:**
+- **Categoría:** Implementación en CUDA de un algoritmo de superpíxeles (*waterpixels*) para HSI.
+- **Contexto:** Segmentación por cuencas (*watershed*) sobre un gradiente vectorial de todas las bandas; autómatas celulares en GPU (Sec. 2).
+- **Corrección:** Razonable. La línea base es OpenMP con 8 hilos (y la secuencial). Reporta el promedio de 10 ejecuciones y excluye la E/S (Sec. 4). No evalúa la calidad de los superpíxeles en este artículo.
+- **Contribución:** Cuatro etapas en GPU: gradiente vectorial, regularización espacial, selección de marcadores y cuencas con un autómata celular asíncrono por bloques con 8-conectividad. Optimizaciones: memoria compartida, ocupación, operaciones atómicas y **partición de los datos en el dominio espectral** (Sec. 3). Hasta 32.9× frente a OpenMP de 8 hilos en Santa Barbara Line_2, de 224 bandas (Sec. 5).
+- **Claridad:** Clara, con pseudocódigo que marca qué está en memoria global y qué en compartida.
+- **Operación acelerada / organización en GPU:** Gradiente vectorial con bloques 2-D de hilos y bucle sobre las bandas; cuencas por autómata celular.
+- **¿Fusiona? ¿Pasada hacia atrás?:** No aplica (no es diferenciable).
+- **Hardware y aceleración:** GPU de arquitectura Pascal; hasta 32.9× frente a OpenMP de 8 hilos.
+- **Cómo midió:** Promedio de 10 ejecuciones, sin E/S.
+- **Relación con tu núcleo:** El antecedente de HPC más cercano a tu tema (superpíxeles de HSI en GPU). Su partición espectral es una opción cuando *d* = B bandas no cabe en la memoria compartida.
+- **¿Amenaza?:** No.
+- **Prioridad final:** A.
+
+## hassani2022neighborhood · Prioridad inicial C
+
+Hassani et al. (2022). Neighborhood Attention Transformer. *arXiv:2204.07143*.
+
+- **Fecha:**
+- **Categoría:** Nueva arquitectura (NAT) y un paquete con núcleos C++/CUDA (NATTEN).
+- **Contexto:** Atención global (ViT) y por ventanas (Swin).
+- **Corrección:** Razonable; el foco es la exactitud del modelo, no el núcleo.
+- **Contribución:** Define la atención de vecindad: cada píxel atiende solo a sus vecinos más cercanos, con complejidad lineal. NATTEN corre hasta 40 % más rápido que la atención por ventanas de Swin, con hasta 25 % menos memoria (resumen). Prueba ventanas de 3 × 3 a 9 × 9.
+- **Claridad:** Clara.
+- **Dato que citarás:** La definición de atención de vecindad, para decir que tu asociación de 3 × 3 es estructuralmente una atención de vecindad.
+- **¿Amenaza?:** No.
+- **Prioridad final:** C.
+
+# Medición y modelo de rendimiento
+
+## hoefler2015scientific · Prioridad inicial A
+
+Hoefler y Belli (2015). Scientific benchmarking of parallel computing systems: twelve ways to tell the masses when reporting performance results. *SC15*.
+
+- **Fecha:**
+- **Categoría:** Guía metodológica basada en una muestra de 120 artículos de tres congresos de HPC.
+- **Contexto:** Estadística aplicada a mediciones de rendimiento; críticas previas a cómo se reportan los resultados (Bailey).
+- **Corrección:** Sólida. Introduce la «interpretabilidad» como versión débil de la reproducibilidad (Sec. 6).
+- **Contribución:** 12 reglas. Las que aplican a ti son 1, 5, 9, 10, 11 y 12: decir si la línea base de la aceleración es el mejor código serial o la misma versión paralela (1); intervalos de confianza para datos no deterministas (5); no suponer normalidad (6); comparar con pruebas estadísticas (7); documentar hardware, software y configuración (9); describir cómo se midió el tiempo (10); **mostrar cotas superiores de rendimiento** (11); graficar lo necesario (12). Recomienda reportar la distribución y no solo la media (Fig. 1, 50 ejecuciones).
+- **Claridad:** Muy clara, con reglas numeradas fáciles de citar.
+- **Operación acelerada:** No aplica.
+- **Relación con tu núcleo:** Es la metodología de la comparación. La regla 11 se cumple con el *roofline*.
+- **¿Amenaza?:** No.
+- **Prioridad final:** A.
+
+## williams2009roofline · Prioridad inicial A
+
+Williams, Waterman y Patterson (2009). Roofline: an insightful visual performance model for multicore architectures. *Communications of the ACM*. El PDF de Zotero es la versión del autor (eScholarship).
+
+- **Fecha:**
+- **Categoría:** Modelo de rendimiento visual.
+- **Contexto:** Modelos analíticos y estadísticos de rendimiento; el modelo de las 3C de cachés como analogía (Secs. 1--2).
+- **Corrección:** Útil por simple: es una cota superior, no una predicción. Se demostró en **cuatro computadoras multinúcleo con CPU**, no en GPU.
+- **Contribución:** Rendimiento alcanzable = mín(pico de cómputo, ancho de banda × intensidad operacional), donde la intensidad operacional son las operaciones por byte de tráfico con la memoria principal. El **punto de quiebre** (*ridge point*) indica la intensidad mínima para alcanzar el pico. Añade «techos» de optimización (Sec. 4).
+- **Claridad:** Muy clara.
+- **Relación con tu núcleo:** Es la definición que usarás. Para la GPU, complétalo con Yang et al. (2019).
+- **¿Amenaza?:** No.
+- **Prioridad final:** A.
+
+## yang2019hierarchical · Prioridad inicial B
+
+Yang, Kurth y Williams (2019). Hierarchical Roofline analysis for GPUs. *Concurrency and Computation: Practice and Experience* (versión del autor en eScholarship).
+
+- **Fecha:**
+- **Categoría:** Metodología para construir un *roofline* jerárquico en GPU NVIDIA.
+- **Contexto:** El *roofline* de Williams et al. y su versión previa para GPU; preparación del supercomputador Perlmutter (V100).
+- **Corrección:** Sólida. Usa `nvprof` para recolectar métricas. *[inferencia]* En GPU recientes ese perfilador fue sustituido por Nsight Compute, que es el que usarás; las métricas equivalentes tienen otros nombres.
+- **Contribución:** Una sola figura con L1, L2, memoria de la GPU y memoria del sistema. Los picos se **miden empíricamente** con el Empirical Roofline Toolkit (ERT), y por cada núcleo se miden el tiempo, los FLOPs por precisión y los bytes por nivel de memoria (Sec. II). Incluye FP16 y Tensor Cores.
+- **Claridad:** Clara; muy práctica.
+- **Relación con tu núcleo:** La receta para tu *roofline*: medir los picos reales de **tu** GPU de laptop (no los de la ficha técnica) y ubicar las dos versiones, PyTorch y la fusionada.
+- **¿Amenaza?:** No.
+- **Prioridad final:** B.
+
+## paszke2019pytorch · Prioridad inicial B
+
+Paszke et al. (2019). PyTorch: An Imperative Style, High-Performance Deep Learning Library. *NeurIPS 2019* (versión de arXiv).
+
+- **Fecha:**
+- **Categoría:** Descripción del diseño y la implementación de una biblioteca.
+- **Contexto:** Bibliotecas de aprendizaje profundo con grafo estático contra ejecución inmediata.
+- **Corrección:** Razonable. **No trata las extensiones C++/CUDA**: eso está en la documentación de PyTorch, no en este artículo.
+- **Contribución:** Diferenciación automática en ejecución inmediata. Ejecuta los operadores de GPU de forma **asíncrona** mediante flujos de CUDA (Sec. 5.2) y usa un **asignador de memoria con caché** propio para evitar el costo de liberar memoria (Sec. 5.3).
+- **Claridad:** Clara.
+- **Relación con tu núcleo:** Cita para la implementación de referencia y la infraestructura. *[inferencia]* Sus dos mecanismos condicionan la medición: sincroniza la GPU antes de tomar cada tiempo (por la ejecución asíncrona), y mide la memoria con las funciones de PyTorch, porque `nvidia-smi` incluye la memoria reservada en caché.
+- **¿Amenaza?:** No.
+- **Prioridad final:** B.
+
+# HPC en imágenes hiperespectrales
+
+## plaza2011high · Prioridad inicial B
+
+Plaza et al. (2011). High Performance Computing for Hyperspectral Remote Sensing. *IEEE JSTARS*.
+
+- **Fecha:**
+- **Categoría:** Revisión con experimentos propios: la misma cadena de desmezclado en clúster, red heterogénea, FPGA y GPU.
+- **Contexto:** Necesidad de procesamiento en tiempo real o casi real en percepción remota (resumen).
+- **Corrección:** Razonable; el hardware ya es antiguo (Tesla C1060).
+- **Contribución:** Panorama de HPC en HSI y comparación entre arquitecturas. Los clústeres sirven para grandes archivos de datos, y FPGA y GPU para el análisis a bordo (Secs. V-E y VI). Trabajo futuro: los algoritmos espectral-espaciales tienen patrones de cálculo y comunicación más complejos y son **más difíciles de paralelizar** que los que tratan cada píxel por separado (Sec. VII).
+- **Claridad:** Clara.
+- **Relación con tu núcleo:** Motivación general, y su Sec. VII justifica que una operación espectral-espacial como la tuya sea un problema de HPC no trivial.
+- **¿Amenaza?:** No.
+- **Prioridad final:** B.
+
+## delgado2016fast · Prioridad inicial C
+
+Delgado et al. (2016). Fast Spatial Preprocessing for Spectral Unmixing of Hyperspectral Data on Graphics Processing Units. *IEEE JSTARS*.
+
+- **Fecha:**
+- **Categoría:** Tres implementaciones en GPU de un preprocesamiento espacial (SPP) para desmezclado.
+- **Contexto:** Desmezclado espectral guiado por información espacial; SPP es un cálculo regular sobre una ventana de vecindad.
+- **Corrección:** Razonable. La línea base es **un solo núcleo de CPU** compilado con `-O3`. *[inferencia]* Según la regla 1 de Hoefler, eso infla la aceleración y debe decirse. Reporta la media de 10 ejecuciones, con diferencias de milisegundos (Sec. V-C).
+- **Contribución:** Tres estrategias: un píxel por bloque, varios píxeles por bloque, y varios píxeles por bloque con memoria compartida, más configuraciones de L1 y memoria compartida. Analiza las esperas por memoria y la tasa de aciertos de L1, con el efecto de los accesos agrupados (*coalescing*) (Figs. 9 y 10). Obtiene tiempo real en una **GTX 580 y en una GTX 870M, una GPU de laptop**.
+- **Claridad:** Clara.
+- **Relación con tu núcleo:** Sus tres estrategias son las opciones de diseño de tu núcleo, y es un precedente de medir en una GPU de laptop.
+- **¿Amenaza?:** No.
+- **Prioridad final:** B (sube de C).
+
+# Resumen de la pasada
+
+| Artículo | Inicial | Operación | ¿Fusiona? | ¿Hacia atrás propia? | Hardware | Medición | Final |
+|---|---|---|---|---|---|---|---|
+| ren2015gslicr | A | Asignación de SLIC | No | No | No reportado | Sin repeticiones | A |
+| qu2013parallel | A | SAM | No | No | GTX 560, S2050 | 5 ejecuciones | A |
+| dao2022flashattention | A | Similitud + softmax | Sí | Sí (recalcula) | A100 | Por longitud | A |
+| hassani2024faster | A | Atención de vecindad | Sí | Sí | A100 | Promedios por tamaño | A |
+| quesadabarriuso2021gpu | A | Waterpixels en HSI | — | No | Pascal | 10 ejecuciones | A |
+| hoefler2015scientific | A | — (metodología) | — | — | — | 12 reglas | A |
+| williams2009roofline | A | — (modelo) | — | — | CPU multinúcleo | — | A |
+| yang2019hierarchical | B | — (roofline en GPU) | — | — | V100 | ERT + perfilador | B |
+| paszke2019pytorch | B | — (biblioteca) | — | Autograd | — | — | B |
+| plaza2011high | B | Desmezclado | No | No | Varias | — | B |
+| delgado2016fast | C | SPP en HSI | — | No | GTX 580, 870M | 10 ejecuciones | B |
+| hassani2022neighborhood | C | Atención de vecindad | No | — | — | — | C |
+
+: Resultado de la pasada 1 del grupo 8 {#tbl-pasada1-g8}
+
+Ninguno amenaza la originalidad: ninguno acelera la asociación suave y diferenciable de un segmentador de superpíxeles.
