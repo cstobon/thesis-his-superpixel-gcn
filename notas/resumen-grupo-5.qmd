@@ -1,0 +1,336 @@
+---
+lang: es
+number-sections: false
+format:
+  pdf:
+    documentclass: article
+    fontsize: 11pt
+    papersize: letter
+    pdf-engine: pdflatex
+    fontenc: OT1
+    fontfamily: fix-cm
+    indent: false
+    colorlinks: false
+    boxlinks: true
+    geometry:
+      - left=53.24pt
+      - textwidth=469.8pt
+      - top=36.7pt
+      - textheight=636pt
+      - footskip=27pt
+    include-in-header:
+      - ../document/preamble.tex
+      - unicode-latex.tex
+---
+
+<!-- =====================================================================
+     RESUMEN DE LA PASADA 2 · GRUPO 5 · Superpíxeles diferenciables
+     SSN (Jampani et al., 2018), Superpixel FCN (Yang et al., 2020) y
+     Suzuki (2020), tomados solo de los PDF de Zotero.
+     Pensado para la metodología (segmentador), el marco teórico y la
+     formulación de la originalidad. Lo marcado como [inferencia] es
+     interpretación, no de los artículos.
+     Para compilar: quarto render resumen-grupo-5.qmd
+     ===================================================================== -->
+
+```{=latex}
+\title{Centro de investigación y estudios avanzados del IPN\\
+       Departamento de Computación\\
+       \textbf{Resumen de la pasada 2: grupo 5}}
+\author{Tesista: Edgar Tobón Sosa}
+\date{SSN (2018), Superpixel FCN (2020) y Suzuki (2020)}
+\begingroup\setlength{\parskip}{0pt}
+\maketitle
+\endgroup
+\kern-15pt
+```
+
+**Cómo usar este documento.** Estos tres artículos son la base técnica de tu segmentador, así que el resumen es más detallado que los anteriores. Primero vienen las ideas clave y una derivación que conecta la pérdida de SSN con la EV. Después hay una ficha por artículo, con su párrafo y su ficha llena. Al final hay una comparación y los puntos de cuidado. Todo sale de los PDF de Zotero. Lo que es interpretación mía está marcado como *[inferencia]*.
+
+# Lo esencial para tu tesis
+
+1. **SSN es tu punto de partida y debes describirlo con sus ecuaciones.**
+   - Convierte el *argmin* de SLIC en una asociación suave $Q_{pi} = e^{-\lVert F_p - S_i \rVert^2}$ (Ec. 3), limitada a los 9 superpíxeles vecinos (Sec. 4.1).
+   - Actualiza los centros como $S = \hat Q^{T} F$ (Ec. 4).
+   - Se entrena con una pérdida de reconstrucción que **no depende del significado** de la propiedad $R$ que se reconstruye, más una compacidad (Ecs. 5 y 6).
+   - *[inferencia]* Tu propuesta cambia tres cosas: la distancia euclidiana por una afinidad angular, $R$ por el espectro (sin etiquetas) y el entrenamiento supervisado por uno no supervisado.
+2. **La pérdida de reconstrucción de SSN, con el espectro como $R$, es la EV.** *[inferencia]* Lo demuestro en la sección siguiente: con asociación dura y error cuadrático, minimizarla equivale exactamente a maximizar la EV. Con la asociación suave es una aproximación diferenciable. Esto justifica la frase de tu metodología «reconstrucción espectral (aproximación diferenciable de EV)».
+3. **Ya existe un precedente de reconstrucción sin etiquetas a través de los superpíxeles.** Superpixel FCN define $L_{SLIC}$ (Ec. 4): reconstruye el **color** de cada píxel a partir de los centros de sus superpíxeles, sin etiquetas, más una compacidad. Lo usan para preentrenar su red sin etiquetas (Sec. 4.2).
+   - *[inferencia]* Por eso tu originalidad **no** puede formularse como «primer entrenamiento de superpíxeles sin etiquetas por reconstrucción». Formúlala como: reconstrucción del **espectro completo** de una HSI, con **afinidad angular**, ligada **explícitamente a la EV** y evaluada por su efecto en una **GCN semi-supervisada** con 5 etiquetas por clase.
+   - Tu veredicto de originalidad dice que «la aportación es reconstruir el espectro sin etiquetas». Es correcto, pero conviene matizarlo citando a Yang et al. (2020).
+4. **Suzuki (2020) es sin etiquetas, pero su reconstrucción es otra cosa.** Optimiza una CNN por imagen con una pérdida de agrupamiento por entropía (RIM) y una suavidad. Su reconstrucción es la de un **autocodificador** (la red predice la imagen), **no** pasa por los superpíxeles (Ec. 4). *[inferencia]* Por eso no fuerza a que los superpíxeles sean homogéneos y no equivale a la EV. Lo que sí aporta es el argumento de que hacen falta superpíxeles sin etiquetas, «agnósticos a la tarea», que retengan la información de la imagen (Sec. 1).
+5. **Un dato para tu objetivo 8.** En SSN, «una parte significativa del tiempo se debe al SLIC diferenciable». SSN$_{pix}$, que es solo el SLIC diferenciable sin red, tarda 58 ms; SSN$_{deep}$ tarda de 71 a 101 ms, en una V100 con 1000 superpíxeles sobre una imagen de 512 × 1024 (Tabla 1). La versión dura en GPU (gSLICr) tarda 10 ms. *[inferencia]* Es una justificación directa, citable, de acelerar la asociación con un núcleo propio.
+
+# La pérdida de reconstrucción de SSN y la EV *[inferencia]*
+
+Toma la Ec. 5 de SSN con $R = X$ (las firmas espectrales, $n \times B$) y $\mathcal{L}$ igual al error cuadrático:
+$$
+\mathcal{L}_{\text{recon}} = \sum_{p=1}^{n} \left\lVert \mathbf{x}_p - (\tilde{Q}\hat{Q}^{T}X)_p \right\rVert^2 .
+$$
+Si la asociación es dura, $(\tilde{Q}\hat{Q}^{T}X)_p = \bar{\mathbf{x}}_{s(p)}$, la firma media del superpíxel de $p$. Entonces
+$$
+\mathcal{L}_{\text{recon}} = \sum_{k=1}^{K} \sum_{p \in s_k} \lVert \mathbf{x}_p - \bar{\mathbf{x}}_{s_k} \rVert^2
+= \left(1 - \text{EV}(S)\right) \sum_{p=1}^{n} \lVert \mathbf{x}_p - \bar{\mathbf{x}} \rVert^2,
+$$
+por la descomposición de la varianza total en varianza entre y dentro de los superpíxeles, la misma que usa tu marco teórico al explicar la EV. El último factor solo depende de la imagen, así que **minimizar la reconstrucción equivale a maximizar la EV**. Con la asociación suave de SSN, la reconstrucción es un promedio ponderado y el resultado es una aproximación diferenciable.
+
+Dos consecuencias para tu metodología:
+
+- **La EV es la pérdida, no solo la métrica.** Puedes presentarla como la reconstrucción de SSN con $R = X$, cuyo valor con la asignación dura es exactamente $1 - \text{EV}$.
+- **Necesitas la compacidad.** Barcelos et al. (2024) muestran que la EV es máxima cuando cada píxel es su propio superpíxel. Con 9 vecinos y una rejilla fija, el número de superpíxeles está acotado, pero la forma no; por eso SSN y FCN añaden siempre un término de compacidad.
+
+\newpage
+
+# Jampani et al. (2018) · SSN
+
+Jampani, Sun, Liu, Yang y Kautz (2018). Superpixel Sampling Networks. *ECCV 2018*, LNCS 11211, pp. 363--380. Clave: `jampani2018superpixel`. Código y modelos: <https://varunjampani.github.io/ssn/>.
+
+**Qué propone.** El primer algoritmo de superpíxeles entrenable de extremo a extremo (Sec. 1). Una CNN extrae características por píxel, y un **SLIC diferenciable** las agrupa (Fig. 1).
+
+**Por qué SLIC no es diferenciable (Sec. 4.1).** La única operación no diferenciable es la asociación píxel-superpíxel, que es un vecino más cercano (Ec. 1): $H_p = \arg\min_i D(I_p, S_i)$, con $D(a, b) = \lVert a - b \rVert^2$.
+
+**El SLIC diferenciable (Sec. 4.1, Algoritmo 1).**
+
+| Paso | SLIC (duro) | SSN (suave) |
+|---|---|---|
+| Asociación | $H_p = \arg\min_i \lVert I_p - S_i \rVert^2$ (Ec. 1) | $Q_{pi} = e^{-\lVert F_p - S_i \rVert^2}$ (Ec. 3) |
+| Centros | Media de los píxeles asignados (Ec. 2) | $S_i = \frac{1}{Z_i}\sum_p Q_{pi} F_p$, es decir, $S = \hat{Q}^{T} F$ (Ec. 4) |
+| Vecindad | Ventana de $2S \times 2S$ | Solo los **9 superpíxeles vecinos**: $Q$ pasa de $n \times m$ a $n \times 9$ |
+
+- **Inicialización:** los centros son la característica media de cada celda de una rejilla regular (Algoritmo 1, línea 2).
+- **Iteraciones:** se alternan la asociación y la actualización de centros $v$ veces: 5 en el entrenamiento y 10 en la prueba (Sec. 4.4).
+- **Pasos opcionales, no diferenciables:** convertir $Q$ en asignación dura ($\arg\max$) y forzar la conectividad (Algoritmo 1, líneas 7 y 8). Para evaluar, siempre se aplican.
+- **Sin pérdida de calidad:** relajar el vecino más cercano no degrada el resultado. SSN$_{pix}$, el SLIC diferenciable sobre XYLab sin red, rinde como SLIC (Sec. 5.1).
+
+**Paso entre píxeles y superpíxeles (Sec. 4.1).**
+
+- De píxeles a superpíxeles: $S = \hat{Q}^{T} F$, con $\hat{Q}$ normalizada por columna.
+- De superpíxeles a píxeles: $F = \tilde{Q} S$, con $\tilde{Q}$ normalizada por renglón.
+- Las dos son productos de matrices y son diferenciables. *[inferencia]* Es la misma forma que el codificador y el decodificador de CEGCN (grupo 4), pero con $Q$ suave.
+
+**Red (Sec. 4.2, Fig. 3).** Siete capas convolucionales de $3 \times 3$ con 64 canales, BN y ReLU, con dos *max-pooling* y salidas sobremuestreadas y concatenadas. La salida tiene $k - 5$ canales, que se concatenan con XYLab: $k$ características por píxel ($k = 20$ en el modelo final).
+
+**Pérdidas (Sec. 4.3).**
+
+- **Reconstrucción específica de la tarea (Ec. 5):** $\mathcal{L}_{\text{recon}} = L(R, \tilde{Q}\hat{Q}^{T}R)$. $R$ es la propiedad que los superpíxeles deben representar: etiquetas semánticas en *one-hot* (con entropía cruzada) o flujo óptico (con L1). $R$ solo se usa al entrenar; en la prueba, SSN predice desde la imagen. **El aprendizaje es «agnóstico al significado» de $R$** (Sec. 5.1).
+- **Compacidad (Ec. 6):** $\mathcal{L}_{\text{compact}} = \lVert I^{xy} - \bar{I}^{xy} \rVert^2$. Las posiciones se llevan a los superpíxeles con $\hat{Q}^{T}$ y se devuelven con la asignación **dura** $H$.
+- **Total:** $\mathcal{L} = \mathcal{L}_{\text{recon}} + \lambda \mathcal{L}_{\text{compact}}$, con $\lambda = 10^{-5}$.
+
+**Configuración (Sec. 4.4).**
+
+- *Implementación:* el SLIC diferenciable está escrito como capas CUDA en Caffe.
+- *Escalas:* $\gamma_{color} = 0.26$ (color en 0--255) y $\gamma_{pos} = \eta \max(m_w/n_w, m_h/n_h)$ con $\eta = 2.5$. Escalar $\gamma_{pos}$ permite cambiar el número de superpíxeles con un solo modelo.
+- *Entrenamiento:* parches de $201 \times 201$ con 100 superpíxeles, Adam con tasa $10^{-4}$, lote de 8 y 500 mil iteraciones.
+
+**Resultados.**
+
+- **BSDS500** (Figs. 4 y 5). Se entrena con los segmentos de la verdad de terreno como $R$. Reporta ASA, BR y precisión de bordes (BP). SSN$_{linear}$ ya mejora a SSN$_{pix}$, y SSN$_{deep}$ supera a SLIC, SNIC, SEEDS, LSC, ERS, ETPS y SCALP en ASA y BR-BP.
+- **Cityscapes y PascalVOC** (Figs. 6 y 8a). SSN rinde como SEAL en ASA en Cityscapes y lo supera en BR-BP. En PascalVOC supera a los demás en ASA, y el modelo entrenado en BSDS pierde muy poco al transferirse.
+- **Red posterior** (Tabla 2). Al usar SSN en lugar de SLIC dentro de la red de segmentación semántica con superpíxeles de Gadde et al., la IoU sube de 74.1 a 75.3.
+- **Flujo óptico** (Fig. 8b). Con el flujo como $R$, SSN aprende superpíxeles alineados con los bordes del flujo.
+- **Tiempo** (Tabla 1, V100, 1000 superpíxeles en $512 \times 1024$):
+
+| Método | Dispositivo | ms |
+|---|---|---|
+| SLIC | CPU | 350 |
+| ERS | CPU | 4600 |
+| gSLICr | GPU | 10 |
+| SSN$_{pix}$ ($v = 10$) | GPU | 58 |
+| SSN$_{deep}$ ($v = 5$, $k = 10$) | GPU | 71 |
+| SSN$_{deep}$ ($v = 10$, $k = 20$) | GPU | 101 |
+
+**Para tu tesis.**
+
+- Es la base de tu segmentador: cita las Ecs. 3--6 en la metodología y el marco teórico.
+- *[inferencia]* La Ec. 5 con $R = X$ (el espectro) es tu pérdida sin etiquetas: equivale a $1 - \text{EV}$ (ver la derivación). El artículo nunca entrena sin etiquetas: en todos sus experimentos $R$ son etiquetas o flujo.
+- *[inferencia]* Tu afinidad angular sustituye $-\lVert F_p - S_i \rVert^2$ por un coseno escalado. Ten en cuenta que en SSN las escalas $\gamma$ hacen de «temperatura» de la exponencial; con el coseno necesitarás una temperatura explícita.
+- Para el objetivo 8, la Tabla 1 muestra que el SLIC diferenciable domina el tiempo (58 de 101 ms) y que la versión dura en GPU es unas 6 veces más rápida (10 ms).
+
+**Párrafo de la pasada 2.** Jampani et al. (2018) proponen SSN, el primer segmentador en superpíxeles entrenable de extremo a extremo. Una CNN extrae características por píxel y un SLIC diferenciable las agrupa. Para hacerlo diferenciable, reemplazan la asignación al centro más cercano por una asociación suave, $e^{-\lVert F_p - S_i \rVert^2}$, limitada a los 9 superpíxeles vecinos, y calculan los centros como un promedio ponderado. La red se entrena con una pérdida que reconstruye una propiedad $R$ (etiquetas o flujo) a través de los superpíxeles, más una compacidad espacial; en BSDS500, Cityscapes y PascalVOC supera a SLIC, LSC, ERS y SEEDS en ASA y en precisión-recuperación de bordes. Frente a tu propuesta, siempre se entrena con etiquetas, usa distancia euclidiana, trabaja con imágenes RGB y no garantiza superpíxeles conectados sin un posprocesamiento no diferenciable.
+
+**Ficha llena.**
+
+- **¿Amenaza tu originalidad?:** No; es la base del método.
+- **Problema que resuelve:** Los algoritmos de superpíxeles no son diferenciables y no se integran en redes profundas.
+- **Cómo forma los superpíxeles:** A (CNN + SLIC diferenciable con asociación suave sobre 9 vecinos).
+- **Señal con la que los aprende:** Clasificación o tarea: reconstrucción de $R$ (segmentos o etiquetas con entropía cruzada; flujo con L1) + compacidad.
+- **Espectro completo o PCA:** No aplica (RGB en XYLab).
+- **Distancia:** Euclidiana al cuadrado sobre características aprendidas y XYLab escalado.
+- **Etiquetas por clase:** No aplica (conjuntos de imágenes con verdad de terreno completa).
+- **Conjuntos de datos:** BSDS500, Cityscapes, PascalVOC 2012 y MPI-Sintel.
+- **OA en Indian Pines:** No aplica.
+- **Métricas de los superpíxeles:** ASA, BR y BP (además de EPE en flujo).
+- **¿Analiza por tipo de escena? ¿Publica su código?:** No. Sí publica su código.
+- **Limitación frente a tu propuesta:** Supervisado, euclidiano, en RGB; la conectividad requiere un posprocesamiento.
+- **Para el protocolo:** Marco teórico (superpíxeles diferenciables), metodología (Ecs. 3--6) y el objetivo 8 (Tabla 1).
+
+\newpage
+
+# Yang et al. (2020) · Superpixel FCN
+
+Yang, Sun, Jin y Zhou (2020). Superpixel Segmentation with Fully Convolutional Networks. *CVPR 2020*. Clave: `yang2020superpixel`. **El PDF de Zotero es la versión de arXiv** (2003.12929v1). Código: <https://github.com/fuy34/superpixel_fcn>.
+
+**Qué propone.** Una red totalmente convolucional (FCN) que **predice directamente** la asociación de cada píxel con las 9 celdas vecinas de una rejilla regular, sin el agrupamiento iterativo de SSN (Sec. 3.1, Fig. 3). Además, usa esos superpíxeles para reducir y recuperar la resolución dentro de una red de correspondencia estéreo.
+
+**La asociación (Sec. 3.1).**
+
+- Cada celda de la rejilla es una «semilla» de superpíxel.
+- Para cada píxel $p$ solo se consideran las 9 celdas que lo rodean, $\mathcal{N}_p$ (Fig. 2).
+- La red produce $Q \in \mathbb{R}^{H \times W \times 9}$ con un softmax, de modo que $\sum_{s \in \mathcal{N}_p} q_s(p) = 1$. El superpíxel final es $\arg\max_s q_s(p)$.
+- Los autores defienden la restricción a 9 celdas por la importancia de la compacidad.
+
+**Diferencia con SSN (Sec. 3.1, Fig. 3).** En SSN la CNN extrae características y un *k*-means suave calcula $Q$ de forma iterativa. En FCN, la CNN predice $Q$ en un solo paso. Por eso es más rápida y se integra con facilidad en otras redes.
+
+**Red (Sec. 3.2, Fig. 4).** Codificador-decodificador con conexiones de salto, *leaky* ReLU y softmax en la capa de predicción.
+
+**Pérdidas (Sec. 3.2, Ecs. 1--5).** Primero se calculan los centros con las probabilidades (Ec. 1):
+$$
+u_s = \frac{\sum_{p:\, s \in \mathcal{N}_p} f(p)\, q_s(p)}{\sum_{p:\, s \in \mathcal{N}_p} q_s(p)}, \qquad
+l_s = \frac{\sum_{p:\, s \in \mathcal{N}_p} p\, q_s(p)}{\sum_{p:\, s \in \mathcal{N}_p} q_s(p)} .
+$$
+Después se reconstruyen la propiedad y la posición de cada píxel (Ec. 2): $f'(p) = \sum_{s \in \mathcal{N}_p} u_s\, q_s(p)$ y $p' = \sum_{s \in \mathcal{N}_p} l_s\, q_s(p)$. La pérdida general (Ec. 3) es
+$$
+L(Q) = \sum_p \operatorname{dist}\!\left(f(p), f'(p)\right) + \frac{m}{S} \lVert p - p' \rVert_2 .
+$$
+Proponen dos versiones:
+
+- **$L_{SLIC}$ (Ec. 4), sin etiquetas:** $f$ es el color CIELAB y la distancia es la norma $\ell_2$. Es «una función objetivo similar a la del SLIC original».
+- **$L_{sem}$ (Ec. 5), con etiquetas:** $f$ son las etiquetas semánticas en *one-hot* y la distancia es la entropía cruzada.
+
+A diferencia de SSN, la compacidad también reconstruye la posición con la asociación **suave** (Ec. 2).
+
+**Relación con la propagación espacial convolucional (Sec. 3.3).** Calcular el centro de un superpíxel de $S \times S$ equivale a una convolución con un núcleo de $3S \times 3S$ derivado de $Q$ (Ecs. 6--8). Predecir $Q$ es, en ese sentido, aprender una matriz de afinidad.
+
+**Configuración (Sec. 3.4).**
+
+- *Pérdida y datos:* $L_{sem}$ con $m = 0.003$, recortes de $208 \times 208$, celdas de $16 \times 16$ (unos 169 superpíxeles), Adam con tasa $5 \times 10^{-5}$ y unas 300 mil iteraciones.
+- *Número de superpíxeles:* se cambia redimensionando la imagen.
+- *Conectividad:* se fuerza con un algoritmo de componentes conexas que fusiona los superpíxeles pequeños.
+- *Evaluación:* con el banco de pruebas de Stutz et al. (ASA, BR-BP y compacidad CO; tolerancia de 0.0025 veces la diagonal).
+
+**Resultados.**
+
+- **BSDS500** (Fig. 5). Supera a los métodos tradicionales en todas las métricas, salvo a SLIC en CO. Frente a SEAL y SSN es competitivo o mejor en ASA y BR-BP, y claramente mejor en CO: logra un mejor equilibrio entre adherencia y compacidad.
+- **NYUv2 sin reentrenar** (Fig. 6). Generaliza mejor que SEAL y SSN en BR-BP y CO.
+- **Tiempo** (Fig. 7, GTX 1080Ti). Corre a unos 50 cuadros por segundo: de 3 a 8 veces más rápido que SSN y más de 50 veces más rápido que SEAL.
+- **Estéreo** (Tablas 1 y 2). En la red PSMNet, la reducción y recuperación de resolución con superpíxeles baja el error de 1.04 a 0.93 en SceneFlow y de 3.83 a 2.77 en HR-VS cuando se entrena de forma conjunta. Con los superpíxeles fijos, el resultado empeora en SceneFlow (1.07). La red de superpíxeles se **preentrena con $L_{SLIC}$, sin etiquetas** (Sec. 4.2).
+
+**Para tu tesis.**
+
+- **Es el precedente más directo de tu pérdida.** *[inferencia]* $L_{SLIC}$ es, en color, la reconstrucción a través de los superpíxeles más una compacidad, sin etiquetas: la misma estructura que tu EV más compacidad. Lo que añades: espectro de cientos de bandas, afinidad angular, el vínculo explícito con la EV y la evaluación en una GCN con pocas etiquetas.
+- **Pero en el banco de pruebas entrena con etiquetas.** Sus resultados en BSDS500 usan $L_{sem}$; nunca reportan ASA o BR de superpíxeles entrenados solo con $L_{SLIC}$. *[inferencia]* Que la reconstrucción sin etiquetas dé buenos superpíxeles sigue sin probarse en estos artículos, y es justo lo que mides en HSI.
+- **Su asociación es la alternativa sin iteraciones.** *[inferencia]* Si el SLIC diferenciable resulta lento en HSI, la predicción directa de $Q$ es una opción. Pierde la interpretación de la afinidad como un ángulo entre el píxel y el centro.
+- **El estéreo apoya tu objetivo 7.** El entrenamiento conjunto supera al de superpíxeles fijos (Tabla 1). Es una evidencia, fuera de HSI, de que entrenar la segmentación con la tarea posterior ayuda.
+
+**Párrafo de la pasada 2.** Yang et al. (2020) proponen una red totalmente convolucional que predice directamente, para cada píxel, las probabilidades de pertenecer a las 9 celdas vecinas de una rejilla, sin el agrupamiento iterativo de SSN. Se entrena con una pérdida que reconstruye una propiedad del píxel a través de los centros de los superpíxeles, más una compacidad: con el color, la pérdida $L_{SLIC}$ no requiere etiquetas; con las etiquetas semánticas, $L_{sem}$ sí. En BSDS500, entrenada con $L_{sem}$, iguala o supera a SSN en ASA y bordes con superpíxeles más compactos, corre a unos 50 cuadros por segundo y generaliza mejor a NYUv2. Frente a tu propuesta, su versión sin etiquetas solo se usa para preentrenar una red de estéreo, reconstruye el color de imágenes RGB con distancia euclidiana y nunca se evalúa por sí sola ni en relación con la EV o una tarea con pocas etiquetas.
+
+**Ficha llena.**
+
+- **¿Amenaza tu originalidad?:** Parcial. $L_{SLIC}$ ya es una reconstrucción a través de los superpíxeles sin etiquetas (en color); tu aportación debe formularse sobre el espectro, la afinidad angular, la EV y la GCN.
+- **Problema que resuelve:** Predecir superpíxeles con una red simple y rápida, e integrarlos en redes de predicción densa.
+- **Cómo forma los superpíxeles:** A (FCN que predice $Q$ sobre una rejilla, sin iteraciones).
+- **Señal con la que los aprende:** Clasificación ($L_{sem}$, en el banco de pruebas) o sin etiquetas ($L_{SLIC}$: reconstrucción del color + compacidad, en el preentrenamiento).
+- **Espectro completo o PCA:** No aplica (RGB en CIELAB).
+- **Distancia:** $\ell_2$ en color (o entropía cruzada) más la distancia de posición.
+- **Etiquetas por clase:** No aplica.
+- **Conjuntos de datos:** BSDS500, NYUv2, SceneFlow, HR-VS y Middlebury-v3.
+- **OA en Indian Pines:** No aplica.
+- **Métricas de los superpíxeles:** ASA, BR-BP y CO.
+- **¿Analiza por tipo de escena? ¿Publica su código?:** No. Sí publica su código.
+- **Limitación frente a tu propuesta:** Su pérdida sin etiquetas no se evalúa por sí sola; trabaja en RGB y con distancia euclidiana.
+- **Para el protocolo:** Trabajos relacionados (superpíxeles aprendidos sin etiquetas), planteamiento (precedente de la reconstrucción) y metodología.
+
+\newpage
+
+# Suzuki (2020) · Superpíxeles con RIM
+
+Suzuki (2020). Superpixel Segmentation via Convolutional Neural Networks with Regularized Information Maximization. *ICASSP 2020*. Clave: `suzuki2020superpixel`. **El PDF de Zotero es la versión de arXiv** (2002.06765v3). Código: <https://github.com/DensoITLab/ss-with-RIM>.
+
+**Qué propone.** Un método de superpíxeles **sin etiquetas** que optimiza una CNN inicializada al azar sobre **una sola imagen**, en el momento de la inferencia. Sigue el procedimiento del *deep image prior* (DIP): la estructura de una CNN, aun sin entrenar, actúa como una información previa sobre las imágenes (Sec. 1).
+
+**Motivación (Sec. 1).**
+
+- Los métodos basados en propiedades locales de bajo nivel funcionan bien con muchos superpíxeles, pero fallan con pocos, que deben agrupar regiones amplias y variadas.
+- SSN es **supervisado** y genera superpíxeles «específicos de la tarea». Para muchas tareas es difícil definir y anotar la verdad de terreno, así que los superpíxeles sin etiquetas son necesarios.
+- Sin etiquetas, los superpíxeles deben **retener la información de la imagen original** para servir a cualquier tarea: el autor los llama superpíxeles «agnósticos a la tarea».
+
+**Formulación (Sec. 2).** La segmentación es una clasificación en $N$ clases: la red produce $P \in \mathbb{R}_{+}^{H \times W \times N}$ con $\sum_n P_{h,w,n} = 1$, y el superpíxel es $\arg\max_n P_{h,w,n}$. $N$ es solo una cota superior, porque los superpíxeles pueden quedar vacíos. La función objetivo (Ec. 1) es
+$$
+L = L_{\text{clustering}} + \alpha L_{\text{smoothness}} + \beta R .
+$$
+
+- **Agrupamiento (Ec. 2), inspirado en RIM:**
+$$
+L_{\text{clustering}} = \frac{1}{HW}\sum_{h,w}\sum_n -P_{h,w,n}\log P_{h,w,n} + \lambda \sum_n \hat{P}_n \log \hat{P}_n .
+$$
+El primer término empuja a asignaciones deterministas. El segundo, la entropía negativa de la asignación media $\hat{P}$, empuja a superpíxeles de tamaño uniforme. **$\lambda$ controla el número de superpíxeles**: con $\lambda$ pequeño quedan pocos; al crecer, el número se acerca a $N$. Funciona bien con $\lambda \in [0, 3]$.
+- **Suavidad (Ec. 3):** penaliza los cambios de $P$ entre píxeles vecinos, ponderados por $e^{-\lVert \partial I \rVert^2 / \sigma}$, de modo que los cambios se concentren en los bordes de la imagen ($\sigma = 8$).
+- **Reconstrucción (Ec. 4):** $R = \frac{1}{HWC}\sum \lVert I_{h,w} - \hat{I}_{h,w} \rVert^2$, donde **la misma CNN predice la imagen reconstruida $\hat{I}$**. Es una pérdida de autocodificador: obliga a la red a retener la estructura de la imagen en sus representaciones intermedias.
+
+**Configuración (Sec. 3.1).**
+
+- *Red:* una CNN de 5 capas que recibe RGB más la posición $(x, y)$. Sin la posición, la red agrupa en un mismo superpíxel regiones separadas con el mismo patrón local.
+- *Normalización y salida:* normalización por instancia antes del softmax.
+- *Optimización:* 1000 iteraciones de Adam por imagen, con tasa 0.01, $(\lambda, \alpha, \beta) = (2, 2, 10)$ y $N = 500$.
+
+**Resultados (Sec. 3.2, Figs. 1--3).**
+
+- **Número de superpíxeles:** varía según la imagen, de forma adaptativa (Fig. 1).
+- **Pocos superpíxeles:** en BSDS500 y SBD, con 200 o menos, iguala o supera en ASA a SLIC, SEEDS, FH y ETPS (Fig. 2). La reconstrucción mejora mucho el BR en BSDS500.
+- **Muchos superpíxeles:** con más de 200 no hay una ventaja clara.
+
+**Limitaciones (Sec. 4).**
+
+- Los superpíxeles dependen de la inicialización aleatoria de la CNN.
+- Componentes desconectadas pueden quedar en el mismo superpíxel, sobre todo con la reconstrucción.
+
+**Para tu tesis.**
+
+- **Es la cita para «superpíxeles sin etiquetas con CNN».** También aporta el argumento de que, sin etiquetas, los superpíxeles deben retener la información de la imagen (Sec. 1); la EV mide justamente eso.
+- **Su reconstrucción no es la tuya.** *[inferencia]* Su $R$ es la de un autocodificador: $\hat{I}$ sale de la red, no de los superpíxeles. Un superpíxel podría mezclar colores distintos sin que $R$ lo penalice. En tu propuesta, la reconstrucción pasa por las medias de los superpíxeles y por eso equivale a la EV. Dilo explícitamente al compararte.
+- **Es lento y depende de la imagen.** *[inferencia]* Optimiza 1000 iteraciones por imagen, sin un modelo que generalice. En HSI tendrías una sola imagen por escena, lo que lo hace aplicable, pero su costo y su variabilidad por la inicialización son una limitación que debes considerar si lo usas como línea base.
+- **Su control del número de superpíxeles es indirecto ($\lambda$).** En tu protocolo, con $K = 500$ fijo como en Galarza, la rejilla de SSN te da un control más directo.
+
+**Párrafo de la pasada 2.** Suzuki (2020) genera superpíxeles sin etiquetas optimizando, para cada imagen, una CNN inicializada al azar con tres pérdidas: un agrupamiento por entropía inspirado en la maximización regularizada de la información, cuyo coeficiente $\lambda$ controla el número de superpíxeles; una suavidad espacial ponderada por los bordes; y una reconstrucción auxiliar de la imagen. En BSDS500 y SBD, con 200 superpíxeles o menos, iguala o supera a SLIC, SEEDS, FH y ETPS en ASA, y la reconstrucción mejora la recuperación de bordes. Su motivación coincide con la tuya: sin etiquetas, los superpíxeles deben retener la información de la imagen para servir a cualquier tarea. Frente a tu propuesta, su reconstrucción es la de un autocodificador y no pasa por los superpíxeles, por lo que no mide su homogeneidad; además, trabaja en RGB, se optimiza imagen por imagen y no se evalúa en una tarea posterior.
+
+**Ficha llena.**
+
+- **¿Amenaza tu originalidad?:** Parcial (baja). Es sin etiquetas, pero su reconstrucción no pasa por los superpíxeles ni se relaciona con la EV.
+- **Problema que resuelve:** Superpíxeles sin etiquetas que retengan la información de la imagen y se adapten en número.
+- **Cómo forma los superpíxeles:** A (CNN optimizada por imagen, estilo DIP).
+- **Señal con la que los aprende:** Sin etiquetas: entropía RIM + suavidad + reconstrucción de autocodificador.
+- **Espectro completo o PCA:** No aplica (RGB).
+- **Distancia:** No usa una distancia explícita píxel-centro; la asignación es un softmax de la CNN.
+- **Etiquetas por clase:** 0.
+- **Conjuntos de datos:** BSDS500 y SBD.
+- **OA en Indian Pines:** No aplica.
+- **Métricas de los superpíxeles:** ASA y BR.
+- **¿Analiza por tipo de escena? ¿Publica su código?:** No. Sí publica su código.
+- **Limitación frente a tu propuesta:** La reconstrucción no pasa por los superpíxeles; se optimiza por imagen; RGB; sin tarea posterior.
+- **Para el protocolo:** Trabajos relacionados (superpíxeles sin etiquetas) y planteamiento (argumento de retener la información).
+
+\newpage
+
+# Comparación de los tres
+
+| | SSN | Superpixel FCN | Suzuki |
+|---|---|---|---|
+| Cómo se obtiene $Q$ | SLIC diferenciable iterativo sobre características de una CNN | La FCN predice $Q$ directamente | Softmax de una CNN por imagen |
+| Vecindad | 9 superpíxeles | 9 celdas | Toda la imagen ($N$ clases) |
+| Distancia | $\lVert F_p - S_i \rVert^2$ | Implícita (aprendida) | Implícita |
+| Pérdida sin etiquetas | No la usa (posible con la Ec. 5) | **$L_{SLIC}$: reconstrucción del color + compacidad** | RIM + suavidad + autocodificador |
+| ¿La reconstrucción pasa por los superpíxeles? | Sí ($\tilde{Q}\hat{Q}^{T}R$) | Sí (Ecs. 1 y 2) | **No** |
+| Entrenamiento en sus resultados | Con etiquetas | Con etiquetas ($L_{sem}$) | Sin etiquetas |
+| Generaliza a imágenes nuevas | Sí | Sí | No (una optimización por imagen) |
+| Métricas | ASA, BR, BP | ASA, BR-BP, CO | ASA, BR |
+| Tiempo | 71--101 ms (V100) | ≈ 50 cuadros por segundo (1080Ti) | 1000 iteraciones por imagen |
+
+*[inferencia]* Tu segmentador está en la columna de SSN (SLIC diferenciable, 9 vecinos, reconstrucción a través de los superpíxeles), con la pérdida sin etiquetas que FCN usó en color y el argumento de retener la información que plantea Suzuki. Ninguno trabaja con HSI, con afinidad angular ni con una GCN posterior.
+
+# Puntos de cuidado al redactar
+
+1. **La Ec. 3 de SSN no escribe un softmax.** Escribe $Q_{pi} = e^{-D}$, y la normalización por renglón $\tilde{Q}$ aparece al pasar de superpíxeles a píxeles. *[inferencia]* Normalizar por renglón $e^{-D}$ sobre los 9 vecinos es exactamente un softmax de $-D$. Si en la metodología escribes «softmax», di que equivale a la normalización por renglón de SSN.
+2. **La compacidad de SSN usa la asignación dura** (Ec. 6): el gradiente solo fluye por $\hat{Q}^{T}$. En FCN, la compacidad usa la asociación suave. Decide cuál usas y dilo.
+3. **No escribas que SSN «se entrena sin etiquetas».** Puede hacerlo con la Ec. 5, pero en el artículo siempre usa etiquetas o flujo. Suzuki lo describe explícitamente como un método supervisado.
+4. **Versiones.** FCN y Suzuki están en tu Zotero como versiones de arXiv; SSN es la versión publicada (ECCV, LNCS 11211).
+5. **Ajusta la formulación de tu originalidad.** Cita a Yang et al. (2020, $L_{SLIC}$) al afirmar que entrenas sin etiquetas por reconstrucción, y a Eliasof et al. (2022), que según tu pasada 1 también usa una reconstrucción de la imagen superpixelada. Tu aportación es la versión espectral y angular, su vínculo exacto con la EV y su evaluación en la GCN con 5 etiquetas.

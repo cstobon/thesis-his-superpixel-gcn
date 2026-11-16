@@ -1,0 +1,193 @@
+---
+lang: es
+number-sections: false
+format:
+  pdf:
+    documentclass: article
+    fontsize: 11pt
+    papersize: letter
+    pdf-engine: pdflatex
+    fontenc: OT1
+    fontfamily: fix-cm
+    indent: false
+    colorlinks: false
+    boxlinks: true
+    geometry:
+      - left=53.24pt
+      - textwidth=469.8pt
+      - top=36.7pt
+      - textheight=636pt
+      - footskip=27pt
+    include-in-header:
+      - ../document/preamble.tex
+      - unicode-latex.tex
+---
+
+<!-- =====================================================================
+     PASADA 1 · GRUPO 4 · artículos B (Keshav, «How to Read a Paper», 2007)
+     Versión condensada de los 8 artículos de prioridad inicial B, tomada
+     de los PDF de Zotero (título, resumen, introducción, encabezados y
+     conclusiones; secciones puntuales para verificar datos). Parte de
+     pasada1-grupos-4-5.qmd, con cada dato clave verificado en el PDF.
+     Lo marcado como [inferencia] es interpretación.
+     Los A (MDGCN, miniGCN, CEGCN) tienen pasada 2 en resumen-grupo-4.pdf.
+     Para compilar: quarto render pasada1-grupo-4.qmd
+     ===================================================================== -->
+
+```{=latex}
+\title{Centro de investigación y estudios avanzados del IPN\\
+       Departamento de Computación\\
+       \textbf{Pasada 1: grupo 4 (artículos B)}}
+\author{Tesista: Edgar Tobón Sosa}
+\date{[fecha]}
+\begingroup\setlength{\parskip}{0pt}
+\maketitle
+\endgroup
+\kern-15pt
+```
+
+**Las 5 C.** *Categoría*: qué tipo de artículo es. *Contexto*: con qué trabajos se relaciona. *Corrección*: si sus supuestos parecen razonables. *Contribución*: qué aporta. *Claridad*: si está bien escrito.
+
+# Lo esencial del grupo
+
+1. **Ninguno amenaza tu originalidad.** Los ocho usan superpíxeles fijos (SLIC, Super Hierarchy, HMS o fusión de regiones) o ninguno; ninguno los aprende ni mide su calidad con ASA, BR o EV.
+2. **Tres artículos nombran tu problema con sus propias palabras.**
+   - *dSPG* (Yu et al., 2024, Sec. I) lo llama «problema de mezcla dentro de los superpíxeles»: un superpíxel puede contener varias clases, sobre todo en los bordes, y eso crea conexiones entre clases en el grafo.
+   - *GiGCN* (Jia et al., 2024, Fig. 3) muestra que la variabilidad espectral dentro de los superpíxeles de SLIC sigue siendo grande.
+   - *PSFormer* (Zou et al., 2024, Sec. V) admite que fijar a mano las escalas de los superpíxeles puede limitar la exactitud, y propone usar superpíxeles **aprendibles** como trabajo futuro.
+3. **Un argumento a favor de aprender sin etiquetas.** MSSGU (Liu et al., 2022, Sec. I) dice que, por la contradicción entre las pocas muestras y las topologías complejas, «es difícil que una red aprenda automáticamente» las relaciones jerárquicas, y por eso fija los grafos en el preprocesamiento. *[inferencia]* Tu señal sin etiquetas (la EV) responde justo a esa dificultad.
+4. **La práctica de segmentar sobre PCA se repite.** Li et al. (2023), Liu et al. (2022) y Sellars et al. (2020) segmentan sobre componentes principales. DMSGer (Yang et al., 2024) y Li et al. (2023) declaran que el segmentador es intercambiable.
+5. **Líneas base con pocas etiquetas.** Sellars et al. (2020) da **82.6 ± 3.9 % en Indian Pines con 5 etiquetas por clase** (Tabla II), con 10 repeticiones. dSPG evalúa de 3 a 50 etiquetas por clase, pero con 12 clases en Indian Pines.
+
+# GCN y grafos sobre superpíxeles
+
+## jia2024graph · Prioridad inicial B
+
+Jia et al. (2024). Graph-in-Graph Convolutional Network for Hyperspectral Image Classification. *IEEE TNNLS*.
+
+- **Fecha:**
+- **Categoría:** Método nuevo (GiGCN). Cada superpíxel es un grafo interno de píxeles, y los superpíxeles forman un grafo externo.
+- **Contexto:** GCN sobre píxeles (S$^2$GCN, miniGCN) y sobre superpíxeles (MDGCN) (Sec. I). Se compara con MDGCN y con métodos para pocas muestras.
+- **Corrección:** El supuesto central es sólido: describir un superpíxel con su media o su máximo pierde información, porque la variabilidad espectral dentro de cada superpíxel de SLIC sigue siendo grande (Fig. 3, Sec. III-A). *[inferencia]* Posible fuga espacial: la etiqueta de un píxel de entrenamiento se asigna a todo su superpíxel (Ec. 22), lo que puede inflar la OA (97.10 % en Pavia University con 10 etiquetas por clase).
+- **Contribución:** Convoluciones interna (IGC) y externa (EGC) que se combinan, más un ensamble de cuatro tamaños de superpíxel (de 50 a 200 píxeles) por voto mayoritario.
+- **Claridad:** Clara y bien ilustrada.
+- **Superpíxeles:** F (SLIC con varios tamaños fijos). No evalúa Indian Pines.
+- **¿Amenaza?:** No. Mejora la representación dentro del superpíxel, no la segmentación.
+- **Prioridad final:** B. Su Fig. 3 apoya tu motivación: los superpíxeles de SLIC no son espectralmente homogéneos, que es lo que mide la EV.
+
+## yang2024semi · Prioridad inicial B
+
+Yang et al. (2024). Semi-Supervised Multiscale Dynamic Graph Convolution Network for Hyperspectral Image Classification. *IEEE TNNLS*.
+
+- **Fecha:**
+- **Categoría:** Método nuevo (DMSGer): GCN semi-supervisada y multiescala sobre superpíxeles, con métrica aprendida para las aristas.
+- **Contexto:** Continúa a MDGCN y CAD-GCN (Wan et al.), con quienes se compara.
+- **Corrección:** Protocolo adecuado: 30 etiquetas por clase y un barrido con 5, 30 y 150 (Sec. IV-D). Reservas: la OA de MDGCN en Indian Pines (93.47 %, Fig. 9) es idéntica a la del artículo original, lo que sugiere que fue copiada y no recalculada; el texto sobre el número de regiones $N_{sr}$ es confuso.
+- **Contribución:** Distancia de Mahalanobis aprendida en el kernel de las aristas, actualización de los píxeles con la adyacencia de su región (PGNU) y versión multiescala. OA de 95.39 % en Indian Pines.
+- **Claridad:** Aceptable; tiene erratas («MSSUG»).
+- **Superpíxeles:** F (SLIC). Los autores aclaran que «la elección de SLIC no es una limitación del estudio».
+- **¿Amenaza?:** No.
+- **Prioridad final:** B. *[inferencia]* Que declaren intercambiable el segmentador deja abierta la pregunta de tu tesis: qué segmentación conviene a la GCN.
+
+## yu2024dspg · Prioridad inicial B
+
+Yu et al. (2024). dSPG: A New Discriminant Superpixel Graph Regularizer and Convolutional Network for Hyperspectral Image Classification. *IEEE TGRS*.
+
+- **Fecha:**
+- **Categoría:** Método nuevo con fundamento teórico. Formula dos proposiciones sobre el grafo óptimo: (1) los pesos entre clases deben ser cero; (2) todo subconjunto de una clase debe contener etiquetas o estar conectado al resto.
+- **Contexto:** Grafos de píxeles, espaciales y de superpíxeles (el SPG de Sellars et al.). Se compara con MDGCN, DMSGer, GiGCN, MSSGU y CEGCN.
+- **Corrección:** Planteamiento sólido, con una métrica de calidad del grafo (GQ, Ec. 24). Reservas: en la comparación principal de Indian Pines usa **12 clases** (Sec. IV), y no dice qué algoritmo de superpíxeles usa.
+- **Contribución:** Un grafo dentro de cada superpíxel que desconecta los píxeles espectralmente distintos, y un grafo entre superpíxeles espectralmente cercanos; se usa como regularizador y como guía de una GCN (dSPGCN). Código: <https://github.com/yulong112/dSPG>.
+- **Claridad:** Clara y bien argumentada.
+- **Superpíxeles:** F, muchos y pequeños (sp_n = 1100 en Indian Pines).
+- **¿Amenaza?:** No, pero es muy cercano en motivación. Nombra el «problema de mezcla dentro de los superpíxeles» (Sec. I) y lo corrige en el grafo; tu propuesta lo corrige en la segmentación.
+- **Prioridad final:** A (sube de B). Formula tu problema con precisión, evalúa de 3 a 50 etiquetas por clase contra los métodos del grupo, y su métrica GQ puede servir para evaluar tus grafos.
+
+## zou2024psformer · Prioridad inicial B
+
+Zou et al. (2024). PSFormer: Pyramid Superpixel Transformer for Hyperspectral Image Classification. *IEEE TGRS*.
+
+- **Fecha:**
+- **Categoría:** Método nuevo: un *transformer* jerárquico sobre la imagen completa, con una pirámide de superpíxeles entre etapas.
+- **Contexto:** Mismos autores que EMS-GCN. Critica los *transformers* que trabajan sobre parches pequeños.
+- **Corrección:** Razonable. Usa la partición espacialmente disjunta oficial de Houston, que evita la fuga espacial. No evalúa Indian Pines.
+- **Contribución:** Fusión progresiva de superpíxeles con matrices de asociación binarias entre niveles, atención espectral y una cabeza con compuertas por escala.
+- **Claridad:** Clara; tiene una incoherencia entre el texto y la Tabla X sobre qué escena WHU-Hi se usa.
+- **Superpíxeles:** F (Super Hierarchy, cuatro niveles).
+- **¿Amenaza?:** No.
+- **Prioridad final:** B. Su Sec. V es una cita útil para el planteamiento: la definición empírica de las escalas de superpíxeles «podría afectar la exactitud», y sustituirla por técnicas de segmentación aprendibles «podría mejorar el desempeño».
+
+## li2023multistage · Prioridad inicial B
+
+Li et al. (2023). Multistage Superpixel-Guided Hyperspectral Image Classification With Sparse Graph Attention Networks. *IEEE TGRS*.
+
+- **Fecha:**
+- **Categoría:** Método nuevo: una GAT en forma de U sobre una jerarquía de superpíxeles en cuatro etapas (MSG-SGAT).
+- **Contexto:** GAT y MSSGU (Liu et al., 2022). Se compara con CEGCN, MSSGU, WFCG y otros.
+- **Corrección:** Razonable, pero el número inicial de superpíxeles óptimo cambia con el conjunto y se elige mirando la exactitud. El número de etiquetas por clase está en su Tabla I (que no salió como texto); revísala antes de comparar su OA en Indian Pines (98.98 %).
+- **Contribución:** Una GAT dispersa con poda de aristas, un módulo espectral en paralelo y un refinamiento de superpíxel a píxel.
+- **Claridad:** Aceptable, con definiciones ambiguas.
+- **Superpíxeles:** F (Super Hierarchy sobre componentes principales, con 1024 nodos en la primera etapa). Los autores dicen que otros métodos de segmentación «también pueden ser apropiados».
+- **¿Amenaza?:** No.
+- **Prioridad final:** B. Otro ejemplo de segmentación sobre PCA con una escala ajustada a mano.
+
+## liu2022multilevel · Prioridad inicial B
+
+Liu et al. (2022). Multilevel Superpixel Structured Graph U-Nets for Hyperspectral Image Classification. *IEEE TGRS*.
+
+- **Fecha:**
+- **Categoría:** Método nuevo (MSSGU): una U-Net híbrida, con una CNN en el primer nivel y GCN en grafos de superpíxeles de fino a grueso.
+- **Contexto:** Mismos autores que CEGCN, que equivale a MSSGU con dos niveles. Se compara con CEGCN y redes profundas.
+- **Corrección:** Razonable. La comparación principal usa muchas etiquetas (5 % en Indian Pines), pero añade un barrido de 5 a 25 por clase.
+- **Contribución:** Grafos multinivel por fusión de regiones, con *pooling* y *unpooling* basados en matrices de asociación binarias entre niveles. OA de 98.25 % en Indian Pines con 5 %. Código: <https://github.com/qichaoliu/MSSG-UNet>.
+- **Claridad:** Clara.
+- **Superpíxeles:** F (algoritmo de Boruvka sobre las tres primeras componentes principales; niveles de 2048, 1024, 512 y 256 superpíxeles).
+- **¿Amenaza?:** No.
+- **Prioridad final:** B. Su Sec. I justifica no aprender la segmentación porque, con pocas muestras, «es difícil que una red aprenda automáticamente» esas relaciones. Es un argumento a favor de tu señal sin etiquetas.
+
+# Grafo de superpíxeles sin red neuronal y grafo de píxeles
+
+## sellars2020superpixel · Prioridad inicial B
+
+Sellars et al. (2020). Superpixel Contracted Graph-Based Learning for Hyperspectral Image Classification. *IEEE TGRS*. El PDF de Zotero es la versión de arXiv.
+
+- **Fecha:**
+- **Categoría:** Método nuevo (SGL): superpíxeles diseñados para HSI (HMS), un grafo «contraído» de superpíxeles y propagación de etiquetas (LGC) en forma cerrada, sin redes neuronales.
+- **Contexto:** Manifold SLIC y la propagación de etiquetas de Zhou et al. Se compara con métodos no profundos.
+- **Corrección:** Protocolo muy adecuado: de 3 a 20 etiquetas por clase y 10 repeticiones con desviación estándar (Tabla II). Reservas: la etiqueta de cada superpíxel se toma de sus píxeles de entrenamiento (posible fuga espacial), y varios parámetros se ajustan por conjunto sin decir con qué datos.
+- **Contribución:** HMS, presentado como un algoritmo de superpíxeles «específicamente diseñado para HSI». Combina la distancia espectral, la distancia entre matrices de covarianza locales y la distancia espacial. **82.6 ± 3.9 % de OA en Indian Pines con 5 etiquetas por clase.**
+- **Claridad:** Clara y completa.
+- **Superpíxeles:** F (HMS sobre las componentes principales que retienen ≥ 0.999 de la varianza; $K = 1200$ en Indian Pines).
+- **¿Amenaza?:** No. Sus superpíxeles son fijos y el clasificador no es una GCN.
+- **Prioridad final:** A (sube de B). Es el flujo más cercano al de Galarza fuera del aprendizaje profundo, y da la referencia directa con 5 etiquetas por clase.
+
+## qin2019spectral · Prioridad inicial B
+
+Qin et al. (2019). Spectral–Spatial Graph Convolutional Networks for Semisupervised Hyperspectral Image Classification. *IEEE GRSL*.
+
+- **Fecha:**
+- **Categoría:** Carta de 5 páginas. Propone S$^2$GCN, una GCN semi-supervisada sobre un grafo de píxeles con pesos espectrales y espaciales.
+- **Contexto:** La GCN de Kipf y Welling, y la regularización laplaciana clásica (LapSVM).
+- **Corrección:** La idea es razonable, pero el protocolo es escueto (1 % de etiquetas) y no dice si el grafo incluye todos los píxeles.
+- **Contribución:** Una convolución de segundo orden con aristas espectrales ponderadas por la cercanía espacial. En Indian Pines, la OA sube de 66.8 % (GCN) a 91.6 % (resumen).
+- **Claridad:** Concisa, con pocos detalles.
+- **Superpíxeles:** — (un nodo por píxel).
+- **¿Amenaza?:** No.
+- **Prioridad final:** C (baja de B). Es un antecedente histórico: su costo, con un nodo por píxel, es lo que llevó a MDGCN a usar superpíxeles.
+
+# Resumen de la pasada
+
+| Artículo | Inicial | Superpíxeles | Sobre qué segmenta | ¿Amenaza? | Final |
+|---|---|---|---|---|---|
+| jia2024graph | B | F (SLIC, 4 tamaños) | No lo dice | No | B |
+| yang2024semi | B | F (SLIC) | Imagen | No | B |
+| yu2024dspg | B | F (no especifica) | No lo dice | No | A |
+| zou2024psformer | B | F (Super Hierarchy) | 3 componentes | No | B |
+| li2023multistage | B | F (Super Hierarchy) | PCA | No | B |
+| liu2022multilevel | B | F (Boruvka) | PCA (3 componentes) | No | B |
+| sellars2020superpixel | B | F (HMS, para HSI) | PCA (≥ 0.999 de varianza) | No | A |
+| qin2019spectral | B | — (píxeles) | --- | No | C |
+
+: Resultado de la pasada 1 de los artículos B del grupo 4 {#tbl-pasada1-g4}
+
+Ninguno amenaza la originalidad: todos fijan la segmentación antes de clasificar. Tres de ellos (dSPG, GiGCN y PSFormer) describen como problema justo lo que tu propuesta ataca. Los artículos C del grupo ya tienen su pasada 1 en `pasada1-grupos-4-5.pdf`.

@@ -1,0 +1,126 @@
+---
+lang: es
+number-sections: false
+format:
+  pdf:
+    documentclass: article
+    fontsize: 11pt
+    papersize: letter
+    pdf-engine: pdflatex
+    fontenc: OT1
+    fontfamily: fix-cm
+    indent: false
+    colorlinks: false
+    boxlinks: true
+    geometry:
+      - left=53.24pt
+      - textwidth=469.8pt
+      - top=36.7pt
+      - textheight=636pt
+      - footskip=27pt
+    include-in-header:
+      - ../document/preamble.tex
+      - unicode-latex.tex
+---
+
+<!-- =====================================================================
+     RESUMEN DE LA PASADA 2 · Revisión de Zhao et al. (2025)
+     «A review of hyperspectral image classification based on graph neural
+     networks», Artificial Intelligence Review 58:172. Tomado solo del PDF
+     de Zotero. Lo marcado como [inferencia] es interpretación mía.
+     Para compilar: quarto render resumen-zhao2025.qmd
+     ===================================================================== -->
+
+```{=latex}
+\title{Centro de investigación y estudios avanzados del IPN\\
+       Departamento de Computación\\
+       \textbf{Resumen de la pasada 2: revisión de Zhao et al. (2025)}}
+\author{Tesista: Edgar Tobón Sosa}
+\date{Búsqueda de trabajos faltantes en sus referencias de 2023 en adelante}
+\begingroup\setlength{\parskip}{0pt}
+\maketitle
+\endgroup
+\kern-15pt
+```
+
+**Cómo usar este documento.** La tarea tenía tres pasos: leer la clasificación de métodos y las tablas de la revisión, recorrer sus referencias de 2023 en adelante buscando superpíxeles aprendidos o pérdidas sin etiquetas, y citarla en la introducción de «Trabajos relacionados». Este documento recoge los dos primeros. El tercero ya está en el protocolo. Todo sale del PDF de Zotero. Lo que es interpretación mía está marcado como *[inferencia]*.
+
+# Lo esencial para tu tesis
+
+1. **La revisión no trata los superpíxeles aprendidos como una línea propia.** Clasifica los métodos por tipo de red: GRNN, GCN espectrales, GCN espaciales, autocodificadores de grafos (GAE) e híbridos. Solo distingue si el grafo se construye sobre **píxeles** o sobre **superpíxeles** (columna *Construction* de las Tablas 4 y 5). No tiene una sección dedicada a la segmentación ni compara algoritmos de superpíxeles.
+2. **Dos frases citables que respaldan tu motivación.**
+   - «La exactitud de la segmentación en superpíxeles tiene un impacto sustancial en los resultados de la clasificación posterior. Una segmentación inexacta puede producir clasificaciones sesgadas» (Sec. 5.1.2, p. 19).
+   - La construcción del vecindario «depende en gran medida de una determinación manual», y que la GNN determine adaptativamente su estructura «según las características espectrales y espaciales de cada región» es una dirección prometedora (Sec. 9.1, p. 42). Proponen como solución el grafo de superpíxeles.
+3. **Encontré un antecedente directo que ya estaba en tu Zotero pero no en el protocolo: CAD-GCN** (Wan et al., 2021). La revisión lo describe como el primero que propone «una construcción del grafo de superpíxeles aprendible», que «automatiza la conversión de píxel a superpíxel» (Tabla 4). Lo verifiqué en el PDF: aprende una **asignación suave** píxel–región con la misma forma que SSN, sobre el **espectro completo**, pero **solo con entropía cruzada**. Ya lo agregué al protocolo (ver abajo).
+4. **Ninguna referencia de 2023 en adelante aprende superpíxeles de forma diferenciable.** Las que tienen superpíxeles los fijan con SLIC u otro método. Lo nuevo y relevante son **pérdidas sin etiquetas sobre grafos de superpíxeles**, casi todas para **agrupamiento**: contraste entre vistas (SLCGC, S²GCL, SDCGSC) y autoentrenamiento por divergencia KL (AHSGC). Son de la línea de tu sección «Superpíxeles para el agrupamiento no supervisado».
+5. **Sus experimentos no sirven como referencia de pocas etiquetas.** Compara 7 métodos en IP, PU y Houston con **10 % de etiquetas por clase** (Sec. 8.2), y 7 GNN en WHU-Hi-HongHu (Tabla 13). No reporta ASA, BR ni EV.
+
+# Ficha
+
+- **Pasada 2:** 16/11/2026.
+- **¿Amenaza tu originalidad?** No. Es una revisión. Sí señala como dirección abierta construir el grafo de forma adaptativa, que es lo que tu propuesta hace desde la segmentación.
+- **Problema que resuelve:** ofrecer la primera revisión enfocada solo en GNN para clasificar HSI (contribución 1, Sec. 1.2), con búsqueda en Web of Science hasta octubre de 2024.
+- **Clasificación de métodos:**
+  - **GRNN** (Sec. 4, Tabla 2).
+  - **GCN espectrales** (Sec. 5.1, Tabla 4).
+  - **GCN espaciales**, que incluyen GraphSAGE y GAT (Sec. 5.2, Tabla 5).
+  - **GAE**, autosupervisados (Sec. 6, Tabla 6).
+  - **Híbridos** en paralelo y en serie (Sec. 7, Tabla 7).
+- **Cómo forma los superpíxeles:** no aplica. De los métodos que tabula, los que usan superpíxeles los toman de una segmentación previa, salvo CAD-GCN.
+- **Señal sin etiquetas:** la trata en los GAE (Sec. 6) y en la dirección futura «Exploring supervisory information» (Sec. 9.4): aprendizaje contrastivo y agrupamiento como fuente de conocimiento previo.
+- **Distancia:** solo F-GCN (Xu et al., 2024) aparece por sustituir la distancia euclidiana, con una medida difusa (Tabla 5). Ningún método tabulado usa una distancia angular para construir el grafo.
+- **Conjuntos de datos de sus experimentos:** Indian Pines, Pavia University, Houston 2013 y WHU-Hi-HongHu (Tabla 8).
+- **OA en Indian Pines:** con 10 % de etiquetas por clase, miniGCN obtiene 95.58 %, CEGCN 95.93 % y S²GCN 95.83 % (Tabla 9). En WHU-Hi-HongHu, el mejor es S²GCL, con 88.91 ± 0.59 % (Tabla 13).
+- **Métricas de los superpíxeles:** ninguna. Solo OA, AA, κ y exactitud por clase.
+- **Código:** enlaces a 7 implementaciones en la Tabla 12: HGCN-MHF, GTFN, WFCG, CEGCN, AMGCFN, DGAE y S²GCL.
+- **Limitación frente a tu propuesta:** considera la segmentación un preprocesamiento. Reconoce que influye en la clasificación, pero solo propone mitigarla con análisis multiescala (Sec. 5.1.2).
+- **Para el protocolo:** cita general en la introducción de «Trabajos relacionados». Ya está agregada (ver la última sección).
+
+# Hallazgo: CAD-GCN (Wan et al., 2021)
+
+Lo leí en el PDF de Zotero porque la revisión lo presenta como superpíxeles aprendibles.
+
+- **Qué aprende** (Sec. III-B):
+  - una matriz de asignación suave $P_{ij} = e^{-\gamma\lVert \mathbf{z}_i - \mathbf{v}_j\rVert^2}$ (Ec. 8), restringida a la región del píxel y sus regiones adyacentes;
+  - $\mathbf{z}_i \in \mathbb{R}^d$ es el **espectro** del píxel, y $\mathbf{v}_j$ son «puntos ancla» de las regiones;
+  - las características de la región son $\mathbf{x}_j = \sum_i P_{ij}\mathbf{z}_i / \sum_i P_{ij}$ (Ec. 9), y la salida vuelve a los píxeles como $PH^{(L)}$ (Ec. 15).
+- **Cómo inicializa y entrena:**
+  - los anclas se inicializan con las firmas medias de SLIC porque, con inicialización aleatoria, casi todos los píxeles pueden terminar en una sola región;
+  - después se actualizan por descenso de gradiente;
+  - la única pérdida es la entropía cruzada de los píxeles etiquetados (Ec. 16).
+- **El grafo:** aprende una distancia de Mahalanobis por capa entre regiones (Ecs. 10–12) y un filtro que elimina las aristas débiles (Ec. 13).
+- **Resultados:**
+  - 94.06 ± 0.85 % en Indian Pines con 30 muestras por clase (Tabla IV);
+  - sin la asignación aprendida (CAD-GCN-v3), 90.30 % (Tabla VII);
+  - un barrido de 5 a 30 muestras por clase solo en gráfica (Fig. 9).
+- *[inferencia]* **Relación con tu propuesta.** Es la misma estructura de SSN, con el espectro completo, dentro de una GCN, y tres años antes que EMS-GCN. Te deja dos diferencias claras: la señal (solo etiquetas frente a EV sin etiquetas) y la distancia (euclidiana frente a angular). Además, no evalúa la calidad de las regiones. Conviene **no** decir que tu propuesta es la primera en aprender la asignación píxel–superpíxel en HSI.
+
+# Referencias de 2023 en adelante relevantes que faltan en tu lista
+
+Revisé las 54 referencias de 2023 a 2025 de la revisión. Ninguna aprende superpíxeles de forma diferenciable. Estas usan pérdidas sin etiquetas, o muy pocas etiquetas, sobre grafos de superpíxeles en HSI. **No están en tu Zotero.** La descripción viene solo de lo que dice la revisión, porque aún no las he leído.
+
+| Referencia | Qué dice la revisión | Prioridad | Acceso |
+|---|---|---|---|
+| Ding et al. (2025b), **SLCGC**, arXiv | Combina aprendizaje contrastivo y agrupamiento para reducir la dependencia de las anotaciones (Sec. 9.4) | Alta | arXiv:2502.03497 |
+| Ding et al. (2025a), **AHSGC**, arXiv | Agrupamiento por grafos que capta la homofilia espectral–espacial y actualiza el grafo mediante autoentrenamiento (Sec. 9.1) | Alta | arXiv:2501.01595 |
+| Yang et al. (2024), **S²GCL**, IEEE TGRS 62 | Aprendizaje contrastivo de grafos para agrupar HSI; el mejor en WHU-Hi-HongHu (Tabla 13) | Media | IEEE (suscripción) |
+| Li et al. (2024), **SDCGSC**, ICIC, Springer | Superpíxeles + autocodificador de grafos con doble vecindad + contraste para agrupamiento por subespacios (Tabla 6) | Media | Springer (suscripción) |
+| Yu et al. (2023), **ConGCN**, IEEE TGRS 61 | Primera GCN contrastiva sobre superpíxeles para HSI; funciona con muy pocos píxeles etiquetados (Tabla 4) | Media | IEEE (suscripción) |
+
+*[inferencia]* Ninguna amenaza tu originalidad por lo que dice la revisión: todas fijan los superpíxeles. Las dos primeras son las más útiles para la sección de agrupamiento no supervisado. ConGCN es la más cercana a tu tarea (GCN semi-supervisada sobre superpíxeles con pocas etiquetas).
+
+Descarté, por no tratar superpíxeles aprendidos ni pérdidas sin etiquetas sobre superpíxeles:
+
+- Cai et al. (2023b), FLGC, y Cai et al. (2024), grafo de anclas para HSI + LiDAR;
+- MGAE (Liu et al., 2023), DSR-GCN (Xue et al., 2023), HGCN (Xu et al., 2023), MFSGCN (Wu et al., 2024b) y DCGCN (Ding et al., 2023a);
+- las revisiones generales de Wu et al. (2024a), Ahmad et al. (2024) y Ullah et al. (2024).
+
+Hay una nota para tu afinidad angular: **SCS-Net** (Ahmad y Mazzara, 2024) usa similitud coseno «afilada» en una red para HSI. No es de superpíxeles. Solo la anoto por si quieres un antecedente del coseno como operación de red.
+
+# Cambios en el protocolo
+
+1. **Introducción de «Trabajos relacionados»:**
+   - la cita general: «Para una revisión reciente de la clasificación de HSI con redes neuronales de grafos, véase @zhao2025review»;
+   - las dos ideas de la revisión: la segmentación influye en la clasificación (Sec. 5.1.2) y la construcción adaptativa del grafo es una dirección abierta (Sec. 9.1).
+2. **«Superpíxeles aprendidos para GCN en HSI»:** un párrafo de CAD-GCN antes de EMS-GCN.
+3. **Cuadro comparativo:** una fila de CAD-GCN: A (anclas iniciadas con SLIC), solo EC, euclidiana² sobre el espectro, 30 por clase, sin métricas de segmentación.

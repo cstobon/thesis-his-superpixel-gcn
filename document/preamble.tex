@@ -48,4 +48,7 @@
     \everypar{\if@noskipsec \global\@noskipsecfalse {\setbox\z@\lastbox}\clubpenalty\@clubpenalty
       \begingroup \@svsechd \endgroup \unskip \@tempskipa #1\relax \hskip -\@tempskipa
       \else \clubpenalty \@clubpenalty \everypar{}\fi}\fi\ignorespaces}
-\makeatother
+\makeatother% Símbolos del cuadro comparativo (pdflatex)
+\DeclareUnicodeCharacter{2713}{\ding{51}}
+\DeclareUnicodeCharacter{2717}{\ding{55}}
+\DeclareUnicodeCharacter{2021}{\ensuremath{\ddagger}}

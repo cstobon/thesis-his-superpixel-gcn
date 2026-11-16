@@ -1,0 +1,286 @@
+---
+lang: es
+number-sections: false
+format:
+  pdf:
+    documentclass: article
+    fontsize: 11pt
+    papersize: letter
+    pdf-engine: pdflatex
+    fontenc: OT1
+    fontfamily: fix-cm
+    indent: false
+    colorlinks: false
+    boxlinks: true
+    geometry:
+      - left=53.24pt
+      - textwidth=469.8pt
+      - top=36.7pt
+      - textheight=636pt
+      - footskip=27pt
+    include-in-header:
+      - ../document/preamble.tex
+      - unicode-latex.tex
+---
+
+<!-- =====================================================================
+     RESUMEN DE LA PASADA 2 · GRUPO 8 (HPC)
+     Ren et al. (2015, gSLICr) y Qu et al. (2013, SAM en GPU), tomados solo
+     de los PDF de Zotero (las Tablas I-II y las Figs. 1-6 de Qu se leyeron
+     de las imágenes del PDF). Pensado para el objetivo 8: núcleo CUDA que
+     fusiona búsqueda de vecinos + coseno + softmax de la asociación.
+     Lo marcado como [inferencia] es interpretación, no de los artículos.
+     Para compilar: quarto render resumen-grupo-8.qmd
+     ===================================================================== -->
+
+```{=latex}
+\title{Centro de investigación y estudios avanzados del IPN\\
+       Departamento de Computación\\
+       \textbf{Resumen de la pasada 2: grupo 8 (HPC)}}
+\author{Tesista: Edgar Tobón Sosa}
+\date{Ren et al. (2015, gSLICr) y Qu et al. (2013, SAM en GPU)}
+\begingroup\setlength{\parskip}{0pt}
+\maketitle
+\endgroup
+\kern-15pt
+```
+
+**Cómo usar este documento.** La guía del plan pide tres cosas, y el mapa de abajo dice dónde está cada una:
+
+1. Cómo reparte gSLICr el trabajo de la asignación local y qué parte deja en la CPU.
+2. Cómo calculan Qu et al. el ángulo espectral en CUDA, y cómo los recursos por hilo limitan los bloques activos.
+3. La comparación con tu caso y el párrafo de 4 a 6 oraciones de cada artículo.
+
+Todo sale de los PDF de Zotero. Lo que es interpretación o estimación mía está marcado como *[inferencia]*.
+
+# Mapa: qué buscar y dónde está
+
+| Pregunta de la guía | Respuesta corta | De dónde |
+|---|---|---|
+| ¿Cómo reparte gSLICr la asignación? | Un hilo por píxel, que examina como máximo 9 centros | Ren, Sec. 3 |
+| ¿Cómo actualiza los centros? | Dos núcleos: sumas parciales en un arreglo $n_{sr} \times n_{sc} \times n_{bl}$ y luego una reducción | Ren, Sec. 3 |
+| ¿Qué queda en la CPU? | Solo la adquisición de datos y la visualización | Ren, Sec. 3 y Fig. 2 |
+| ¿Cómo calcula Qu el SAM en CUDA? | Por rebanadas del cubo, repartidas en flujos (*streams*) con memoria fijada | Qu, Sec. II-C y Fig. 2 |
+| ¿Recursos por hilo y bloques activos? | Solo una búsqueda empírica de la rejilla y del bloque (140 × 8); **no reporta registros ni ocupación** | Qu, Sec. III-B y Fig. 4 |
+| ¿Cómo se compara con tu núcleo? | Estimación de la intensidad aritmética de tu asociación | Sección final de este documento |
+
+\newpage
+
+# Ren, Prisacariu y Reid (2015) · gSLICr
+
+Ren, Prisacariu y Reid (2015). gSLICr: SLIC superpixels at over 250Hz. *arXiv:1509.04232*. Clave: `ren2015gslicr`. Código: <https://github.com/carlren/gSLICr>.
+
+**Qué es.** Un reporte técnico de 6 páginas que describe una implementación de SLIC en CUDA, compatible con la versión secuencial y de código abierto.
+
+## Motivación (Sec. 1)
+
+Para que un método de superpíxeles sea útil, según los autores, debe cumplir dos requisitos: no degradar el desempeño de la cadena de procesamiento completa y ser rápido. El SLIC secuencial en CPU tarda entre 300 y 400 ms por imagen de 640 × 480. Reducir el número de iteraciones lo acelera, pero degrada el resultado.
+
+## El SLIC que implementan (Sec. 2, Ec. 1)
+
+**Rejilla y centros.** La imagen tiene $N$ píxeles y se piden $K$ superpíxeles. El paso de la rejilla es $S = \sqrt{N/K}$, y cada centro es $C_k = [l_k, a_k, b_k, x_k, y_k]^T$.
+
+**Distancia.**
+$$
+d_{lab} = \sqrt{(l_k - l_i)^2 + (a_k - a_i)^2 + (b_k - b_i)^2}, \qquad
+d_{xy} = \sqrt{(x_k - x_i)^2 + (y_k - y_i)^2},
+$$
+$$
+D_s = d_{lab} + \frac{m}{S}\, d_{xy}.
+$$
+Es una **suma**, no la raíz de la suma de cuadrados del SLIC original (Achanta, Ec. 3). Un $m$ mayor da superpíxeles más compactos. El PDF tiene una errata: escribe $(n_k - b_i)$ donde debe ir $(b_k - b_i)$.
+
+**Algoritmo.**
+
+- Mover cada centro al punto de menor gradiente de su vecindad.
+- Iterar: asignar los píxeles de una vecindad local a cada centro y recalcular los centros.
+- Parar cuando la distancia L1 entre los centros de dos iteraciones seguidas sea menor que un umbral.
+- Forzar la conectividad.
+
+## La implementación en GPU (Sec. 3, Fig. 2)
+
+**Reparto CPU-GPU.** La GPU hace casi todo; en la CPU solo quedan la **adquisición de los datos** (la imagen se copia de la CPU a la GPU) y la **visualización** (el resultado vuelve a la CPU y, opcionalmente, se dibuja).
+
+| Etapa | Organización en la GPU |
+|---|---|
+| Conversión de RGB a CIELAB | Un hilo por píxel |
+| Inicialización de los centros | Un hilo por centro. El «mapa de superpíxeles» es una imagen de $n_{sr} \times n_{sc}$ (superpíxeles por renglón y por columna) que guarda, para cada centro, su posición, el número de píxeles asociados y el color |
+| **Asociación** (*find cluster association*) | **Un hilo por píxel.** Cada píxel busca su centro más cercano con la distancia $D_s$ y examina **como máximo 9 centros** |
+| **Actualización de los centros** | **Dos núcleos.** (1) Cada centro debe leer todos sus píxeles dentro de una vecindad que depende del tamaño del superpíxel; se lanza una rejilla de $n_{sr} \times n_{sc} \times n_{bl}$, con $n_{bl} = \text{tamaño del superpíxel} \times 3 / \texttt{BLOCK\_DIM}$ (el número de píxeles que procesa cada hilo, con bloques de 16), y las sumas parciales se escriben en un arreglo de $n_{sr} \times n_{sc} \times n_{bl}$. (2) Una **reducción** sobre la tercera dimensión da los centros actualizados |
+| Conectividad | Dos llamadas del mismo núcleo, con un hilo por píxel: un píxel adopta la etiqueta de sus vecinos si todos los de su vecindad de 2 × 2 tienen una etiqueta distinta |
+
+**El ciclo principal (Sec. 4, listado de `Perform_Segmentation`).**
+
+1. Copiar la imagen de la CPU a CUDA y convertir el espacio de color.
+2. `InitClusterCenters()` y una primera `FindCenterAssociation()`.
+3. Repetir `no_iters` veces: `UpdateClusterCenter()` y `FindCenterAssociation()`.
+4. Si se pide, `EnforceConnectivity()`.
+5. `cudaThreadSynchronize()`.
+
+Esto choca con la Sec. 2: el texto describe un criterio de paro por convergencia, pero el código usa un **número fijo de iteraciones**.
+
+**Diseño del código (Fig. 3).** Tiene tres capas:
+
+- una abstracta, con las llamadas del algoritmo;
+- una específica del dispositivo (solo se entrega la de GPU, en `gSLICr_seg_engine_GPU.cu`);
+- una agnóstica del dispositivo, con el código en línea de C por píxel y por centro (`gSLICr_seg_engine_shared.h`).
+
+## Resultados (Sec. 5, Tabla 1)
+
+Producen «virtualmente» el mismo resultado que el SLIC secuencial, sin una métrica que lo muestre. La Tabla 1 compara tiempos en cinco tamaños de imagen; las unidades no se indican, pero parecen segundos:
+
+| Método | 1024 × 1024 | 3631 × 3859 | 933 × 800 |
+|---|---|---|---|
+| gSLICr, 1000 o 2000 superpíxeles | 0.01 | 0.12 | 0.008 |
+| SLIC original, 1000 superpíxeles | 0.73 | 9.69 | 0.55 |
+| SLIC original, 2000 superpíxeles | 0.74 | 9.88 | 0.55 |
+| SEEDS, 200 superpíxeles | 1.53 | 22.1 | 1.01 |
+| ERS, 1000 superpíxeles | 6.94 | 116 | 5.35 |
+
+El «hasta 83×» corresponde a la imagen grande ($9.88 / 0.12 \approx 82$).
+
+## Lectura crítica
+
+- **No reporta el hardware.** No dice la GPU, la CPU, el número de repeticiones ni la dispersión. *[inferencia]* Según la regla 9 de Hoefler, sus tiempos no son reproducibles.
+- **El título no se demuestra en la tabla.** Ningún tiempo de la Tabla 1 llega a 250 Hz (4 ms): el menor es 0.008, unos 125 Hz. Es probable que los 250 Hz correspondan a 640 × 480, que no aparece en la tabla *[inferencia]*.
+- **Los tiempos no cambian con $K$** (1000 o 2000 superpíxeles, Tabla 1). Es coherente con la complejidad $O(N)$ de SLIC.
+- **La asignación es dura.** El *argmin* no tiene gradiente y no hay pasada hacia atrás.
+
+## Párrafo de la pasada 2
+
+Ren et al. (2015) implementan SLIC completo en CUDA y dejan en la CPU solo la adquisición de la imagen y la visualización del resultado. La asociación usa un hilo por píxel, que compara el píxel con como máximo 9 centros vecinos. La actualización de los centros usa dos núcleos: uno acumula sumas parciales por bloques en un arreglo $n_{sr} \times n_{sc} \times n_{bl}$, y otro las reduce. Reportan hasta 83× frente al SLIC secuencial, pero sin indicar el hardware, las repeticiones ni las unidades de la Tabla 1, y con una distancia que suma en lugar de combinar en cuadratura. Frente a tu núcleo, su asociación es dura y no tiene pasada hacia atrás; el tuyo reemplaza el *argmin* por un softmax sobre las similitudes coseno y debe propagar gradientes hacia los píxeles y los centros.
+
+\newpage
+
+# Qu, Zhang, Lin y Chen (2013) · SAM en GPU
+
+Qu et al. (2013). Parallel Acceleration of SAM Algorithm and Performance Analysis. *IEEE JSTARS*, 6(3), 1172--1178. Clave: `qu2013parallel`.
+
+**Qué es.** Implementan el SAM en tres plataformas: MATLAB (en serie, con operaciones matriciales, con GPU y con Jacket), CUDA y un clúster de MATLAB. Además, analizan el rendimiento.
+
+## El problema y la variante de SAM (Secs. I y II-A)
+
+- **Por qué SAM.** Es apto para el cómputo paralelo porque el ángulo de cada píxel no depende de los demás píxeles.
+- **Su variante.** Usan **varias muestras de entrenamiento** por clase como espectros de referencia, en lugar de una sola. Las extraen de la propia imagen, sobre el objetivo (un avión), erosionando sus bordes con morfología para evitar píxeles mezclados.
+- **El cálculo.** Calculan el ángulo entre el píxel y cada referencia, toman el máximo y lo comparan con un umbral. Después aplican una apertura morfológica para eliminar ruido.
+- **La Ec. 1** es la fórmula de SAM con sumas sobre las $n_b$ bandas del espectro de prueba $t$ y el de referencia $r$.
+
+## Las implementaciones (Secs. II-B a II-D)
+
+**En MATLAB (Fig. 1).** La versión original recorre cada píxel con tres ciclos `for` anidados. La versión mejorada usa operaciones matriciales: una matriz $A$ de $M \times L$ es una rebanada del cubo ($M$ renglones, $L$ bandas), y $B$ contiene las muestras de entrenamiento ($I$ bandas × $J$ muestras).
+
+**En CUDA (Fig. 2).** El flujo es: cargar los datos en la CPU, inicializar la GPU y crear los flujos y eventos, transferir los datos a la GPU, y luego, **para cada rebanada del cubo**, calcular el SAM contra las referencias y escribir el resultado parcial en memoria global. Al final, el resultado vuelve a la CPU. Hay tres estrategias de aceleración:
+
+1. **Configuración de hilos.** Más hilos dan más paralelismo, pero «necesitan más recursos y degradan el rendimiento». El texto no dice cuántos registros o cuánta memoria compartida usa cada hilo.
+2. **Memoria fijada** (`cudaHostAlloc`, *page-locked*). El sistema operativo no la pagina a disco, y el motor de transferencias de la GPU puede acceder a ella directamente. Según los autores, casi **duplica** la velocidad de transferencia. La usan solo para los búferes de origen y destino de las copias, y los liberan en cuanto dejan de usarse.
+3. **Flujos (*streams*).** La tarea se divide en partes, una por flujo, con `cudaMemcpyAsync`. Mientras un flujo calcula, otro transfiere, y así se oculta la latencia de las copias.
+
+**En el clúster (Sec. II-D, Fig. 3).** El cubo se divide en $n$ subconjuntos ($M \times N/n \times L$) que se reparten a los nodos trabajadores, y un nodo maestro reúne los resultados.
+
+## Experimentos (Sec. III)
+
+**Datos y equipo.**
+
+- *Imagen:* AVIRIS de 400 × 400 × 224 bandas, a 3.5 m.
+- *Software:* CUDA 4.0, MATLAB 2010b y Jacket 1.8.
+- *GPU:* GTX 560 (capacidad de cómputo 2.1, 7 multiprocesadores con 48 núcleos cada uno) y una Tesla S2050.
+- *Clúster:* 4 nodos con Pentium de dos núcleos.
+
+**Tabla I: MATLAB** (en segundos; promedio de 5 ejecuciones).
+
+| | Transferencia $t_1$ | Cómputo $t_2$ | Presentación $t_3$ | Total $t_4$ |
+|---|---|---|---|---|
+| Mat(1) original, ciclos | 1.23 | 216.17 | 0.31 | 217.71 |
+| Mat(2) matricial | 1.21 | 3.80 | 0.32 | 5.34 |
+| Mat(3) matricial + GPU | 1.21 | 5.07 | 0.30 | 6.58 |
+| Mat(4) matricial + Jacket | 1.32 | 1.04 | 0.32 | 2.68 |
+
+La GPU desde MATLAB es *más lenta* que la CPU matricial, por las transferencias de memoria entre la CPU y la GPU.
+
+**Configuración de hilos (Fig. 4).** Midieron el tiempo como función de dos parámetros: el tamaño de la rejilla (múltiplos de 7, por los 7 multiprocesadores) y el del bloque (múltiplos de 8). El mínimo está en una **rejilla de 140 bloques de 8 hilos**: 1120 hilos activos. La superficie es casi plana, salvo un pico de unos 200 ms con rejillas pequeñas.
+
+**Tabla II: CUDA** (en ms; **una sola muestra de entrenamiento**). Time$_1$ es solo el cómputo; Time$_2$ es el total, con las transferencias.
+
+| | A (C en CPU) | B (sin optimizar) | C (hilos) | D (fijada) | E (fijada + hilos) | F (+ flujos) | G (F en Tesla) |
+|---|---|---|---|---|---|---|---|
+| Time$_1$ | 400.90 | 29.44 | 22.99 | 29.46 | 22.96 | --- | --- |
+| Time$_2$ | 400.90 | 99.62 | 93.21 | 81.70 | 75.08 | **54.87** | **34.70** |
+
+**Flujos (Fig. 5).** El tiempo baja de unos 58 ms con 2 o 4 flujos a **54.87 ms con 20**, y vuelve a subir con 40 por el costo de administrar tantos flujos.
+
+**Aceleración contra carga (Fig. 6).** La aceleración frente al código en C crece con el número de muestras de entrenamiento: unas 7× con 1, **63.9× con 24** y **141.6× con 128** (Sec. IV). Los autores concluyen que la GPU conviene para algoritmos de cómputo intensivo y poca entrada y salida.
+
+**Clúster (Fig. 7, Tabla III).** El cuello de botella es la entrada y salida. En una sola computadora, la versión paralela (2.68 s) supera al clúster (5.71 s en el mejor caso).
+
+## Lectura crítica
+
+- **La guía del plan pide algo que el artículo no da.** El resumen promete estudiar «el balance entre los recursos de cada hilo y el número de bloques activos», pero el cuerpo solo hace una búsqueda empírica de la rejilla y del bloque. No reporta registros por hilo, memoria compartida ni ocupación. *[inferencia]* Esto tendrás que medirlo tú con Nsight Compute (ocupación teórica y alcanzada, registros por hilo).
+- **Bloques de 8 hilos.** *[inferencia]* Un *warp* tiene 32 hilos, así que con bloques de 8 cada *warp* queda ocupado en una cuarta parte. El óptimo empírico de 140 × 8 probablemente refleja otro cuello de botella, no un buen uso de la GPU. 1120 hilos para 160,000 píxeles implican que cada hilo procesa muchos píxeles, aunque el artículo no explica cómo.
+- **«Casi el doble» con memoria fijada no se ve en la Tabla II.** *[inferencia]* La transferencia (Time$_2$ − Time$_1$) baja de 70.2 ms (B) a 52.2 ms (D): unas 1.34×, no 2×.
+- **La línea base.** A es «código en C en la CPU», sin decir cuántos hilos usa, aunque el resumen habla de una contraparte multihilo. Con una sola referencia, la aceleración total es de apenas $400.90 / 54.87 \approx 7.3\times$; la de 63.9× aparece solo al aumentar el cómputo por píxel.
+- **Errata de unidades.** En la Sec. III-B se lee «54.87 seconds» donde la Tabla II dice ms.
+- **El criterio de decisión parece invertido.** Dice que un píxel es objetivo si el ángulo *máximo* supera el umbral. En SAM, un ángulo menor indica más semejanza. *[inferencia]* Probablemente compara el coseno, pero no lo aclara.
+
+## Párrafo de la pasada 2
+
+Qu et al. (2013) aceleran el SAM, con varias muestras de referencia por clase, en MATLAB, CUDA y un clúster, sobre una imagen AVIRIS de 400 × 400 × 224. En CUDA procesan el cubo por rebanadas repartidas en 20 flujos con memoria fijada para ocultar las transferencias, y eligen empíricamente una rejilla de 140 bloques de 8 hilos en una GTX 560. Con una sola referencia, el tiempo total baja de 400.90 ms en C a 54.87 ms (unas 7×). La aceleración sube a 63.9× con 24 referencias y a 141.6× con 128, porque aumenta el cómputo por cada byte transferido. El artículo no reporta los recursos por hilo ni la ocupación; además, la CPU de comparación no está bien especificada. Frente a tu núcleo, el ángulo es el mismo cálculo, pero allí las referencias son las mismas para todos los píxeles, mientras que en tu asociación cada píxel se compara con sus propios 9 superpíxeles vecinos y además necesitas la pasada hacia atrás.
+
+\newpage
+
+# Comparación con tu núcleo (objetivo 8)
+
+## Qué hereda tu núcleo de cada artículo
+
+| Aspecto | gSLICr | Qu et al. | Tu núcleo |
+|---|---|---|---|
+| Operación | Distancia $D_s$ y *argmin* sobre 9 centros | Ángulo contra $J$ referencias y máximo | Coseno contra 9 centros y **softmax** |
+| Hilos | Uno por píxel | 1120 en total (búsqueda empírica) | Uno por píxel *[inferencia]* |
+| Con quién compara | 9 centros distintos por píxel, pero compartidos entre píxeles cercanos | Las mismas $J$ referencias para todos | 9 centros por píxel, compartidos entre píxeles cercanos |
+| Dimensión | 5 ($labxy$) | 224 bandas | $B$ bandas o $d$ características |
+| Actualización de centros | Sumas parciales por bloque y reducción | No aplica | Suma ponderada por la asociación suave |
+| Pasada hacia atrás | No | No | **Sí**: gradientes hacia los píxeles y los centros |
+| Medición | Una tabla, sin repeticiones ni hardware | 5 ejecuciones en MATLAB, tiempos de transferencia y cómputo por separado | Repeticiones, intervalos, Nsight y *roofline* (Hoefler, Williams, Yang) |
+
+## Estimación de la intensidad aritmética de tu asociación *[inferencia]*
+
+Estimación aproximada para orientarte; la cifra real debe salir de Nsight Compute. Por píxel, en FP32 (4 bytes) y con dimensión $d$ (las bandas $B$ o las características aprendidas):
+
+- **Operaciones.** La norma del píxel cuesta unas $2d$ FLOP y los 9 productos punto unas $18d$; el softmax sobre 9 valores es despreciable. En total, unas $20d$ FLOP. Las normas de los centros se calculan una vez por centro.
+- **Bytes, si cada píxel lee sus 9 centros de memoria global** (como el lote de PyTorch que reúne el tensor $N \times 9 \times d$): lee $4d$ (el píxel) y $36d$ (los centros), y escribe 36 (las 9 asociaciones). La intensidad queda en unos $20d / 40d \approx$ **0.5 FLOP/byte**. Además, PyTorch escribe y vuelve a leer ese tensor intermedio, lo que la baja todavía más.
+- **Bytes, si un bloque carga en memoria compartida los pocos centros que usan sus píxeles.** Es la idea de la vecindad compartida de gSLICr, pero explícita. Por píxel quedan unos $4d + 36$ bytes, y la intensidad sube a unos $20d / 4d \approx$ **5 FLOP/byte**.
+
+**Qué significa.**
+
+- **Es la decisión de diseño central.** Reutilizar los centros en memoria compartida multiplica la intensidad por unas 10 veces.
+- **Aun así, probablemente sigues limitado por memoria.** 5 FLOP/byte suele quedar por debajo del punto de quiebre del *roofline* de una GPU actual (el cruce entre el techo de ancho de banda y el de cómputo; Williams et al.). Por eso la ganancia esperable es reducir los bytes que se mueven, no las FLOP. Esto coincide con la estimación del grupo 8 a partir de Hassani et al.
+- **Coincide con la lección de Qu (Fig. 6).** La GPU rinde más cuanto más cómputo se hace por cada dato leído. En tu caso, eso se logra reutilizando los centros, no aumentando las referencias.
+- **La dimensión importa.** Con $d$ pequeño (características aprendidas), el costo fijo de escribir las 9 asociaciones pesa más y la intensidad baja un poco: con $d = 16$, unos $320 / 100 \approx 3$ FLOP/byte.
+
+## Lo que ninguno de los dos resuelve
+
+- **La pasada hacia atrás.** El gradiente respecto a los centros es una suma sobre todos los píxeles que los tienen como vecinos. *[inferencia]* Puedes hacerlo con operaciones atómicas o con el patrón de gSLICr: sumas parciales por bloque y una reducción, que evita los atómicos. Para no guardar las 9 asociaciones, puedes recalcularlas como FlashAttention.
+- **Medir bien.** Ninguno de los dos cumple las reglas de Hoefler: faltan repeticiones, intervalos de confianza y la descripción del equipo. *[inferencia]* Úsalos como ejemplos de lo que tu medición debe evitar; Qu sí separa los tiempos de transferencia y de cómputo, y eso vale la pena imitarlo.
+
+# Fichas llenas (para copiar en `fichas-lectura.md`)
+
+**ren2015gslicr**
+
+- **Pasada 1 (fecha):** · **Pasada 2 (fecha):**
+- **Problema que resuelve:** SLIC demasiado lento para tiempo real (300--400 ms por imagen de 640 × 480 en CPU).
+- **Operación que acelera y cómo la organiza en la GPU:** Todo SLIC. La asociación usa un hilo por píxel con como máximo 9 centros. La actualización de centros usa dos núcleos (sumas parciales $n_{sr} \times n_{sc} \times n_{bl}$ con bloques de 16, y una reducción). La conectividad usa un hilo por píxel. En la CPU solo quedan la adquisición y la visualización (Sec. 3, Fig. 2).
+- **¿Fusiona? ¿Pasada hacia atrás?:** No fusiona de forma explícita; asignación dura, sin pasada hacia atrás.
+- **Hardware y aceleración:** Hasta 83× frente al SLIC secuencial (Tabla 1); el hardware no se reporta.
+- **Cómo midió:** Una tabla de tiempos en cinco tamaños de imagen, sin unidades, repeticiones ni dispersión.
+- **Relación con tu núcleo:** Es la estructura base (un hilo por píxel, 9 vecinos, reducción por centro); tu núcleo la hace suave y diferenciable.
+- **Para el protocolo:** Metodología, núcleo CUDA: la organización de hilos de la asociación local en GPU.
+
+**qu2013parallel**
+
+- **Pasada 1 (fecha):** · **Pasada 2 (fecha):**
+- **Problema que resuelve:** Acelerar el SAM con varias referencias por clase en datos hiperespectrales.
+- **Operación que acelera y cómo la organiza en la GPU:** El ángulo de cada píxel contra $J$ referencias. El cubo se procesa por rebanadas, con rejilla de 140 × 8 hilos, memoria fijada y 20 flujos (Sec. II-C, Figs. 2, 4 y 5).
+- **¿Fusiona? ¿Pasada hacia atrás?:** No aplica; solo cálculo hacia adelante.
+- **Hardware y aceleración:** GTX 560 y Tesla S2050. Con 1 referencia, 7.3× en tiempo total (Tabla II); 63.9× con 24 y 141.6× con 128 (Fig. 6), frente a C en CPU.
+- **Cómo midió:** Promedio de 5 ejecuciones en MATLAB; tiempos de transferencia y de cómputo por separado (Tablas I y II).
+- **Relación con tu núcleo:** Es el mismo cálculo del ángulo. Muestra que la aceleración crece con el cómputo por dato, pero no reporta recursos por hilo ni ocupación.
+- **Para el protocolo:** Metodología, núcleo CUDA: el antecedente del ángulo espectral en GPU sobre HSI.

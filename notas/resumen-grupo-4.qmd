@@ -1,0 +1,306 @@
+---
+lang: es
+number-sections: false
+format:
+  pdf:
+    documentclass: article
+    fontsize: 11pt
+    papersize: letter
+    pdf-engine: pdflatex
+    fontenc: OT1
+    fontfamily: fix-cm
+    indent: false
+    colorlinks: false
+    boxlinks: true
+    geometry:
+      - left=53.24pt
+      - textwidth=469.8pt
+      - top=36.7pt
+      - textheight=636pt
+      - footskip=27pt
+    include-in-header:
+      - ../document/preamble.tex
+      - unicode-latex.tex
+---
+
+<!-- =====================================================================
+     RESUMEN DE LA PASADA 2 · GRUPO 4 · GCN con superpíxeles en HSI
+     MDGCN (Wan et al., 2020), miniGCN (Hong et al., 2021) y CEGCN
+     (Liu et al., 2021), tomados solo de los PDF de Zotero. Las cifras que
+     solo aparecen en figuras se marcan como aproximadas (≈).
+     Pensado para «Trabajos relacionados» y el cuadro comparativo.
+     Lo marcado como [inferencia] es interpretación, no de los artículos.
+     Para compilar: quarto render resumen-grupo-4.qmd
+     ===================================================================== -->
+
+```{=latex}
+\title{Centro de investigación y estudios avanzados del IPN\\
+       Departamento de Computación\\
+       \textbf{Resumen de la pasada 2: grupo 4}}
+\author{Tesista: Edgar Tobón Sosa}
+\date{MDGCN (2020), miniGCN (2021) y CEGCN (2021)}
+\begingroup\setlength{\parskip}{0pt}
+\maketitle
+\endgroup
+\kern-15pt
+```
+
+**Cómo usar este documento.** Primero vienen las cinco ideas que estos tres artículos aportan a tu tesis. Después hay una ficha por artículo, con lo que vas a citar (sección, ecuación o tabla), su párrafo de la pasada 2 y su ficha ya llena para copiar en `fichas-lectura.md`. Al final hay una tabla comparativa y los puntos de cuidado. Todo sale de los PDF de Zotero. Lo que es interpretación mía está marcado como *[inferencia]*, y las cifras leídas de una figura llevan el signo ≈.
+
+# Lo esencial para tu tesis
+
+1. **Ninguno amenaza tu originalidad.** Los tres usan una segmentación fija (SLIC) o ninguna, y ninguno aprende los superpíxeles ni mide su calidad con ASA, BR o EV.
+2. **Dos de ellos admiten que el grafo predefinido es imperfecto, pero corrigen las aristas, no la segmentación.**
+   - *MDGCN* actualiza el grafo en cada capa porque «el grafo inicial puede no ser exacto» (Sec. I). Con el grafo fijo, la OA en Indian Pines baja de 93.47 % a 91.24 % (Tabla VII).
+   - *CEGCN* aprende los pesos de las aristas, y estos se vuelven casi binarios: cortan la propagación en los bordes entre clases (Sec. IV-E).
+   - *[inferencia]* Ambos tratan el síntoma (aristas malas) y no la causa (superpíxeles que mezclan clases). Tu propuesta ataca la causa.
+3. **CEGCN ya tiene la pieza donde encaja tu segmentador.** Su codificador y decodificador de grafo usan una matriz de asociación píxel-superpíxel $Q \in \mathbb{R}^{HW \times Z}$. Los nodos se calculan como $V = \hat Q^{T} X$ y los píxeles se recuperan como $QV$ (Ecs. 2--4). En CEGCN, $Q$ es **dura** (0 o 1, salida de SLIC). *[inferencia]* SSN produce justamente una $Q$ **suave** y diferenciable. Tu metodología («promedio de las firmas ponderado por la asociación suave») es esta misma ecuación con $Q$ suave.
+4. **Un riesgo que debes anticipar.** CEGCN cambia el segmentador (SLIC, quick shift, FH, LSC y SEEDS) y concluye que los resultados «tienen poca diferencia» (Sec. IV-C, Tabla X). Su escala de segmentación también mueve poco la OA (Fig. 7). Pero lo mide con 10 % de etiquetas en Indian Pines, con OA cercanas al 99 %. *[inferencia]* Es el mismo tipo de evidencia que Ayres et al. (2024). Tu respuesta es que el efecto de la segmentación debe medirse con 5 etiquetas por clase, donde la GCN tiene poca evidencia para corregir errores (Galarza).
+5. **Dónde está la referencia con 5 etiquetas por clase.**
+   - *CEGCN* (Fig. 11): ≈ 75 % en Indian Pines, ≈ 87 % en Pavia University y ≈ 93 % en Salinas.
+   - *MDGCN* (Fig. 9): varía de 5 a 30 etiquetas por clase en Indian Pines, pero sus valores solo aparecen en la figura.
+   - *miniGCN* usa 50 por clase y no sirve para este régimen.
+
+\newpage
+
+# Wan et al. (2020) · MDGCN
+
+Wan, Gong, Zhong, Du, Zhang y Yang (2020). Multiscale Dynamic Graph Convolutional Network for Hyperspectral Image Classification. *IEEE TGRS*, 58(5). Clave: `wan2020multiscale`. **El PDF de Zotero es la versión de arXiv** (1905.06133v1, mayo de 2019); las cifras podrían diferir de la versión publicada.
+
+**Qué propone.** Una GCN sobre superpíxeles de SLIC con dos ideas:
+
+- un **grafo dinámico**, que se actualiza en cada capa a partir de las representaciones aprendidas;
+- **varias escalas de vecindad**: grafos que conectan cada superpíxel con sus vecinos a 1, 2 y 3 saltos.
+
+**Motivación (Sec. I).**
+
+- Las CNN convolucionan sobre regiones cuadradas fijas y pierden los bordes entre clases.
+- La GCN original tiene tres problemas en HSI: (1) por el ruido, «el grafo inicial puede no ser exacto», porque el peso de una arista no siempre refleja la similitud real; (2) solo usa la información espectral; (3) su costo es inaceptable con tantos píxeles.
+
+**Construcción del grafo (Secs. III-A y III-B).**
+
+- *Segmentación:* SLIC divide la imagen en superpíxeles homogéneos. El texto no reporta el número de superpíxeles ni dice si aplica PCA antes.
+- *Nodos:* cada nodo es un superpíxel, con la **firma espectral media** de sus píxeles como característica. Los autores justifican los superpíxeles por el costo y porque los píxeles cercanos suelen tener la misma etiqueta.
+- *Aristas (Ec. 1):* $A_{ij} = e^{-\gamma \lVert x_i - x_j \rVert^2}$ si $x_i$ y $x_j$ son vecinos, con $\gamma = 0.2$.
+
+**Grafo dinámico (Sec. III-C, Ec. 12).**
+$$
+A^{(l+1)} = A\left(A^{(l)} + \alpha H^{(l)} H^{(l)T}\right)A^{T} + \beta^{(l)} I.
+$$
+La nueva adyacencia combina el grafo anterior con la similitud de las representaciones de la capa $l$, y la proyecta con el grafo inicial $A$ para no alejarse de la estructura original. Según la Ec. 13, dos superpíxeles se vuelven similares si comparten muchos vecinos.
+
+**Multiescala (Sec. III-D, Ecs. 15 y 16).** Para cada escala $s = 1, 2, 3$ hay una GCN de 2 capas sobre su propio grafo. La salida es la suma de las tres, y se entrena con entropía cruzada sobre los superpíxeles «semilla» etiquetados (Ec. 17, Fig. 1).
+
+**Configuración (Sec. IV-B).**
+
+- *Etiquetas:* 30 píxeles por clase (15 si la clase tiene menos de 30); el 90 % se usa para entrenar y el 10 % para validar los hiperparámetros.
+- *Red:* 20 unidades ocultas, *softplus*, Adam con tasa 0.0005, 5000 épocas y lote completo.
+- *Repeticiones:* 10, con la media y la desviación estándar.
+
+**Resultados.**
+
+- **Indian Pines** (Tabla IV): OA de **93.47 ± 0.38 %**, AA de 96.24 % y $\kappa$ de 92.55, frente a 89.49 % de S$^2$GCN y 69.24 % de la GCN original.
+- **Pavia University** (Tabla V): 95.68 %; la GCN y S$^2$GCN «no escalan» a este conjunto.
+- **KSC** (Tabla VI): 99.79 %.
+- **Ablación** (Tabla VII, Indian Pines):
+
+| Variante | OA (%) |
+|---|---|
+| Solo $s = 1$ | 88.53 |
+| Solo $s = 2$ | 92.03 |
+| Solo $s = 3$ | 89.53 |
+| Multiescala con grafo **fijo** (MGCN) | 91.24 |
+| **MDGCN** (multiescala y dinámico) | **93.47** |
+
+- **Tiempo** (Tabla VIII, RTX 2080): 74 s en Indian Pines, frente a 656 s de la GCN sobre píxeles y 5258 s de DR-CNN. Los autores lo atribuyen a que el grafo de superpíxeles es mucho más pequeño.
+- **Pocas etiquetas** (Fig. 9): de 5 a 30 por clase en Indian Pines. MDGCN queda arriba en todo el rango, pero las cifras solo están en la figura.
+
+**Para tu tesis.**
+
+- Es la cita estándar para el grafo de superpíxeles en HSI (nodos con la firma media y aristas entre vecinos) y para justificar los superpíxeles por costo. Ya la usas en el marco teórico.
+- *[inferencia]* La caída de 93.47 % a 91.24 % con el grafo fijo es evidencia de que el grafo derivado de la segmentación no es óptimo. MDGCN la corrige cambiando aristas; tu propuesta, cambiando la segmentación.
+- *[inferencia]* No reporta el número de superpíxeles ni ninguna métrica de segmentación. Es un ejemplo del hueco que señala tu planteamiento.
+
+**Párrafo de la pasada 2.** Wan et al. (2020) proponen MDGCN, una GCN sobre superpíxeles de SLIC cuyos nodos son la firma espectral media de cada región. El grafo se actualiza en cada capa con la similitud de las representaciones aprendidas, y se combinan tres escalas de vecindad. Con 30 etiquetas por clase alcanzan 93.47 % de OA en Indian Pines y 95.68 % en Pavia University, y muestran que fijar el grafo reduce la OA a 91.24 %. Además, el grafo de superpíxeles reduce el tiempo de entrenamiento de 656 s a 74 s frente a una GCN sobre píxeles. Frente a tu propuesta, la segmentación es un preprocesamiento fijo del que no se reporta ni el número de superpíxeles ni su calidad; MDGCN corrige el grafo, pero no los superpíxeles que lo originan.
+
+**Ficha llena.**
+
+- **¿Amenaza tu originalidad?:** No. Usa una segmentación fija; lo dinámico son las aristas.
+- **Problema que resuelve:** Grafo inicial impreciso y una sola escala espacial en las GCN para HSI.
+- **Cómo forma los superpíxeles:** F (SLIC; número de superpíxeles no reportado).
+- **Señal con la que los aprende:** — (la GCN usa entropía cruzada, Ec. 17).
+- **Espectro completo o PCA:** No dice que aplique PCA; los nodos son la firma media.
+- **Distancia:** Euclidiana dentro de un kernel gaussiano, $\gamma = 0.2$ (Ec. 1).
+- **Etiquetas por clase:** 30 (15 en las clases pequeñas); barrido de 5 a 30 (Fig. 9).
+- **Conjuntos de datos:** Indian Pines, Pavia University y KSC.
+- **OA en Indian Pines:** 93.47 ± 0.38 % con 30 etiquetas por clase.
+- **Métricas de los superpíxeles:** Ninguna; solo OA, AA y $\kappa$.
+- **¿Analiza por tipo de escena? ¿Publica su código?:** No. El PDF no indica dónde está el código.
+- **Limitación frente a tu propuesta:** La segmentación es fija y no se evalúa; corrige el grafo después.
+- **Para el protocolo:** Marco teórico (grafo de superpíxeles) y trabajos relacionados (pioneros).
+
+\newpage
+
+# Hong et al. (2021) · miniGCN
+
+Hong, Gao, Yao, Zhang, Plaza y Chanussot (2021). Graph Convolutional Networks for Hyperspectral Image Classification. *IEEE TGRS*, 59(7). Clave: `hong2021graph`. **El PDF de Zotero es la versión previa a la aceptación** (arXiv 2008.02457v2). Código: <https://github.com/danfenghong/IEEE_TGRS_GCN>.
+
+**Qué propone.** Tres cosas:
+
+- una comparación cualitativa y cuantitativa entre CNN y GCN para HSI;
+- **miniGCN**, una GCN que se entrena por minilotes muestreando subgrafos y que clasifica muestras nuevas sin reentrenar;
+- **FuNet**, la fusión de CNN y miniGCN de forma aditiva, multiplicativa o por concatenación (Ecs. 21--23).
+
+**El grafo (Sec. II-B).** Usa **un nodo por píxel**. La adyacencia es un grafo de $K$ vecinos más cercanos ($K = 10$) con un kernel gaussiano, $A_{ij} = \exp(-\lVert x_i - x_j \rVert^2 / \sigma^2)$ con $\sigma = 1$ (Ec. 1, Sec. IV-C). **No usa superpíxeles.**
+
+**CNN contra GCN (Sec. III-A).**
+
+| Aspecto | CNN | GCN |
+|---|---|---|
+| Entrada | Parches | Píxeles más una adyacencia precalculada |
+| Relaciones | De corto alcance | De medio y largo alcance |
+| Entrenamiento | Por minilotes | Solo con el lote completo |
+| Costo por capa | $O(NDP)$ | $O(NDP + N^2 D)$; con minilotes de tamaño $M$, $O(NDP + NMD)$ |
+
+**miniGCN (Sec. III-B, Ecs. 18--20).** En cada época se muestrean subgrafos de $M$ nodos sin reemplazo y se aplica la regla de Kipf en cada subgrafo. Es un esquema **inductivo**: los nodos de prueba no participan en el entrenamiento, ni sus características ni sus aristas.
+
+**Configuración (Sec. IV-B).**
+
+- *Etiquetas:* Indian Pines con **50 por clase** (15 en las clases pequeñas; 695 en total, Tabla I). Pavia University y Houston 2013 con las particiones estándar (3921 de entrenamiento en Pavia University).
+- *Hiperparámetros:* elegidos por validación cruzada de 10 particiones.
+- *Repeticiones:* las tablas reportan **un solo valor, sin desviación estándar**.
+
+**Resultados (Tablas V--VII, OA en %).**
+
+| Conjunto | GCN | miniGCN | CNN 2-D | CNN 3-D | FuNet-C |
+|---|---|---|---|---|---|
+| Indian Pines | 71.97 | 75.11 | 75.89 | 75.48 | **79.89** |
+| Pavia University | 77.99 | 79.79 | 86.05 | 88.44 | **92.20** |
+| Houston 2013 | 81.19 | 81.71 | 83.72 | 86.04 | 87.39 |
+
+En Houston 2013 la mejor es FuNet-M, con 88.62 %. Los modelos basados en GCN «no logran modelar» las clases con muy pocas muestras (alfalfa, avena; Sec. IV-D). La sensibilidad al grafo está dominada por $K$; con $\sigma$ hay poca variación, y los autores admiten que quizá $\sigma$ «no quedó bien ajustado» (Sec. IV-C, Fig. 6).
+
+**Para tu tesis.**
+
+- Es la cita del **costo cuadrático de una GCN sobre píxeles** ($O(N^2 D)$, Sec. III-A4), que justifica construir el grafo sobre superpíxeles.
+- *[inferencia]* Muestra que una GCN sobre píxeles, sin superpíxeles, apenas iguala a una CNN 2-D (75.11 % frente a 75.89 % en Indian Pines). Esto refuerza que el aporte de la GCN en HSI depende de cómo se construye el grafo.
+- *[inferencia]* Sirve para contrastar dos esquemas en el marco teórico: miniGCN es supervisada e inductiva; tu GCN (la de Kipf y Galarza) es semi-supervisada y transductiva.
+- No es comparable en exactitud con tu régimen: usa 50 etiquetas por clase, otra partición y una sola corrida.
+
+**Párrafo de la pasada 2.** Hong et al. (2021) comparan las CNN con las GCN para clasificar HSI y proponen miniGCN, que entrena la GCN por minilotes de subgrafos. Así reduce el costo por capa de $O(N^2 D)$ a $O(NMD)$ y puede clasificar píxeles nuevos sin reentrenar. Construyen un grafo de píxeles con 10 vecinos espectrales y un kernel gaussiano, y fusionan miniGCN con una CNN 2-D (FuNet). Con 50 etiquetas por clase en Indian Pines, miniGCN obtiene 75.11 % de OA, casi lo mismo que la CNN 2-D (75.89 %), y la fusión por concatenación llega a 79.89 %; reportan una sola corrida, sin desviación estándar. Frente a tu propuesta, no usa superpíxeles ni aprendizaje transductivo, y su régimen de etiquetas es mucho más amplio; su valor está en documentar el costo de un grafo de píxeles.
+
+**Ficha llena.**
+
+- **¿Amenaza tu originalidad?:** No. Usa un grafo de píxeles, sin segmentación.
+- **Problema que resuelve:** El costo y el entrenamiento por lote completo de la GCN en HSI, y la inferencia de muestras nuevas.
+- **Cómo forma los superpíxeles:** — (un nodo por píxel).
+- **Señal con la que los aprende:** — (entropía cruzada supervisada).
+- **Espectro completo o PCA:** Espectro completo en la rama GCN.
+- **Distancia:** Euclidiana dentro de un kernel gaussiano, en un grafo de 10 vecinos.
+- **Etiquetas por clase:** 50 en Indian Pines; particiones estándar en Pavia University y Houston 2013.
+- **Conjuntos de datos:** Indian Pines, Pavia University y Houston 2013.
+- **OA en Indian Pines:** 75.11 % (miniGCN) y 79.89 % (FuNet-C), con 50 por clase.
+- **Métricas de los superpíxeles:** No aplica.
+- **¿Analiza por tipo de escena? ¿Publica su código?:** No. Sí publica su código.
+- **Limitación frente a tu propuesta:** No usa superpíxeles; es supervisado e inductivo, con muchas etiquetas.
+- **Para el protocolo:** Marco teórico (costo de la GCN sobre píxeles) y trabajos relacionados (pioneros).
+
+\newpage
+
+# Liu et al. (2021) · CEGCN
+
+Liu, Xiao, Yang y Wei (2021). CNN-Enhanced Graph Convolutional Network With Pixel- and Superpixel-Level Feature Fusion for Hyperspectral Image Classification. *IEEE TGRS*, 59(10). Clave: `liu2021cnn`. Código: <https://github.com/qichaoliu/CNN_Enhanced_GCN>.
+
+**Qué propone.** Una red heterogénea con dos ramas que se fusionan:
+
+- una **GCN sobre superpíxeles** (SGsN), para las regiones grandes e irregulares;
+- una **CNN sobre píxeles** (PCsN), para las regiones pequeñas y regulares.
+
+Un codificador y un decodificador de grafo pasan las características entre la imagen y el grafo (Sec. II).
+
+**Motivación (resumen y Sec. V).** Una GCN sobre superpíxeles no clasifica a nivel de píxel. Por eso pierde las regiones pequeñas y produce mapas sobresuavizados.
+
+**Construcción del grafo: el módulo SGC (Sec. II-A).**
+
+- **Segmentación.** Aplica LDA para reducir la dimensión y después SLIC, con $Z = \lceil HW / \lambda \rceil$ superpíxeles y escala $\lambda = 100$. En Indian Pines son unos 210 superpíxeles. *[inferencia]* LDA es supervisado y necesita etiquetas de clase, pero el texto no dice cuáles usa.
+- **La matriz de asociación (Ec. 2):** $Q_{ij} = 1$ si el píxel $i$ pertenece al superpíxel $j$, y 0 en otro caso.
+- **El codificador (Ec. 3):** $V = \hat Q^{T}\, \text{Flatten}(X)$, donde $\hat Q$ es $Q$ normalizada por columna. Cada nodo resulta ser la **media** de sus píxeles.
+- **El decodificador (Ec. 4):** $X^{*} = \text{Reshape}(QV)$, que devuelve a cada píxel la característica de su nodo.
+- **La máscara de adyacencia (Ec. 5):** $M_{ij} = 1$ si los superpíxeles $S_i$ y $S_j$ comparten un borde.
+
+**Aristas aprendidas (Sec. II-C, Ecs. 10 y 11).**
+$$
+A^{l} = \operatorname{Sigmoid}\!\left((\tilde H^{l-1} W_\phi^{l})(\tilde H^{l-1} W_\phi^{l})^{T}\right) \odot M + I,
+$$
+seguida de la normalización simétrica de Kipf. Las aristas solo existen entre superpíxeles adyacentes (por la máscara $M$), pero su peso se aprende.
+
+**Clasificación (Sec. II-E, Ecs. 13--15).** Se concatenan la salida decodificada de la GCN y la de la CNN, y se aplica un softmax por píxel con entropía cruzada sobre los píxeles etiquetados.
+
+**Configuración (Secs. III-A y III-B).**
+
+- *Red:* 2 capas por rama, Adam con tasa 0.0005, 600 iteraciones, PyTorch, GTX 1080Ti.
+- *Etiquetas:* 10 % para entrenar y 1 % para validar en Indian Pines; 1 % y 1 % en Pavia University y Salinas.
+- *Repeticiones:* 10, con la media y la desviación estándar.
+
+**Resultados.**
+
+- **Comparación principal** (OA de los mapas, Figs. 4--6): 99.12 % en Indian Pines, 99.49 % en Pavia University y 99.36 % en Salinas, frente a SSRN, FDSSC, HybridSN y DBDA.
+- **LDA** (Tabla IX): con LDA, la OA es mayor en los tres conjuntos.
+- **Escala de segmentación** (Fig. 7, $\lambda$ de 100 a 500):
+  - en Indian Pines baja ligeramente, de ≈ 99.1 % a ≈ 98.9 %;
+  - en Salinas sube, de ≈ 99.4 % a ≈ 99.7 %;
+  - en Pavia University no cambia;
+  - las diferencias caben dentro de la desviación estándar.
+- **Método de segmentación** (Sec. IV-C, Tabla X). Con SLIC, quick shift, FH, LSC y SEEDS, «los resultados tienen poca diferencia», y el mejor método cambia según el conjunto. Los autores concluyen que basta con «elegir un método apropiado según la experiencia».
+- **Profundidad** (Fig. 8): 2 capas es lo mejor en Indian Pines; en Salinas, más capas (más suavizado) ayudan porque predominan los objetos grandes.
+- **Grafo aprendido** (Fig. 9, Sec. IV-E). Los pesos de las aristas se polarizan en 0 o 1: la información fluye dentro de las regiones homogéneas y se bloquea en los bordes entre clases.
+- **Pocas etiquetas** (Fig. 11): de 5 a 25 por clase, con 1 de validación. Con **5 por clase**, CEGCN obtiene ≈ 75 % en Indian Pines, ≈ 87 % en Pavia University y ≈ 93 % en Salinas, por encima de los demás métodos.
+
+**Para tu tesis.**
+
+- **Su codificador es la pieza que tu segmentador sustituye.** *[inferencia]* Las Ecs. 2--4 con una $Q$ suave (la asociación de SSN) son exactamente tu «construcción diferenciable del grafo». Cítalo en la metodología como el antecedente de la matriz de asociación entre píxeles y superpíxeles.
+- **Es la evidencia más fuerte en contra de tu hipótesis.** La Tabla X y la Fig. 7 sugieren que la segmentación importa poco. *[inferencia]* Pero se miden con 10 % de etiquetas en Indian Pines, con OA cercanas al 99 %, y con una rama CNN que compensa los errores de la segmentación. Galarza y tu tesis trabajan con 5 etiquetas por clase y una GCN pura. Anticípalo en la discusión, junto con Ayres et al. (2024).
+- **Su segmentación usa información de las etiquetas.** *[inferencia]* SLIC sobre LDA depende de las clases. Es otro ejemplo de que los métodos fuertes no forman los superpíxeles sin etiquetas.
+- **Es el antecedente directo de MSSGU** (`liu2022multilevel`, de los mismos autores), y CEGCN aparece como línea base en dSPG y en GiGCN.
+
+**Párrafo de la pasada 2.** Liu et al. (2021) proponen CEGCN, que fusiona una GCN sobre superpíxeles de SLIC, calculados sobre la imagen reducida con LDA, con una CNN sobre píxeles. Una matriz de asociación entre píxeles y superpíxeles codifica la imagen en nodos (la media de cada región) y devuelve las características del grafo a los píxeles. Los pesos de las aristas se aprenden entre superpíxeles adyacentes, y el modelo alcanza 99.12 % de OA en Indian Pines con 10 % de etiquetas y ≈ 75 % con 5 por clase. Al cambiar el método o la escala de segmentación, la exactitud apenas varía, de lo que concluyen que el segmentador puede elegirse por experiencia. Frente a tu propuesta, su asociación es dura, se calcula una sola vez y depende de LDA; tu segmentador la vuelve suave y la aprende sin etiquetas, y tu hipótesis debe mostrar que, con 5 etiquetas por clase, la segmentación sí importa.
+
+**Ficha llena.**
+
+- **¿Amenaza tu originalidad?:** No, pero contiene un riesgo. Su segmentación es fija; sus Tabla X y Fig. 7 sugieren que la segmentación importa poco, aunque con muchas etiquetas.
+- **Problema que resuelve:** El sobresuavizado y la pérdida de regiones pequeñas en una GCN sobre superpíxeles.
+- **Cómo forma los superpíxeles:** F (SLIC sobre LDA, $\lambda = 100$).
+- **Señal con la que los aprende:** — (aprende las aristas con entropía cruzada).
+- **Espectro completo o PCA:** LDA, no PCA.
+- **Distancia:** Aristas aprendidas, $\text{Sigmoid}(HW_\phi (HW_\phi)^T)$, enmascaradas por la adyacencia.
+- **Etiquetas por clase:** 10 % en Indian Pines y 1 % en los demás; barrido de 5 a 25 por clase (Fig. 11).
+- **Conjuntos de datos:** Indian Pines, Pavia University y Salinas.
+- **OA en Indian Pines:** 99.12 % con 10 %; ≈ 75 % con 5 por clase (Fig. 11).
+- **Métricas de los superpíxeles:** Ninguna; compara segmentadores solo por OA (Tabla X).
+- **¿Analiza por tipo de escena? ¿Publica su código?:** En parte: interpreta la escala según el tamaño de los objetos de cada escena (Sec. IV-B). Sí publica su código.
+- **Limitación frente a tu propuesta:** La asociación es dura y fija, depende de LDA y no evalúa la calidad de la segmentación.
+- **Para el protocolo:** Trabajos relacionados (grafo de superpíxeles), metodología (matriz de asociación) y discusión (riesgo de la Tabla X).
+
+\newpage
+
+# Comparación de los tres
+
+| | MDGCN | miniGCN | CEGCN |
+|---|---|---|---|
+| Nodos | Superpíxeles (SLIC) | Píxeles | Superpíxeles (SLIC sobre LDA) |
+| Característica del nodo | Firma media | Firma del píxel | Media vía $\hat Q^{T} X$ |
+| Aristas | Gaussianas entre vecinos, **dinámicas** | 10 vecinos, gaussianas | Adyacencia con **pesos aprendidos** |
+| Aprendizaje | Semi-supervisado, transductivo | Supervisado, inductivo | Por píxel, sobre la imagen completa |
+| Etiquetas (comparación principal) | 30 por clase | 50 por clase | 10 % en Indian Pines |
+| OA en Indian Pines | 93.47 % | 75.11 % | 99.12 % |
+| Con 5 etiquetas por clase | Fig. 9 (solo gráfica) | --- | ≈ 75 % (Fig. 11) |
+| ¿Mide la segmentación? | No | No aplica | Solo por OA (Tabla X) |
+
+*[inferencia]* Las OA no son comparables entre sí: cambian las etiquetas, las particiones y el número de repeticiones. Para tu cuadro comparativo, usa la columna de 5 etiquetas por clase cuando exista.
+
+# Puntos de cuidado al redactar
+
+1. **Versiones de los PDF.** MDGCN y miniGCN están en tu Zotero como versiones de arXiv. Si citas una tabla, aclara que es de esa versión o verifica la publicada.
+2. **No compares OA de regímenes distintos.** 93.47 % (MDGCN, 30 por clase), 75.11 % (miniGCN, 50 por clase) y 99.12 % (CEGCN, 10 %) miden cosas diferentes.
+3. **Que la Tabla X de CEGCN no te tome por sorpresa.** Si en tus resultados la segmentación mueve poco la OA, esa tabla ya lo anticipaba. Si la mueve mucho con 5 etiquetas, es un hallazgo que contrasta con ella.
+4. **El LDA de CEGCN.** No escribas que «usa información supervisada en la segmentación» como un hecho del artículo; es una deducción (LDA requiere clases), y el texto no dice qué etiquetas usa.

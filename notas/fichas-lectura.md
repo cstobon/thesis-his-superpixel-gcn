@@ -692,21 +692,21 @@ Zhao et al. (2025). A review of hyperspectral image classification based on grap
 
 > Por qué está en la lista: Revisión de 2025 de GNN en HSI: comprueba con sus referencias que no te falte nada.
 
-- **Pasada 1 (fecha):** 
-- **Pasada 2 (fecha):** 
-- **¿Amenaza tu originalidad? (sí / no / parcial, y por qué):** 
-- **Problema que resuelve:** 
-- **Cómo forma los superpíxeles (F / A / —, y con qué método):** 
-- **Señal con la que los aprende (clasificación / sin etiquetas / —, y qué pérdida):** 
-- **Espectro completo o PCA:** 
-- **Distancia (euclidiana / angular / otra):** 
-- **Etiquetas por clase:** 
-- **Conjuntos de datos:** 
-- **OA en Indian Pines (y con cuántas etiquetas):** 
-- **Métricas de los superpíxeles (¿reporta ASA, BR o EV, o solo OA, AA y κ?):** 
-- **¿Analiza por tipo de escena? ¿Publica su código?:** 
-- **Limitación frente a tu propuesta:** 
-- **Para el protocolo (en qué sección lo citas y la idea en una oración):** 
+- **Pasada 1 (fecha):** sí
+- **Pasada 2 (fecha):** 16/11/2026 (resumen en `resumen-zhao2025.qmd`)
+- **¿Amenaza tu originalidad? (sí / no / parcial, y por qué):** no; es una revisión. Llevó a CAD-GCN (Wan 2021), que sí aprende la asignación suave píxel–región en HSI, pero solo con EC
+- **Problema que resuelve:** primera revisión centrada solo en GNN para clasificar HSI (WoS hasta oct. 2024)
+- **Cómo forma los superpíxeles (F / A / —, y con qué método):** — (clasifica los métodos por grafo de píxeles o de superpíxeles, Tablas 4–5)
+- **Señal con la que los aprende (clasificación / sin etiquetas / —, y qué pérdida):** — (trata lo autosupervisado en GAE, Sec. 6, y Sec. 9.4)
+- **Espectro completo o PCA:** —
+- **Distancia (euclidiana / angular / otra):** —; solo F-GCN sustituye la euclidiana (medida difusa, Tabla 5)
+- **Etiquetas por clase:** sus experimentos usan 10 % (Sec. 8.2)
+- **Conjuntos de datos:** IP, PU, Houston 2013, WHU-Hi-HongHu (Tabla 8)
+- **OA en Indian Pines (y con cuántas etiquetas):** 10 %: miniGCN 95.58, CEGCN 95.93, S²GCN 95.83 (Tabla 9)
+- **Métricas de los superpíxeles (¿reporta ASA, BR o EV, o solo OA, AA y κ?):** solo OA, AA y κ
+- **¿Analiza por tipo de escena? ¿Publica su código?:** no; lista los enlaces de 7 códigos (Tabla 12)
+- **Limitación frente a tu propuesta:** considera la segmentación un preprocesamiento; dice que influye en la clasificación (Sec. 5.1.2), pero solo propone mitigarla con multiescala
+- **Para el protocolo (en qué sección lo citas y la idea en una oración):** introducción de Trabajos relacionados: «Para una revisión reciente… véase @zhao2025review», y la construcción adaptativa del grafo como dirección abierta (Sec. 9.1)
 
 ### hong2021graph · Prioridad A
 
