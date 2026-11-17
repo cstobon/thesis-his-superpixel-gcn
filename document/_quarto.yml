@@ -3,7 +3,8 @@ project:
 
 lang: es
 number-sections: true
-bibliography: lecturas-verificadas.bib
+bibliography: referencias.bib
+csl: csl/apa.csl
 format:
   pdf:
     documentclass: article

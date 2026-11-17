@@ -16,7 +16,7 @@ Desarrollar un segmentador en superpíxeles diferenciable, basado en Superpixel 
 
 2. Adaptar la arquitectura SSN a imágenes hiperespectrales mediante un extractor de características espectrales y una afinidad angular, inspirada en SAM, entre píxeles y superpíxeles.
 
-3. Formular una función de pérdida no supervisada que combine la EV, calculada sobre las bandas originales, con un término de compacidad espacial, y entrenar con ella el segmentador sin utilizar etiquetas. La pérdida adapta el mecanismo de reconstrucción de SSN, que en los trabajos previos reconstruye las etiquetas [@zhang2022ems; @li2023feature], para reconstruir el espectro de cada píxel a partir de su superpíxel.
+3. Formular una función de pérdida no supervisada que combine la EV, calculada sobre las bandas originales, con un término de compacidad espacial, y entrenar con ella el segmentador sin utilizar etiquetas. La pérdida adapta el mecanismo de reconstrucción de SSN, que en los trabajos previos reconstruye las etiquetas [@zhangEMSGCNEndtoEndMixhop2022; @liFeatureguidedDynamicGraph2023], para reconstruir el espectro de cada píxel a partir de su superpíxel.
 
 4. Evaluar los superpíxeles obtenidos integrándolos en el clasificador GCN semi-supervisado y comparándolos con los métodos de referencia mediante métricas de segmentación (ASA, BR y EV) y de clasificación (OA, AA y $\kappa$).
 

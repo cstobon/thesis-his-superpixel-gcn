@@ -1,7 +1,7 @@
 # Referencias {#sec-referencias}
 
 <!-- No escribas nada aquí: la lista se genera sola a partir de las citas
-     usadas en el texto (@clave) y de lecturas-verificadas.bib. -->
+     usadas en el texto (@clave) y de referencias.bib (exportado desde Zotero con Better BibTeX). -->
 
 ::: {#refs}
 :::
