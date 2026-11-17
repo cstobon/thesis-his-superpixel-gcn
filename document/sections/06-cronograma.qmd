@@ -3,47 +3,45 @@
 # Cronograma de actividades (plan de trabajo)
 
 <!-- Una fila por actividad. Pon \X en cada mes en que se trabaja la
-     actividad (celda roja), \Xc para el tono claro (actualización continua)
+     actividad (celda roja), \X para el tono claro (actualización continua)
      y \hito para marcar un hito; deja vacío el resto. -->
 
 ```{=latex}
 \kern10pt
-\noindent\begin{tabular}{|p{6cm}|c|c|c|c|c|c|c|c|c|c|c|}
+\begingroup\small\setlength{\tabcolsep}{3.5pt}\renewcommand{\arraystretch}{1.1}
+\noindent\begin{tabular}{|p{7.4cm}|c|c|c|c|c|c|c|c|c|c|c|}
 \hline\hline
  & oct & nov & dic & ene & feb & mar & abr & may & jun & jul & ago \\ \hline
 Revisión del estado del arte.
- & \X & \X & \X & \X & \X & \X & \Xc & \Xc & \Xc & \Xc & \\ \hline
+ & \X & \X & \X & \X & \X & \X & \X & \X & \X & \X & \\ \hline
 Estudio de fundamentos de aprendizaje profundo, redes de grafos y superpíxeles diferenciables.
  & \X & \X & \X & \X & & & & & & & \\ \hline
 Estudiar las extensiones CUDA para PyTorch y las herramientas de perfilado (Nsight Compute).
  & & & & \X & & & & & & & \\ \hline
 Redacción y entrega del protocolo de tesis.
- & \X & \X & \X\hito & & & & & & & & \\ \hline
-Reproducir las líneas base SLIC-GCN y PCNN-GCN sobre seis conjuntos de datos bajo el protocolo de referencia.
- & & \X & \X & & & & & & & & \\ \hline
+ & \X & \X & & & & & & & & & \\ \hline
+Reproducir la arquitectura PCNN-GCN y los métodos de referencia (SLIC, LSC, ERS, SEEDS y PCNN-SAM) sobre seis conjuntos de datos.
+ & & & \X & \X & & & & & & & \\ \hline
 Reproducir SSN en imágenes RGB (BSDS500) y evaluar su viabilidad.
- & & & & \X\hito & & & & & & & \\ \hline
+ & & & & \X & \X & & & & & & \\ \hline
 Adaptar SSN a imágenes hiperespectrales mediante un extractor espectral y una afinidad angular inspirada en SAM.
- & & & & & \X & & & & & & \\ \hline
+ & & & & & \X & \X & & & & & \\ \hline
 Formular la función de pérdida no supervisada (EV + compacidad) y entrenar el segmentador sin etiquetas.
  & & & & & \X & \X & & & & & \\ \hline
-Integrar los superpíxeles en la GCN semi-supervisada y realizar la evaluación preliminar.
- & & & & & & \X\hito & & & & & \\ \hline
+Evaluar los superpíxeles aprendidos en la GCN semi-supervisada frente a SLIC, LSC, ERS, SEEDS y PCNN-SAM.
+ & & & & & & \X & \X & & & & \\ \hline
 Explorar el entrenamiento de extremo a extremo del segmentador con la GCN.
  & & & & & & & \X & \X & & & \\ \hline
 Implementar el núcleo CUDA fusionado de la asociación, verificar sus gradientes y compararlo con PyTorch (tiempo, memoria y \textit{roofline}).
  & & & & & & & \X & \X & & & \\ \hline
-Evaluar la arquitectura propuesta frente a SLIC, LSC, ERS, SEEDS y PCNN-SAM, incluyendo el estudio de ablación.
+Determinar mediante ablaciones el efecto de la compacidad, de la dimensión de las características y de la afinidad.
  & & & & & & & & \X & & & \\ \hline
 Analizar los resultados por tipo de escena y la relación entre las métricas de segmentación y la exactitud de clasificación.
  & & & & & & & & & \X & & \\ \hline
 Redacción del manuscrito de tesis.
  & & & & & \X & \X & \X & \X & \X & \X & \X \\ \hline
 Revisión final, preparación de artículo y defensa.
- & & & & & & & & & & \X & \X\hito \\ \hline
+ & & & & & & & & & & \X & \X \\ \hline
 \end{tabular}
-
-\par\vspace{4pt}\noindent{\footnotesize
-\fcolorbox{black}{crono!35}{\rule{0pt}{5pt}\hspace{8pt}} = actualización continua.\quad
-\hito{} = hito.}
+\endgroup
 ```
