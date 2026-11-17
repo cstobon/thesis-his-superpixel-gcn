@@ -1,0 +1,221 @@
+---
+lang: es
+number-sections: false
+format:
+  pdf:
+    documentclass: article
+    fontsize: 11pt
+    papersize: letter
+    pdf-engine: pdflatex
+    fontenc: OT1
+    fontfamily: fix-cm
+    indent: false
+    colorlinks: false
+    boxlinks: true
+    geometry:
+      - left=53.24pt
+      - textwidth=469.8pt
+      - top=36.7pt
+      - textheight=636pt
+      - footskip=27pt
+    include-in-header:
+      - ../document/preamble.tex
+      - unicode-latex.tex
+---
+
+<!-- =====================================================================
+     PASADA 2 · Galarza (2026), cap. 5 y resultados de EV del cap. 4
+     Tomado solo del PDF de Zotero. Las páginas son las impresas en la
+     tesis (no las del visor de PDF). Lo marcado como [inferencia] o
+     [cálculo propio] no es de Galarza.
+     Para compilar: quarto render resumen-galarza.qmd
+     ===================================================================== -->
+
+```{=latex}
+\title{Centro de investigación y estudios avanzados del IPN\\
+       Departamento de Computación\\
+       \textbf{Pasada 2: Galarza (2026), capítulos 4 y 5}}
+\author{Tesista: Edgar Tobón Sosa}
+\date{Conclusiones, trabajo futuro y resultados de EV}
+\begingroup\setlength{\parskip}{0pt}
+\maketitle
+\endgroup
+\kern-15pt
+```
+
+**Cómo usar este documento.** Primero vienen las conclusiones y el trabajo futuro del capítulo 5, contados con mis palabras. Después, los números exactos del capítulo 4, con su página, listos para citar. Luego se comprueban las tres afirmaciones de tu protocolo. Al final hay un análisis propio de las tablas de Galarza que matiza su hallazgo principal: **léelo antes de redactar el planteamiento**. Las páginas son las impresas en la tesis; en el visor de PDF hay que sumar 14.
+
+# Lo esencial
+
+1. **Tus tres afirmaciones coinciden con Galarza:**
+   - ningún segmentador gana en todas las escenas (C2);
+   - la EV predice la OA mejor que la ASA, con $r^2$ de 52.2 % frente a 26.6 % (C4, Tabla 4.8);
+   - PCNN-SAM no tiene la EV más alta en 5 de los 6 conjuntos (Tabla 4.5).
+2. **Tu pregunta nace de tres frases de Galarza.**
+   - En la discusión dice que conviene «priorizar explícitamente la retención espectral» al diseñar un segmentador para un clasificador de grafos (p. 89). Tu propuesta convierte esa recomendación en una función objetivo.
+   - TF1 pide un acoplamiento angular más barato. Eso origina tu afinidad angular diferenciable y tu objetivo 8 (el núcleo CUDA).
+   - TF3 pide comprobar si el hallazgo sobre la EV es general. Tu objetivo de analizar las métricas contra la OA lo retoma.
+3. **Cuidado:** la correlación EV–OA de Galarza se calcula sobre 30 pares conjunto × método. *[cálculo propio]* Con sus mismos números:
+   - **dentro de cada conjunto**, la EV se correlaciona **negativamente** con la OA en 5 de 6 escenas;
+   - en las dos escenas que gana PCNN-SAM (HanChuan y HongHu), su EV es la 4.ª y la 5.ª de cinco.
+
+   La correlación agregada refleja sobre todo que las escenas con EV alta son más fáciles, no que elegir el segmentador con más EV dé más OA. Esto no invalida tu pregunta, pero cambia cómo debes plantearla (sección 4).
+
+# Capítulo 5 con mis palabras
+
+**Qué hizo.**
+
+- **Método:** PCNN-SAM, una red neuronal de pulsos cuyo acoplamiento usa SAM sobre el espectro completo, seguida de una GCN de dos capas.
+- **Comparación:** contra SLIC, LSC, ERS y SEEDS.
+- **Protocolo:** 6 conjuntos, 5 etiquetas por clase y $K = 500$.
+- **Repeticiones:** 30 pares conjunto × método, con 10 ejecuciones cada uno, en total 300 (p. 87).
+
+**Conclusiones** (pp. 87–88):
+
+- **C1. El grafo manda.** Con 5 etiquetas por clase, la GCN no puede corregir los errores que hereda de la segmentación. Por eso la elección del segmentador no es un detalle, sino lo que decide el resultado. Por la misma razón fijó el clasificador y solo varió el segmentador.
+- **C2. No hay un segmentador universal.** SLIC gana en las escenas homogéneas o con bordes claros (Salinas, Pavia University e Indian Pines). Gana 3 de 6 conjuntos en OA y en $\hat\kappa$.
+- **C3. PCNN-SAM gana solo en su régimen, pero ahí sí gana.** Gana en HanChuan y HongHu, las dos escenas con más correlación espectral entre clases y más fragmentación. Galarza argumenta que no es casualidad: son justo las escenas que su mecanismo predice.
+- **C4. La EV predice mejor que la ASA** (hallazgo principal). Sobre los 30 pares, la EV explica el 52.2 % de la varianza de la OA y la ASA el 26.6 %. La correlación EV–OA es significativa ($r = 0.722$, $p < 0.001$); la de BR–OA no lo es ($p = 0.184$).
+
+**Predicciones de su hipótesis** (p. 88):
+
+- **P1, superioridad general: refutada.** PCNN-GCN queda segundo, con 70.75 % de OA promedio frente a 72.80 % de SLIC y 71.88 % de ERS.
+- **P2, ventaja condicional: confirmada.** Galarza la considera la contribución central: el mejor segmentador depende de si la dificultad de la escena es geométrica o espectral.
+
+**Discusión** (p. 89):
+
+- ASA y BR no bastan para juzgar si una segmentación sirve a una GCN.
+- Recomienda **priorizar explícitamente la retención espectral** al diseñar un segmentador para un clasificador de grafos, porque la EV se calcula sin entrenar el clasificador.
+- **Costo:** PCNN-SAM es más lento, porque compara el vector espectral completo, pero es un costo de preprocesamiento que se paga una sola vez.
+
+**Límites que él mismo declara** (pp. 89–90):
+
+- **Un solo clasificador**, la GCN de Kipf y Welling, para no confundir efectos.
+- **Una sola escala**, $K = 500$, elegida con un barrido $K \in \{100, 250, 500, 1000\}$.
+- **Comparación por régimen y no prueba de superioridad.** El único respaldo estadístico es la correlación EV–OA, y las comparaciones por conjunto son descriptivas.
+- **Pavia University queda sin explicar.**
+
+**Trabajo futuro** (pp. 90–91):
+
+- **TF1. Abaratar el acoplamiento espectral.** Galarza conjetura que SAM causa el mayor tiempo de segmentación, porque exige un producto punto y un arcocoseno sobre el espectro completo para cada par de vecinos. Propone medir el tiempo por componente y buscar afinidades más baratas que conserven la invariancia a la magnitud. *[inferencia]* Es el origen directo de tu afinidad angular y de tu objetivo 8.
+- **TF2. Pseudoetiquetas a partir del tiempo de disparo de la PCNN**, por su parecido con la propagación de etiquetas. No lo retomas.
+- **TF3. Comprobar si el hallazgo sobre la EV es general,** con GCN más complejas (atención, multiescala). *[inferencia]* Tu objetivo V lo retoma con otra variable: superpíxeles aprendidos en lugar de otro clasificador.
+- **TF4. Caracterizar el régimen de bordes urbanos** (Pavia University), donde ni la ASA ni la EV explican la OA.
+
+*[inferencia]* **De dónde nace tu pregunta.** Galarza muestra que la EV se asocia con la OA y recomienda priorizarla, pero ningún segmentador de su estudio la optimiza: todos son reglas fijas, y PCNN-SAM solo gana en EV en Indian Pines. La pregunta natural es si optimizar la EV directamente, con un segmentador diferenciable y con la afinidad angular de TF1, mejora la OA.
+
+# Números del capítulo 4 (para citar)
+
+**Tabla 4.5** (p. 65): métricas de segmentación con $K = 500$. Solo la EV, que es la que usarás. La más alta de cada conjunto va en negritas:
+
+| Conjunto | SLIC | LSC | ERS | SEEDS | PCNN-SAM |
+|---|---|---|---|---|---|
+| Indian Pines | 0.8528 | 0.8429 | 0.8645 | 0.8414 | **0.8654** |
+| Salinas | 0.8751 | **0.9237** | 0.9114 | 0.9040 | 0.8845 |
+| Pavia University | 0.3572 | 0.5517 | **0.5665** | 0.4741 | 0.4105 |
+| LongKou | 0.9278 | **0.9464** | 0.9434 | 0.9358 | 0.9171 |
+| HanChuan | 0.5564 | 0.6770 | 0.6630 | **0.7280** | 0.6057 |
+| HongHu | 0.7738 | **0.8356** | 0.7817 | 0.8212 | 0.7462 |
+
+- PCNN-SAM solo tiene la EV más alta en Indian Pines, y por apenas 0.0009 sobre ERS.
+- En LongKou y HongHu tiene la más baja.
+- La ASA más alta la tiene SLIC en Indian Pines (empatada con PCNN-SAM) y en Salinas, ERS en Pavia University y LongKou, PCNN-SAM en HanChuan y LSC en HongHu.
+- La BR más alta la tiene ERS en 5 de 6 conjuntos; en Indian Pines también, con 0.9956.
+
+**Tabla 4.6** (p. 72): OA (%) con 5 etiquetas por clase. La más alta de cada conjunto va en negritas:
+
+| Conjunto | SLIC | LSC | ERS | SEEDS | PCNN-SAM |
+|---|---|---|---|---|---|
+| Indian Pines | **68.98** | 61.45 | 63.95 | 68.70 | 65.50 |
+| Salinas | **86.11** | 82.61 | 81.07 | 84.29 | 80.23 |
+| Pavia University | **66.85** | 60.57 | 65.28 | 61.31 | 58.93 |
+| LongKou | 85.24 | 86.65 | **89.52** | 83.91 | 84.47 |
+| HanChuan | 58.13 | 57.78 | 56.43 | 55.84 | **59.96** |
+| HongHu | 71.51 | 74.53 | 75.01 | 73.36 | **75.39** |
+
+**Tabla 4.7** (p. 73): OA promedio en los 6 conjuntos.
+
+| Método | OA promedio | Conjuntos ganados en OA |
+|---|---|---|
+| SLIC | 72.80 % | 3 |
+| ERS | 71.88 % | 1 |
+| SEEDS | 71.24 % | 0 |
+| PCNN-SAM | 70.75 % | 2 |
+| LSC | 70.60 % | 0 |
+
+Solo 2.2 puntos separan al mejor del peor (p. 71).
+
+**Tabla 4.8** (p. 75): la correlación que citas en el planteamiento. Correlación de Pearson con la OA sobre $n = 30$ pares:
+
+| Métrica | $r$ | $r^2$ | $p$ |
+|---|---|---|---|
+| ASA | +0.515 | 26.6 % | 0.0036 |
+| BR | +0.250 | 6.2 % | 0.184 |
+| EV | +0.722 | 52.2 % | < 0.0001 |
+
+**Tabla 4.9** (p. 76): correlación ASA–OA dentro de cada conjunto ($n = 5$, descriptiva). Salinas +0.823, LongKou +0.774, HongHu +0.444, HanChuan +0.203, Indian Pines +0.144 y Pavia University −0.162. **Galarza no reporta esta desagregación para la EV.**
+
+**Tabla 4.10** (p. 84): los cuatro regímenes.
+
+| Régimen | Conjuntos | Ganador | $r$(ASA, OA) |
+|---|---|---|---|
+| Homogeneidad espacial | Salinas, LongKou | SLIC, ERS | +0.823, +0.774 |
+| Ruido de baja resolución | Indian Pines | SLIC | +0.144 |
+| Bordes urbanos abruptos | Pavia University | SLIC | −0.162 |
+| Alta correlación espectral | HanChuan, HongHu | PCNN-SAM | +0.203, +0.444 |
+
+Para el régimen espectral, Galarza dice que «lo determinante es la retención espectral (EV), no la regularidad geométrica». En Pavia University reconoce que no tiene una explicación.
+
+**Otros datos útiles:**
+
+- La EV se define en la Ec. 2.15 (pp. 26–27) como $\sum_k |s_k|(\bar{\mathbf{x}}_{s_k}-\bar{\mathbf{x}})^2 / \sum_p (\mathbf{x}_p-\bar{\mathbf{x}})^2$, con firmas espectrales.
+- Las características de cada nodo de la GCN son la media de las **10 primeras componentes principales** de sus píxeles (p. 58 y Tabla 4.4, p. 62). *[inferencia]* Es decir, PCNN-SAM segmenta sin PCA, pero la GCN sí recibe datos reducidos con PCA. Tenlo en cuenta al reproducir la línea base.
+
+# Comprobación de lo que ya escribiste
+
+| Lo que dice tu protocolo | Lo que dice Galarza | ¿Coincide? |
+|---|---|---|
+| Ningún algoritmo es superior en todas las escenas; SLIC domina en bordes bien definidos y PCNN-SAM en clases espectralmente parecidas | C2 y C3 (pp. 87–88); Tabla 4.10 | Sí |
+| La EV predice la exactitud «casi el doble de bien» que la ASA | C4: 52.2 % frente a 26.6 % de varianza explicada (p. 88; Tabla 4.8, p. 75) | Sí. «Casi el doble» se refiere a $r^2$, no a $r$ (0.722 frente a 0.515). Si das números, cita los $r^2$ |
+| PCNN-SAM no obtiene la EV más alta en 5 de los 6 conjuntos | Tabla 4.5 (p. 65): solo la tiene en Indian Pines | Sí |
+| Con tan pocas etiquetas, la GCN no puede corregir los errores de la segmentación | C1 (p. 87) | Sí |
+| Cada nodo se representa con la media de las 10 primeras componentes principales | Pp. 58–62 (Tabla 4.4) | Sí |
+
+# Análisis propio de las tablas de Galarza *[cálculo propio]*
+
+Con los valores de las Tablas 4.5 y 4.6 reproduje exactamente las correlaciones agregadas de la Tabla 4.8: EV $r = 0.722$ y ASA $r = 0.515$. Eso confirma que los datos están bien copiados. Después calculé lo que Galarza no reporta: la correlación EV–OA **dentro de cada conjunto** ($n = 5$, solo descriptiva).
+
+| Conjunto | $r$(EV, OA) | $r$(ASA, OA) | Mayor EV | Mayor OA | Lugar de PCNN-SAM en EV |
+|---|---|---|---|---|---|
+| Indian Pines | −0.10 | +0.14 | PCNN-SAM | SLIC | 1.º |
+| Salinas | −0.32 | +0.82 | LSC | SLIC | 4.º |
+| Pavia University | −0.15 | −0.16 | ERS | SLIC | 4.º |
+| LongKou | +0.64 | +0.77 | LSC | ERS | 5.º |
+| HanChuan | −0.71 | +0.20 | SEEDS | PCNN-SAM | 4.º |
+| HongHu | −0.11 | +0.44 | LSC | PCNN-SAM | 5.º |
+
+- **La EV promedio de cada conjunto se correlaciona con su OA promedio con $r = 0.78$.** Esto es la variación entre escenas.
+- **Quitando la media de cada conjunto, la correlación EV–OA es $r = -0.17$, y la ASA–OA $r = +0.28$.** Esto es la variación entre métodos dentro de una escena.
+- **El segmentador con la EV más alta nunca obtiene la OA más alta.** En ninguno de los 6 conjuntos coinciden.
+
+*[inferencia]* **Qué significa.**
+
+- El $r = 0.722$ es real, pero mide sobre todo que las escenas con superpíxeles más homogéneos espectralmente (LongKou, Salinas) son también las más fáciles de clasificar.
+- Con estos cinco métodos, no muestra que elegir el segmentador con más EV dé más OA dentro de una misma escena.
+- Tampoco sostiene que PCNN-SAM gane en HanChuan y HongHu *por* su EV: ahí su EV es de las más bajas.
+
+**Consecuencias para tu tesis:**
+
+1. **Tu pregunta sigue siendo válida, y este análisis la hace más necesaria.** Si la EV no predice la OA entre métodos fijos, la única forma de saber si **optimizarla** ayuda es probarlo, que es lo que propones. Coincide con el riesgo que ya señalaste a partir de la ablación de Li et al. (2026).
+2. **Afina la redacción del planteamiento.** En vez de presentar la correlación como prueba de que más EV implica más OA, di que es una correlación sobre 30 pares conjunto × método. Por ejemplo:
+
+   > «Sobre 30 pares de conjunto de datos y método, la EV explicó el 52.2 % de la varianza de la OA, frente al 26.6 % de la ASA (Galarza, 2026). Sin embargo, esa correlación mezcla escenas de distinta dificultad, y entre los segmentadores de una misma escena el de mayor EV no fue el de mayor exactitud. Queda abierto si maximizar la EV directamente mejora la clasificación.»
+
+3. **Diseño experimental.** En el objetivo V, mide la relación EV–OA **dentro de cada escena** (variando $K$, la semilla o el peso de la compacidad) y no solo agregada. Si no, repetirás el efecto de escena. Es la extensión natural de TF3.
+4. **Para la defensa:** que alguien te pregunte esto es probable. Haber visto el efecto de escena antes que el jurado es una fortaleza.
+
+# Cambios sugeridos (no aplicados)
+
+- **Planteamiento:** cambiar la frase de la EV por la versión matizada del punto 2.
+- **Objetivo V:** agregar «dentro de cada escena».
+- **Estado del arte, párrafo del hueco:** «encontró que la EV… predice la exactitud… mejor que la ASA» es literal de Galarza, así que puede quedarse. Conviene añadir «sobre 30 pares conjunto de datos × método».

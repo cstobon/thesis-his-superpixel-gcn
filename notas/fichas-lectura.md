@@ -198,11 +198,11 @@ Galarza (2026). Tesis de referencia: PCNN-SAM y PCNN-GCN (título completo en tu
 
 > Por qué está en la lista: Antecedente directo: el hallazgo de que la EV predice la OA es la base de tu pregunta. Agrégala a Zotero a mano, con el tipo «Tesis».
 
-- **Pasada 2 (fecha):** 
-- **Hallazgos que citas (con página y tabla):** 
-- **Trabajo futuro que retomas (TF1, TF3, TF4):** 
-- **Números exactos para el planteamiento (EV, OA, correlación):** 
-- **Para el protocolo (en qué sección lo citas):** 
+- **Pasada 2 (fecha):** ✔ 16/11/2026 (cap. 5 y Tablas 4.5–4.10; resumen en `resumen-galarza.qmd`)
+- **Hallazgos que citas (con página y tabla):** C1 el grafo manda con 5 etiquetas (p. 87); C2 ningún segmentador universal, SLIC gana 3/6 (p. 87; Tabla 4.7, p. 73); C3 PCNN-SAM gana en HanChuan y HongHu (p. 88); C4 EV r² 52.2 % frente a ASA 26.6 % sobre 30 pares (p. 88; Tabla 4.8, p. 75); PCNN-SAM solo tiene la mayor EV en Indian Pines (Tabla 4.5, p. 65).
+- **Trabajo futuro que retomas (TF1, TF3, TF4):** TF1 (afinidad angular más barata → objetivo 8), TF3 (generalidad del hallazgo de EV → objetivo V); TF4 no.
+- **Números exactos para el planteamiento (EV, OA, correlación):** EV–OA r = 0.722, r² = 52.2 %, p < 0.0001; ASA–OA r = 0.515, r² = 26.6 %, p = 0.0036; BR–OA p = 0.184 (Tabla 4.8). OA promedio: SLIC 72.80, ERS 71.88, PCNN-SAM 70.75 (Tabla 4.7). Ojo [cálculo propio]: dentro de cada conjunto la correlación EV–OA es negativa en 5 de 6 escenas (r agregada sin efecto de escena = −0.17).
+- **Para el protocolo (en qué sección lo citas):** planteamiento (hallazgo de EV, matizado), estado del arte (hueco), objetivos (I y V), metodología (línea base: GCN con 10 componentes principales, K = 500).
 
 ---
 
@@ -1275,14 +1275,14 @@ Hoefler y Belli (2015). Scientific benchmarking of parallel computing systems: t
 > Por qué está en la lista: Cómo medir y reportar tiempos con rigor (calentamiento, repeticiones, mediana, intervalos). Base de la comparación entre tu núcleo y PyTorch.
 
 - **Pasada 1 (fecha):** 
-- **Pasada 2 (fecha):** 
-- **Problema que resuelve:** 
-- **Operación que acelera y cómo la organiza en la GPU (hilos, bloques, memoria compartida):** 
-- **¿Fusiona operaciones o evita materializar tensores intermedios? ¿Cómo hace la pasada hacia atrás?:** 
-- **Hardware y aceleración reportada (× frente a qué):** 
-- **Cómo midió tiempo, memoria o tráfico de memoria (repeticiones, perfilador, roofline):** 
-- **Relación con tu núcleo del objetivo 8:** 
-- **Para el protocolo (en qué sección lo citas y la idea en una oración):** 
+- **Pasada 2 (fecha):** 17/11/2026 (resumen en `resumen-hoefler.qmd`)
+- **Problema que resuelve:** la mayoría de los artículos de HPC no reportan rendimiento de forma interpretable (120 artículos revisados); proponen 12 reglas mínimas.
+- **Operación que acelera y cómo la organiza en la GPU (hilos, bloques, memoria compartida):** ninguna (metodología de medición).
+- **¿Fusiona operaciones o evita materializar tensores intermedios? ¿Cómo hace la pasada hacia atrás?:** no aplica.
+- **Hardware y aceleración reportada (× frente a qué):** ejemplos en Piz Daint, Piz Dora y Pilatus; advierte que la aceleración sin tiempo absoluto no significa nada (Regla 1; 38 % de los artículos lo omite).
+- **Cómo midió tiempo, memoria o tráfico de memoria (repeticiones, perfilador, roofline):** mediana con IC no paramétrico (n > 5), criterio de paro por ancho del IC, Kruskal–Wallis, excluir calentamiento, sobrecarga del reloj < 5 %, límites superiores (roofline, Regla 11), diagramas de caja/violín.
+- **Relación con tu núcleo del objetivo 8:** define cómo comparar el núcleo con PyTorch: tiempo absoluto de la referencia, mediana e IC, prueba estadística, medir también la iteración completa (Regla 2), documentar el equipo (Regla 9).
+- **Para el protocolo (en qué sección lo citas y la idea en una oración):** metodología, viñeta de la comparación de tiempos; ojo: no habla de temperatura ni frecuencia, separar esa cita.
 
 ### quesadabarriuso2021gpu · Prioridad A
 

@@ -58,6 +58,7 @@ La presente investigación se ha pensado llevar a cabo de la siguiente manera:
 - Medición de la calidad de segmentación (ASA, BR, EV), de clasificación (OA, AA, $\kappa$) y del costo computacional (tiempo de entrenamiento e inferencia, memoria).
 - Estudio de ablación: superpíxeles aprendidos sin ajuste conjunto, sin pérdida de reconstrucción, sin término de compacidad y con distancia euclidiana en lugar de afinidad angular.
 - Pruebas de significancia estadística entre métodos sobre las diez ejecuciones.
+- Cálculo de la correlación entre cada métrica de segmentación (ASA, BR, EV) y la exactitud global, agregada sobre todos los conjuntos de datos y, por separado, dentro de cada conjunto, variando el peso de la compacidad, la escala $K$ y la semilla, para distinguir el efecto de la escena del efecto de la segmentación.
 
 ## Núcleo CUDA fusionado para la asociación píxel-superpíxel
 

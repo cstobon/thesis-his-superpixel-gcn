@@ -121,7 +121,7 @@ En este esquema, $\hat{\mathbf{A}}$ no es un parámetro aprendido, sino una entr
      resultados obtuvieron y qué limitación tienen respecto a tu propuesta.
      Puedes cerrar con productos o sistemas comerciales relevantes. -->
 
-Los trabajos relacionados se dividen en tres grupos: los que clasifican HSI con redes de grafos sobre superpíxeles fijos, los que aprenden superpíxeles diferenciables en imágenes RGB, y los que aprenden los superpíxeles de una HSI, para clasificarla con GCN o para agruparla sin etiquetas. Para una revisión reciente de la clasificación de HSI con redes neuronales de grafos, véase @zhao2025review. Esa revisión señala que la exactitud de la segmentación en superpíxeles influye de forma sustancial en la clasificación posterior (Sec. 5.1.2), y propone como dirección futura que la construcción del grafo se adapte a las características espectrales y espaciales de cada región, en lugar de fijarse a mano (Sec. 9.1).
+Los trabajos relacionados se dividen en cuatro grupos: los que clasifican HSI con redes de grafos sobre superpíxeles fijos, los que aprenden superpíxeles diferenciables en imágenes RGB, los que aprenden los superpíxeles de una HSI, para clasificarla con GCN o para agruparla sin etiquetas, y los que aceleran en GPU la segmentación en superpíxeles, el ángulo espectral o las operaciones de similitud con softmax. Para una revisión reciente de la clasificación de HSI con redes neuronales de grafos, véase @zhao2025review. Esa revisión señala que la exactitud de la segmentación en superpíxeles influye de forma sustancial en la clasificación posterior (Sec. 5.1.2), y propone como dirección futura que la construcción del grafo se adapte a las características espectrales y espaciales de cada región, en lugar de fijarse a mano (Sec. 9.1).
 
 ### GCN sobre superpíxeles fijos en HSI {#sec-rel-fijos}
 
@@ -176,7 +176,17 @@ Este grupo reúne a los competidores directos de la propuesta: los trabajos que 
 
 Otros tres trabajos se acercan a esta línea sin aprender la segmentación para una GCN. DSTC [@liu2024dual] agrupa los píxeles en «supertokens» con un *k-means* suave desplegado dentro de una red sobre el espectro completo, pero lo entrena solo con entropía cruzada y clasifica con un *transformer*. LAGAN [@chen2023local] aplica SLIC sobre las características de un autocodificador entrenado sin etiquetas por reconstrucción espectral (Ec. 5), sin entrenar la segmentación; su ablación muestra que segmentar sobre PCA da la peor exactitud (83.69 % en Salinas, frente a 96.54 % sobre el espectro original y 98.05 % sobre las características aprendidas; Tabla 2). S$^2$DL [@cui2024superpixel] agrupa HSI sin etiquetas con superpíxeles fijos de ERS sobre las tres primeras componentes principales, y sus autores proponen desarrollar métodos de superpíxeles específicos para HSI (Sec. V).
 
-Los métodos que aprenden superpíxeles para clasificar HSI con GCN los ajustan con la señal de las etiquetas, con distancias euclidianas, y ninguno mide la calidad de la segmentación que produce [@wan2021hyperspectral; @zhang2022ems; @li2023feature; @wang2025multiscale]. El único trabajo que los aprende con un término espectral sin etiquetas lo hace para el agrupamiento no supervisado y como un término auxiliar, sin evaluar su efecto por separado [@li2026joint]. Por otra parte, Galarza (2026) encontró que la EV de los superpíxeles predice la exactitud de la clasificación semi-supervisada mejor que la ASA. Ningún trabajo usa la EV como criterio explícito y sin etiquetas para aprender los superpíxeles de una GCN semi-supervisada, ni evalúa si maximizarla se traduce en una mayor exactitud cuando solo se dispone de cinco etiquetas por clase. La @tbl-comparativo resume estas diferencias.
+Los métodos que aprenden superpíxeles para clasificar HSI con GCN los ajustan con la señal de las etiquetas, con distancias euclidianas, y ninguno mide la calidad de la segmentación que produce [@wan2021hyperspectral; @zhang2022ems; @li2023feature; @wang2025multiscale]. El único trabajo que los aprende con un término espectral sin etiquetas lo hace para el agrupamiento no supervisado y como un término auxiliar, sin evaluar su efecto por separado [@li2026joint]. Por otra parte, Galarza (2026) encontró que, sobre 30 pares de conjunto de datos y método, la EV de los superpíxeles predice la exactitud de la clasificación semi-supervisada mejor que la ASA, aunque esa relación no se aprecia entre los segmentadores de una misma escena. Ningún trabajo usa la EV como criterio explícito y sin etiquetas para aprender los superpíxeles de una GCN semi-supervisada, ni evalúa si maximizarla se traduce en una mayor exactitud cuando solo se dispone de cinco etiquetas por clase. La @tbl-comparativo resume estas diferencias.
+
+### Superpíxeles y SAM en GPU {#sec-rel-gpu}
+
+**Por qué HSI necesita HPC.** Un sensor como AVIRIS registra 224 bandas por píxel, y el volumen de datos suele alcanzar varios gigabytes por vuelo, lo que a menudo exige infraestructura de cómputo de alto rendimiento (HPC), sobre todo cuando el análisis tiene restricciones de tiempo real [@plaza2011high]. En la revisión de @plaza2011high, una cadena de desmezclado espectral tardó 1078.03 s en un núcleo de un Intel Core i7 y 17.59 s en una GPU Tesla C1060, unas 61 veces menos. Los autores advierten que aún hace falta trabajo para paralelizar algoritmos más elaborados, como los clasificadores, cuyos patrones de cómputo y comunicación no son regulares.
+
+**Superpíxeles y SAM en GPU.** @quesadabarriuso2021gpu implementan en CUDA el algoritmo de *waterpixels* para HSI con todas las bandas. Un gradiente vectorial basado en la distancia euclidiana resume el espectro, con un hilo por píxel que recorre las bandas y bloques de datos cargados en memoria compartida. En una Tesla P40 obtienen una aceleración de 29.2 veces frente a una versión con OpenMP de 8 hilos, que baja a 12.9 veces al incluir la transferencia de datos, en promedio de diez ejecuciones. gSLICr implementa SLIC en CUDA con un hilo por píxel que compara cada píxel con, como máximo, 9 centros vecinos, y actualiza los centros con sumas parciales por bloque y una reducción; reporta hasta 83 veces de aceleración frente a SLIC secuencial, aunque sin indicar el equipo [@ren2015gslicr]. @qu2013parallel aceleran SAM en CUDA sobre una imagen AVIRIS de 400 × 400 × 224: con memoria fijada y 20 flujos, el tiempo baja de 400.90 ms en C a 54.87 ms en una GTX 560, y la aceleración crece hasta 141.6 veces al comparar contra 128 firmas de referencia. Ninguno de estos trabajos es diferenciable: sus asignaciones son duras y no tienen propagación hacia atrás.
+
+**Núcleos que fusionan una similitud con un softmax.** FlashAttention calcula la atención exacta en un solo núcleo de CUDA que fusiona el producto de similitud, el softmax y la suma ponderada. Procesa la entrada por bloques en la memoria del chip, sin escribir la matriz intermedia de atención en la memoria global, y en la propagación hacia atrás la recalcula a partir del factor de normalización guardado en la propagación hacia adelante. Con ello acelera hasta 7.6 veces la atención de GPT-2 y su memoria crece linealmente con la longitud de la secuencia [@dao2022flashattention]. @hassani2024faster aplican la misma idea a la atención por vecindad, en la que cada elemento solo se compara con sus vecinos más cercanos, como en la asociación local de SSN. Muestran que las implementaciones sin fusionar están limitadas por el ancho de banda de la memoria, por la dispersión y recolección de los pesos de atención, y que la versión fusionada mejora en promedio 958 % (solo hacia adelante) y 385 % (hacia adelante y hacia atrás) a los núcleos ingenuos en el caso 2-D, en una A100 y en media precisión.
+
+**El costo de la afinidad angular.** Galarza (2026) conjetura en su trabajo futuro TF1 que SAM es el componente responsable del mayor tiempo de segmentación de PCNN-SAM, porque exige un producto punto y un arcocoseno sobre el espectro completo para cada par de píxeles vecinos en cada iteración, y propone buscar afinidades de menor costo que conserven la invariancia a la magnitud. En SSN el problema se agrava: la asociación entre píxeles y superpíxeles se calcula en cada iteración del agrupamiento diferenciable y en cada época del entrenamiento, hacia adelante y hacia atrás. Sus autores señalan que una parte significativa del tiempo se debe al SLIC diferenciable, que por sí solo tarda 58 ms frente a 10 ms de gSLICr en una V100 (Tabla 1) [@jampani2018superpixel]. Los trabajos que aprenden superpíxeles en HSI reportan, a lo sumo, el tiempo del modelo completo [@zhang2022ems; @li2023feature; @wang2025multiscale], y ninguno de los trabajos revisados fusiona en un núcleo la asociación de superpíxeles diferenciables en HSI ni analiza su costo de memoria. Esto justifica el objetivo particular VIII.
 
 ## Cuadro comparativo de los trabajos relacionados {#sec-cuadro-comparativo}
 
@@ -191,28 +201,28 @@ La @tbl-comparativo reúne los trabajos que forman superpíxeles para clasificar
 \begingroup\footnotesize\setlength{\tabcolsep}{3pt}
 ```
 
-| Trabajo | Ref. | Superp. | Señal | Esp. compl. | Ang. | ASA/BR/EV | Etiq./clase | Datos |
-|:-------|:---------|:-----|:-------|:-----|:--:|:---:|:------|:---------|
-| MDGCN | @wan2020multiscale | F (SLIC) | NA | ✓‡ | ✗ | ✗ | 30; 5--30 | IP, PU, KSC |
-| SGL | @sellars2020superpixel | F (HMS) | NA | ✗ (PCA) | ✗ | ✗ | 3--20 | IP, PU, SA |
-| CEGCN | @liu2021cnn | F (SLIC) | NA | ✗ (LDA) | ✗ | ✗ | 10 %; 5--25 | IP, PU, SA |
-| MSSGU | @liu2022multilevel | F (FR) | NA | ✗ (PCA) | ✗ | ✗ | 5 % | IP, PU, SA, BOT, KSC |
-| MSG-SGAT | @li2023multistage | F (SH) | NA | ✗ (PCA) | ✗ | ✗ | Barrido | IP, PU, SA, HU |
-| GiGCN | @jia2024graph | F (SLIC) | NA | ✓‡ | ✗ | ✗ | 10 | PU, SA, YRE, YC |
-| DMSGer | @yang2024semi | F (SLIC) | NA | ✓‡ | ✗ | ✗ | 30; 5--150 | IP, PU, SA, HU |
-| dSPGCN | @yu2024dspg | F (N. e.) | NA | N. e. | ✗ | ✗ | 3--50 | IP, ZY, HH |
-| PSFormer | @zou2024psformer | F (SH) | NA | ✗ (3 bandas) | ✗ | ✗ | 30 | SA, PU, HU, HH, QUH |
-| SSN | @jampani2018superpixel | A | Etiq. (segm.) | RGB | ✗ | ✓ | GT | BSDS, CS, Sintel |
-| Superpixel FCN | @yang2020superpixel | A | Etiq. o sin etiq. | RGB | ✗ | ✓ | GT o 0 | BSDS, NYUv2 |
-| Suzuki | @suzuki2020superpixel | A | Sin etiq. | RGB | ✗ | ✓ | 0 | BSDS, SBD |
-| Eliasof et al. | @eliasof2022rethinking | A | Sin etiq. | RGB | ✗ | ✓ | 0 | BSDS |
-| CAD-GCN | @wan2021hyperspectral | A | Clas. | ✓ | ✗ | ✗ | 30; 5--30 | IP, PU, SA |
-| EMS-GCN | @zhang2022ems | A (SSN) | Clas. | ✓ | ✗ | ✗ | 30; 5--30 | IP, PU, HU |
-| FG-DGCN | @li2023feature | A (SSN) | Clas. | ✓ | ✗ | ✗ | 200 | GF-5, Chris, GT, KSC |
-| MSGTN | @wang2025multiscale | A (SSN) | Clas. | ✓ | ✗ | ✗ | 1--5 % | IP, PU, SA, HH |
-| DSTC | @liu2024dual | A (*k-means*) | Clas. | ✓ | ✗ | ✗ | 10 % | OHS, IP, KSC, PU |
-| Li et al. | @li2026joint | A (SSN) | Sin etiq. | ✓ | ✗ | ✗ | 0 | TR, SA, UR |
-| **Propuesta** | --- | **A (SSN)** | **Sin etiq. (EV)** | **✓** | **✓** | **✓** | **5** | **IP, SA, PU, LK, HC, HH** |
+| Trabajo | Ref. | Superp. | Señal | Esp. compl. | Ang. | ASA/BR/EV | GPU/t | Etiq./clase | Datos |
+|:-------|:---------|:-----|:-------|:-----|:--:|:---:|:--:|:------|:---------|
+| MDGCN | @wan2020multiscale | F (SLIC) | NA | ✓‡ | ✗ | ✗ | ✓ | 30; 5--30 | IP, PU, KSC |
+| SGL | @sellars2020superpixel | F (HMS) | NA | ✗ (PCA) | ✗ | ✗ | ✗ | 3--20 | IP, PU, SA |
+| CEGCN | @liu2021cnn | F (SLIC) | NA | ✗ (LDA) | ✗ | ✗ | ✓ | 10 %; 5--25 | IP, PU, SA |
+| MSSGU | @liu2022multilevel | F (FR) | NA | ✗ (PCA) | ✗ | ✗ | ✓ | 5 % | IP, PU, SA, BOT, KSC |
+| MSG-SGAT | @li2023multistage | F (SH) | NA | ✗ (PCA) | ✗ | ✗ | ✓ | Barrido | IP, PU, SA, HU |
+| GiGCN | @jia2024graph | F (SLIC) | NA | ✓‡ | ✗ | ✗ | ✗ | 10 | PU, SA, YRE, YC |
+| DMSGer | @yang2024semi | F (SLIC) | NA | ✓‡ | ✗ | ✗ | ✓ | 30; 5--150 | IP, PU, SA, HU |
+| dSPGCN | @yu2024dspg | F (N. e.) | NA | N. e. | ✗ | ✗ | ✗ | 3--50 | IP, ZY, HH |
+| PSFormer | @zou2024psformer | F (SH) | NA | ✗ (3 bandas) | ✗ | ✗ | ✓ | 30 | SA, PU, HU, HH, QUH |
+| SSN | @jampani2018superpixel | A | Etiq. (segm.) | RGB | ✗ | ✓ | ✓ | GT | BSDS, CS, Sintel |
+| Superpixel FCN | @yang2020superpixel | A | Etiq. o sin etiq. | RGB | ✗ | ✓ | ✓ | GT o 0 | BSDS, NYUv2 |
+| Suzuki | @suzuki2020superpixel | A | Sin etiq. | RGB | ✗ | ✓ | ✗ | 0 | BSDS, SBD |
+| Eliasof et al. | @eliasof2022rethinking | A | Sin etiq. | RGB | ✗ | ✓ | ✗ | 0 | BSDS |
+| CAD-GCN | @wan2021hyperspectral | A | Clas. | ✓ | ✗ | ✗ | ✓ | 30; 5--30 | IP, PU, SA |
+| EMS-GCN | @zhang2022ems | A (SSN) | Clas. | ✓ | ✗ | ✗ | ✓ | 30; 5--30 | IP, PU, HU |
+| FG-DGCN | @li2023feature | A (SSN) | Clas. | ✓ | ✗ | ✗ | ✓ | 200 | GF-5, Chris, GT, KSC |
+| MSGTN | @wang2025multiscale | A (SSN) | Clas. | ✓ | ✗ | ✗ | ✓ | 1--5 % | IP, PU, SA, HH |
+| DSTC | @liu2024dual | A (*k-means*) | Clas. | ✓ | ✗ | ✗ | N. v. | 10 % | OHS, IP, KSC, PU |
+| Li et al. | @li2026joint | A (SSN) | Sin etiq. | ✓ | ✗ | ✗ | ✗ | 0 | TR, SA, UR |
+| **Propuesta** | --- | **A (SSN)** | **Sin etiq. (EV)** | **✓** | **✓** | **✓** | **✓** | **5** | **IP, SA, PU, LK, HC, HH** |
 
 : Cuadro comparativo de los trabajos relacionados {#tbl-comparativo}
 
@@ -220,8 +230,8 @@ La @tbl-comparativo reúne los trabajos que forman superpíxeles para clasificar
 \endgroup
 ```
 
-*Columnas.* Superp. = superpíxeles fijos (F) o aprendidos (A); Señal = señal con la que se aprenden los superpíxeles; Esp. compl. = la segmentación usa todas las bandas, o características aprendidas a partir de ellas, sin PCA ni LDA; Ang. = afinidad angular entre píxeles y superpíxeles; ASA/BR/EV = reporta alguna métrica de calidad de la segmentación; Etiq./clase = muestras etiquetadas por clase en la configuración principal y, tras el punto y coma, el barrido evaluado.
+*Columnas.* Superp. = superpíxeles fijos (F) o aprendidos (A); Señal = señal con la que se aprenden los superpíxeles; Esp. compl. = la segmentación usa todas las bandas, o características aprendidas a partir de ellas, sin PCA ni LDA; Ang. = afinidad angular entre píxeles y superpíxeles; ASA/BR/EV = reporta alguna métrica de calidad de la segmentación; GPU/t = indica la GPU empleada y reporta tiempos de ejecución; Etiq./clase = muestras etiquetadas por clase en la configuración principal y, tras el punto y coma, el barrido evaluado.
 
-*Valores.* ✓ = sí; ✗ = no; ‡ = aplica SLIC a la HSI sin mencionar una reducción previa; NA = no aplica (superpíxeles fijos); N. e. = no lo especifica; Clas. = entropía cruzada de la clasificación; Etiq. (segm.) = segmentos de verdad de terreno o flujo óptico; sin etiq. = sin etiquetas; GT = verdad de terreno completa; RGB = imágenes de color; FR = fusión de regiones; SH = Super Hierarchy; HMS = algoritmo de superpíxeles de @sellars2020superpixel; 3 bandas = componentes no correlacionadas.
+*Valores.* ✓ = sí; ✗ = no; ‡ = aplica SLIC a la HSI sin mencionar una reducción previa; NA = no aplica (superpíxeles fijos); N. e. = no lo especifica; N. v. = no verificado (el PDF no está en la biblioteca); Clas. = entropía cruzada de la clasificación; Etiq. (segm.) = segmentos de verdad de terreno o flujo óptico; sin etiq. = sin etiquetas; GT = verdad de terreno completa; RGB = imágenes de color; FR = fusión de regiones; SH = Super Hierarchy; HMS = algoritmo de superpíxeles de @sellars2020superpixel; 3 bandas = componentes no correlacionadas.
 
 *Conjuntos de datos.* IP = Indian Pines; PU = Pavia University; SA = Salinas; KSC = Kennedy Space Center; BOT = Botswana; HU = Houston 2013; YRE = Yellow River Estuary; YC = Yan Cheng; ZY = Zaoyuan; HH = WHU-Hi-HongHu; LK = WHU-Hi-LongKou; HC = WHU-Hi-HanChuan; QUH = QUH-Tangdaowan; OHS = WHU-OHS; TR = Trento; UR = Urban; BSDS = BSDS500; CS = Cityscapes.
