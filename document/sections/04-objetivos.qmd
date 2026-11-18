@@ -22,7 +22,7 @@ Desarrollar un segmentador en superpíxeles diferenciable, basado en Superpixel 
 
 5. Analizar los resultados por tipo de escena (dificultad geométrica o espectral) y cuantificar la relación entre las métricas de segmentación y la exactitud de clasificación, tanto entre escenas como dentro de cada escena, para contrastar el hallazgo de Galarza (2026) con superpíxeles aprendidos, aspecto que no abordan los trabajos que aprenden superpíxeles para GCN.
 
-6. Determinar, mediante ablaciones, el efecto del peso de la compacidad ($\lambda$), de la dimensión de las características aprendidas y del cálculo de la afinidad sobre las bandas originales frente a las características aprendidas.
+6. Determinar, mediante ablaciones, el efecto del peso de la compacidad ($\lambda$), de la dimensión de las características aprendidas, del cálculo de la afinidad sobre las bandas originales frente a las características aprendidas, de la afinidad angular frente a la distancia euclidiana y de la pérdida de reconstrucción espectral.
 
 7. Explorar el entrenamiento de extremo a extremo del segmentador junto con la GCN, de modo que las muestras etiquetadas también influyan en la formación de los superpíxeles, y compararlo con los métodos que ya siguen ese enfoque con la señal de las etiquetas (EMS-GCN, FG-DGCN y MSGTN).
 
