@@ -1,0 +1,22 @@
+# Firmas de aprobación {#sec-firmas}
+
+<!-- Tabla de firmas. Para cambiar un nombre o cargo, edita solo el texto de
+     la fila; \firma dibuja la línea para firmar. -->
+
+```{=latex}
+\vspace{3cm}
+\begin{center}
+\renewcommand{\arraystretch}{2.2}
+\newcommand{\firma}{\rule[-2pt]{0.27\textwidth}{0.4pt}}
+\begin{tabular}{@{\hspace{6pt}}p{0.34\textwidth}p{0.25\textwidth}p{0.29\textwidth}@{}}
+\hline
+Nombre & Cargo & Firma \\
+\hline
+Dra. Xiaoou Li Zhang & Asesora de tesis & \firma \\
+Por definir & Sinodal & \firma \\
+Por definir & Sinodal & \firma \\
+Edgar Tobón Sosa & Estudiante de Maestría & \firma \\
+\hline
+\end{tabular}
+\end{center}
+```
