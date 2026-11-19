@@ -221,7 +221,7 @@ La @tbl-comparativo reúne los trabajos que forman superpíxeles para clasificar
 | EMS-GCN | @zhangEMSGCNEndtoEndMixhop2022 | A (SSN) | Clas. | ✓ | ✗ | ✗ | ✓ | 30; 5--30 | IP, PU, HU |
 | FG-DGCN | @liFeatureguidedDynamicGraph2023 | A (SSN) | Clas. | ✓ | ✗ | ✗ | ✓ | 200 | GF-5, Chris, GT, KSC |
 | MSGTN | @wangMultiscaleGraphTransformer2025 | A (SSN) | Clas. | ✓ | ✗ | ✗ | ✓ | 1--5 % | IP, PU, SA, HH |
-| DSTC | @liuDualStageHyperspectralImage2024 | A (*k-means*) | Clas. | ✓ | ✗ | ✗ | N. v. | 10 % | OHS, IP, KSC, PU |
+| DSTC | @liuDualStageHyperspectralImage2024 | A (*k-means*) | Clas. | ✓ | ✗ | ✗ | N. e. | 10 % | OHS, IP, KSC, PU |
 | Li et al. | @liJointSuperpixelSelfRepresentation2026 | A (SSN) | Sin etiq. | ✓ | ✗ | ✗ | ✗ | 0 | TR, SA, UR |
 | **Propuesta** | Este trabajo | **A (SSN)** | **Sin etiq. (EV)** | **✓** | **✓** | **✓** | **✓** | **5** | **IP, SA, PU, LK, HC, HH** |
 
@@ -233,6 +233,6 @@ La @tbl-comparativo reúne los trabajos que forman superpíxeles para clasificar
 
 *Columnas.* Superp. = superpíxeles fijos (F) o aprendidos (A); Señal = señal con la que se aprenden los superpíxeles; Esp. compl. = la segmentación usa todas las bandas, o características aprendidas a partir de ellas, sin PCA ni LDA; Ang. = afinidad angular entre píxeles y superpíxeles; ASA/BR/EV = reporta alguna métrica de calidad de la segmentación; GPU/t = indica la GPU empleada y reporta tiempos de ejecución; Etiq./clase = muestras etiquetadas por clase en la configuración principal y, tras el punto y coma, el barrido evaluado.
 
-*Valores.* ✓ = sí; ✗ = no; ‡ = aplica SLIC a la HSI sin mencionar una reducción previa; NA = no aplica (superpíxeles fijos); N. e. = no lo especifica; N. v. = no verificado (el PDF no está en la biblioteca); † = reporta tiempos sin indicar el equipo; Clas. = entropía cruzada de la clasificación; Etiq. (segm.) = segmentos de verdad de terreno o flujo óptico; sin etiq. = sin etiquetas; GT = verdad de terreno completa; RGB = imágenes de color; FR = fusión de regiones; SH = Super Hierarchy; HMS = algoritmo de superpíxeles de @sellarsSuperpixelContractedGraphBased2020; 3 bandas = componentes no correlacionadas.
+*Valores.* ✓ = sí; ✗ = no; ‡ = aplica SLIC a la HSI sin mencionar una reducción previa; NA = no aplica (superpíxeles fijos); N. e. = no lo especifica; † = reporta tiempos sin indicar el equipo; Clas. = entropía cruzada de la clasificación; Etiq. (segm.) = segmentos de verdad de terreno o flujo óptico; sin etiq. = sin etiquetas; GT = verdad de terreno completa; RGB = imágenes de color; FR = fusión de regiones; SH = Super Hierarchy; HMS = algoritmo de superpíxeles de @sellarsSuperpixelContractedGraphBased2020; 3 bandas = componentes no correlacionadas.
 
 *Conjuntos de datos.* IP = Indian Pines; PU = Pavia University; SA = Salinas; KSC = Kennedy Space Center; BOT = Botswana; HU = Houston 2013; YRE = Yellow River Estuary; YC = Yan Cheng; ZY = Zaoyuan; HH = WHU-Hi-HongHu; LK = WHU-Hi-LongKou; HC = WHU-Hi-HanChuan; QUH = QUH-Tangdaowan; OHS = WHU-OHS; TR = Trento; UR = Urban; BSDS = BSDS500; CS = Cityscapes.
