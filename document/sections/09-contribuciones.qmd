@@ -16,4 +16,4 @@ La arquitectura resultante de esta investigación va a cumplir con las siguiente
 - Un núcleo CUDA que fusiona la asociación entre píxeles y superpíxeles, con su propagación hacia atrás, y su análisis de tiempo, memoria y *roofline* frente a la implementación en PyTorch.
 - El código fuente del segmentador, del núcleo y de los experimentos, publicado como código abierto.
 
-Los trabajos del cuadro comparativo (@tbl-comparativo) cumplen algunas de estas características, pero ninguno las cumple todas: los que aprenden superpíxeles en HSI lo hacen con la señal de las etiquetas, los que prescinden de ellas trabajan en imágenes RGB o en agrupamiento, ninguno usa una afinidad angular, y ninguno analiza el costo de la asociación en GPU.
+Los trabajos del cuadro comparativo (@tbl-comparativo) cumplen algunas de estas características, pero ninguno las cumple todas: los que aprenden superpíxeles en HSI lo hacen con la señal de las etiquetas, los que prescinden de ellas trabajan en imágenes RGB o en el agrupamiento de la imagen en clases sin ninguna etiqueta, ninguno usa una afinidad angular, y ninguno analiza el costo de la asociación en GPU.
