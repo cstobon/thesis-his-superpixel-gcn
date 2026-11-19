@@ -23,9 +23,7 @@ Dirección: & Calle Necaxa 140, Int 8. \\
            & C.P. 03300 \\
            & Ciudad de México, CDMX. \\
 Teléfono (casa): & 2225081400 \\
-Teléfono (lugar de trabajo): & \\
-Dirección electrónica: &  etobon96@gmail.com\\
-Portal Internet: & \\
+Dirección electrónica: & edgar.tobon@cinvestav.mx \\
 \end{datos}
 ```
 
@@ -46,13 +44,13 @@ Teléfono: & (52) (55) 5747 3758 \\
 
 ```{=latex}
 \begin{datos}
-Institución otorgante: & \\
-Tipo de beca: & \\
-Vigencia: & \\
+Institución otorgante: & SECIHTI \\
+Tipo de beca: & Maestría \\
+Vigencia: & Septiembre 2025 -- Agosto 2027 \\
 \end{datos}
 ```
 
-## Proyecto de origen\protect\footnotemark
+## Proyecto de origen
 
 <!-- Solo si la tesis forma parte de un proyecto financiado; si no, deja los
      valores vacíos, como en el protocolo de referencia. -->
@@ -70,27 +68,5 @@ Fuente de financiamiento: & \\
 ```{=latex}
 \begin{datos}
 Nombre: & Xiaoou Li Zhang\\
-Dirección: & Av. Instituto Politécnico Nacional No. 2508, \\
- & Col. San Pedro Zacatenco, \\
- & México, D.F. 07300 \\
-Teléfono (oficina): & \\
-Institución: & CINVESTAV-IPN \\
-Departamento adscripción: & Departamento de Computación \\
-Grado académico: & \\
-\end{datos}
-```
-
-## Datos del coasesor
-
-```{=latex}
-\begin{datos}
-Nombre: & \\
-Dirección: & Av. Instituto Politécnico Nacional No. 2508, \\
- & Col. San Pedro Zacatenco, \\
- & México, D.F. 07300 \\
-Teléfono (oficina): & \\
-Institución: & CINVESTAV-IPN \\
-Departamento adscripción: & Departamento de Computación \\
-Grado académico: & \\
 \end{datos}
 ```

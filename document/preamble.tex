@@ -53,3 +53,7 @@
 \DeclareUnicodeCharacter{2717}{\ding{55}}
 \DeclareUnicodeCharacter{2021}{\ensuremath{\ddagger}}
 \DeclareUnicodeCharacter{2020}{\ensuremath{\dagger}}
+
+% Índice: espacio para números de sección de dos dígitos (10.)
+\usepackage{etoolbox}
+\makeatletter\patchcmd{\l@section}{1.5em}{1.8em}{}{}\makeatother

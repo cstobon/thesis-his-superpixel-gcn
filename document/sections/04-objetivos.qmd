@@ -26,12 +26,4 @@ Desarrollar un segmentador en superpíxeles diferenciable, basado en Superpixel 
 
 7. Explorar el entrenamiento de extremo a extremo del segmentador junto con la GCN, de modo que las muestras etiquetadas también influyan en la formación de los superpíxeles, y compararlo con los métodos que ya siguen ese enfoque con la señal de las etiquetas (EMS-GCN, FG-DGCN y MSGTN).
 
-<!-- Objetivo 8 (HPC): retoma la pregunta abierta en la línea de trabajo
-     futuro TF1 de Galarza (2026, sec. 5.3) —si una afinidad angular sobre el
-     espectro completo es viable en costo— con el segmentador propio, sin
-     perfilar PCNN-SAM. Núcleo en CUDA C/C++ como extensión de PyTorch, en
-     una laptop con GPU GeForce RTX. El método funciona sin el núcleo: el
-     riesgo queda acotado a la parte de HPC.
-     Confirmar con la Dra. antes de enviar al comité. -->
-
 8. Implementar en CUDA un núcleo propio que fusione el cálculo de la asociación entre cada píxel y sus superpíxeles vecinos (búsqueda de vecinos, similitud coseno y softmax), en la propagación hacia adelante y hacia atrás, y compararlo con la implementación en PyTorch en tiempo, memoria pico y tráfico de memoria, mediante un análisis *roofline*, para las afinidades sobre bandas originales y sobre características aprendidas, verificando que reproduzca los mismos gradientes y la misma calidad de segmentación.

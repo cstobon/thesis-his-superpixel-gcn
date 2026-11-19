@@ -34,7 +34,7 @@ Explorar el entrenamiento de extremo a extremo del segmentador con la GCN.
  & & & & & & & \X & \X & & & \\ \hline
 Implementar el núcleo CUDA fusionado de la asociación, verificar sus gradientes y compararlo con PyTorch (tiempo, memoria y \textit{roofline}).
  & & & & & & & \X & \X & & & \\ \hline
-Determinar mediante ablaciones el efecto de la compacidad, de la dimensión de las características y de la afinidad.
+Determinar mediante ablaciones el efecto de la compacidad, de la dimensión de las características, de la afinidad y de la pérdida de reconstrucción.
  & & & & & & & & \X & & & \\ \hline
 Analizar los resultados por tipo de escena y la relación entre las métricas de segmentación y la exactitud de clasificación.
  & & & & & & & & & \X & & \\ \hline
