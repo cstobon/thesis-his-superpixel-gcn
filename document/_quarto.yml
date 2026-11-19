@@ -5,6 +5,8 @@ lang: es
 number-sections: true
 bibliography: referencias.bib
 csl: csl/apa.csl
+filters:
+  - filtros/limpiar-referencias.lua
 format:
   pdf:
     documentclass: article

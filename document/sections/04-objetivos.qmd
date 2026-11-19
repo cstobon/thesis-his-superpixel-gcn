@@ -12,7 +12,7 @@ Desarrollar un segmentador en superpíxeles diferenciable, basado en Superpixel 
      Cada objetivo particular es una subsección de la Metodología y una fila
      del Cronograma. -->
 
-1. Reproducir la arquitectura PCNN-GCN de Galarza (2026) y los métodos de referencia (SLIC, LSC, ERS, SEEDS y PCNN-SAM) sobre seis conjuntos de datos hiperespectrales, con el protocolo de cinco muestras etiquetadas por clase, para establecer la línea base de comparación.
+1. Reproducir la arquitectura PCNN-GCN de @galarza2026 y los métodos de referencia (SLIC, LSC, ERS, SEEDS y PCNN-SAM) sobre seis conjuntos de datos hiperespectrales, con el protocolo de cinco muestras etiquetadas por clase, para establecer la línea base de comparación.
 
 2. Adaptar la arquitectura SSN a imágenes hiperespectrales mediante un extractor de características espectrales y una afinidad angular, inspirada en SAM, entre píxeles y superpíxeles.
 
@@ -20,7 +20,7 @@ Desarrollar un segmentador en superpíxeles diferenciable, basado en Superpixel 
 
 4. Evaluar los superpíxeles obtenidos integrándolos en el clasificador GCN semi-supervisado y comparándolos con los métodos de referencia mediante métricas de segmentación (ASA, BR y EV) y de clasificación (OA, AA y $\kappa$).
 
-5. Analizar los resultados por tipo de escena (dificultad geométrica o espectral) y cuantificar la relación entre las métricas de segmentación y la exactitud de clasificación, tanto entre escenas como dentro de cada escena, para contrastar el hallazgo de Galarza (2026) con superpíxeles aprendidos, aspecto que no abordan los trabajos que aprenden superpíxeles para GCN.
+5. Analizar los resultados por tipo de escena (dificultad geométrica o espectral) y cuantificar la relación entre las métricas de segmentación y la exactitud de clasificación, tanto entre escenas como dentro de cada escena, para contrastar el hallazgo de @galarza2026 con superpíxeles aprendidos, aspecto que no abordan los trabajos que aprenden superpíxeles para GCN.
 
 6. Determinar, mediante ablaciones, el efecto del peso de la compacidad ($\lambda$), de la dimensión de las características aprendidas, del cálculo de la afinidad sobre las bandas originales frente a las características aprendidas, de la afinidad angular frente a la distancia euclidiana y de la pérdida de reconstrucción espectral.
 

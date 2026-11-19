@@ -10,7 +10,7 @@ La presente investigación se ha pensado llevar a cabo de la siguiente manera. C
 ## Reproducir la arquitectura PCNN-GCN y los métodos de referencia
 
 - Obtención y preparación de los seis conjuntos de datos (Indian Pines, Salinas, Pavia University, WHU-Hi-LongKou, WHU-Hi-HanChuan y WHU-Hi-HongHu), con normalización min-max por banda.
-- Integración del código de PCNN-SAM y del clasificador GCN de dos capas de la tesis de referencia, cuyos nodos se representan con la media de las diez primeras componentes principales de sus píxeles (Galarza, 2026).
+- Integración del código de PCNN-SAM y del clasificador GCN de dos capas de la tesis de referencia, cuyos nodos se representan con la media de las diez primeras componentes principales de sus píxeles [@galarza2026].
 - Ejecución de SLIC, LSC, ERS y SEEDS con la misma configuración que la tesis de referencia, para obtener las cinco segmentaciones de comparación.
 - Implementación del protocolo experimental: cinco muestras etiquetadas por clase, escala $K = 500$ y diez ejecuciones independientes con semillas fijas, que se reutilizarán sin cambios en todos los objetivos.
 - Implementación de las métricas de segmentación (ASA, BR y EV) y de clasificación (OA, AA y $\kappa$) en un único programa de evaluación.
@@ -41,7 +41,7 @@ La presente investigación se ha pensado llevar a cabo de la siguiente manera. C
 
 ## Analizar los resultados por tipo de escena y la relación entre las métricas de segmentación y la exactitud
 
-- Clasificación de los seis conjuntos según su dificultad geométrica o espectral, siguiendo los regímenes identificados por Galarza (2026, Tabla 4.10), y comparación de los métodos dentro de cada régimen.
+- Clasificación de los seis conjuntos según su dificultad geométrica o espectral, siguiendo los regímenes identificados por @galarza2026 [Tabla 4.10], y comparación de los métodos dentro de cada régimen.
 - Cálculo de la correlación de Pearson entre ASA, BR y EV y la OA, agregada sobre los pares conjunto de datos $\times$ método, incluida la propuesta, para contrastarla con la de la tesis de referencia.
 - Cálculo de la misma correlación dentro de cada conjunto de datos, variando el peso de la compacidad $\lambda$, la escala $K$ y la semilla, para distinguir el efecto de la escena del efecto de la segmentación.
 - Análisis visual de los mapas de clasificación y de las particiones en superpíxeles en las escenas donde la propuesta gane o pierda frente a las líneas base.
