@@ -6,11 +6,13 @@
 
 La infraestructura mínima necesaria para el desarrollo del proyecto de tesis es:
 
-Hardware
-:   Computadora portátil con GPU NVIDIA GeForce RTX 3050 Ti Laptop (arquitectura Ampere, capacidad de cómputo 8.6) con 4 GiB de memoria, controlador NVIDIA 550.163.01 (CUDA 12.4 como versión máxima admitida); procesador Intel Core i7-11800H de 11.ª generación a 2.30 GHz, con 8 núcleos y 16 hilos; 15 GiB de RAM; y sistema operativo Debian GNU/Linux 13 (núcleo 6.12.95). El equipo se usará para el desarrollo, el entrenamiento y todas las mediciones de tiempo, memoria y tráfico de memoria del objetivo VIII. La memoria de 4 GiB de la GPU es la restricción que motiva evitar la materialización del tensor de características vecinas en el núcleo fusionado.
+*Hardware*
+:   Computadora portátil con GPU NVIDIA GeForce RTX 3050 Ti Laptop (arquitectura Ampere, capacidad de cómputo 8.6) con 4 GiB de memoria, controlador NVIDIA 550.163.01 (CUDA 12.4 como versión máxima admitida); procesador Intel Core i7-11800H de 11.ª generación a 2.30 GHz, con 8 núcleos y 16 hilos; 15 GiB de RAM; y sistema operativo Debian GNU/Linux 13 (núcleo 6.12.95). El equipo se usará para el desarrollo y como segunda plataforma de medición del núcleo CUDA (objetivo VI). Su memoria de 4 GiB es la restricción que motiva evitar la materialización del tensor de firmas vecinas en el núcleo fusionado.
 
-Software
+    Servidor con GPU del laboratorio, que se usará desde diciembre de 2026 para el entrenamiento y la evaluación, a fin de reducir el riesgo de memoria con los conjuntos WHU-Hi (alrededor de 270 bandas), y como plataforma principal de medición del núcleo CUDA. Sus especificaciones se registrarán junto con los resultados.
+
+*Software*
 :   Python con PyTorch [@paszkePyTorchImperativeStyle2019] sobre CUDA para el segmentador; CUDA Toolkit (compilador `nvcc`) y el mecanismo de extensiones de PyTorch para el núcleo fusionado, escrito en CUDA C y conectado a PyTorch con una envoltura mínima en C++; Nsight Compute, el perfilador de PyTorch y `nvidia-smi` para medir tiempo, memoria, tráfico de memoria, temperatura y frecuencia; PyTorch Geometric para la GCN; NumPy, SciPy, scikit-learn y scikit-image para la carga de los datos, las líneas base y el cálculo de métricas; el código de la tesis de referencia (PCNN-SAM y PCNN-GCN) y las implementaciones públicas de SLIC, LSC, ERS y SEEDS; Git y GitHub para el control de versiones; Quarto y LaTeX para la redacción; y Zotero para la gestión de referencias. Las versiones exactas de cada biblioteca se registrarán junto con los resultados.
 
 Datos
-:   Indian Pines, Salinas y Pavia University, del repositorio de escenas hiperespectrales de la Universidad del País Vasco (EHU); WHU-Hi-LongKou, WHU-Hi-HanChuan y WHU-Hi-HongHu, del grupo RSIDEA de la Universidad de Wuhan [@zhongWHUHiUAVborneHyperspectral2020]; y BSDS500, de imágenes RGB, para validar la reproducción de SSN.
+:   Indian Pines, Salinas y Pavia University, del repositorio de escenas hiperespectrales de la Universidad del País Vasco (EHU); WHU-Hi-LongKou, WHU-Hi-HanChuan y WHU-Hi-HongHu, del grupo RSIDEA de la Universidad de Wuhan [@zhongWHUHiUAVborneHyperspectral2020]; y BSDS500, de imágenes RGB, para la prueba rápida de SSN, si es necesaria.

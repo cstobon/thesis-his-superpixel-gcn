@@ -3,7 +3,7 @@
 
 ## Título de proyecto
 
-Superpíxeles diferenciables guiados por retención espectral para la clasificación semi-supervisada de imágenes hiperespectrales mediante redes convolucionales de grafos
+Superpíxeles diferenciables entrenados sin etiquetas para maximizar la retención espectral en la clasificación semi-supervisada de imágenes hiperespectrales con GCN
 
 ```{=latex}
 \addvspace{1sp}
@@ -31,11 +31,11 @@ Dirección electrónica: & edgar.tobon@cinvestav.mx \\
 
 ```{=latex}
 \begin{datos}
-Nombre: & CINVESTAV-IPN \\
+Nombre: & Cinvestav \\
 Departamento: & Depto. de Computación. \\
 Dirección: & Av. Instituto Politécnico Nacional No. 2508, \\
  & Col. San Pedro Zacatenco, \\
- & México, D. F. 07300. \\
+ & Ciudad de México, CDMX, C.P. 07300. \\
 Teléfono: & (52) (55) 5747 3758 \\
 \end{datos}
 ```
@@ -52,21 +52,14 @@ Vigencia: & Septiembre 2025 -- Agosto 2027 \\
 
 ## Proyecto de origen
 
-<!-- Solo si la tesis forma parte de un proyecto financiado; si no, deja los
-     valores vacíos, como en el protocolo de referencia. -->
-
-```{=latex}
-\begin{datos}
-Institución: & \\
-Nombre del proyecto: & \\
-Fuente de financiamiento: & \\
-\end{datos}
-```
+No aplica.
 
 ## Datos del asesor
 
 ```{=latex}
 \begin{datos}
-Nombre: & Xiaoou Li Zhang\\
+Nombre: & Dra. Xiaoou Li \\
+Departamento: & Depto. de Computación \\
+Dirección electrónica: & xiaoou.li@cinvestav.mx \\
 \end{datos}
 ```

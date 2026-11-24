@@ -9,11 +9,11 @@ Con este trabajo se espera obtener un segmentador en superpíxeles diferenciable
 
 La arquitectura resultante de esta investigación cumplirá con las siguientes características:
 
-- Un segmentador diferenciable para HSI que opera sobre el espectro completo, sin reducción de dimensionalidad, y asocia los píxeles con los superpíxeles mediante una afinidad angular inspirada en SAM.
-- Una pérdida diferenciable sin etiquetas, basada en la reconstrucción espectral, que aproxima la EV y se combina con un término de compacidad.
-- Una evaluación en seis escenas con cinco etiquetas por clase, comparada con SLIC, LSC, ERS, SEEDS y PCNN-SAM, y analizada por tipo de escena (dificultad geométrica o espectral).
+- Un segmentador diferenciable para HSI que opera sobre el espectro completo, sin reducción de dimensionalidad en la segmentación, y asocia los píxeles con los superpíxeles mediante una afinidad angular inspirada en SAM.
+- Una pérdida diferenciable sin etiquetas, basada en la reconstrucción espectral, que aproxima la EV y se combina con un término de compacidad, con la medición de su diferencia respecto a la EV con asignación dura.
+- Una evaluación en seis escenas con cinco etiquetas por clase, comparada con SLIC y PCNN-SAM mediante pruebas pareadas de equivalencia y de superioridad, junto con los resultados de LSC, ERS y SEEDS de la tesis de referencia, y analizada por tipo de escena (dificultad geométrica o espectral).
 - Un análisis de la relación entre las métricas de segmentación (ASA, BR y EV) y la exactitud de clasificación con superpíxeles aprendidos, entre escenas y dentro de cada una.
-- Un núcleo CUDA que fusiona la asociación entre píxeles y superpíxeles, con su propagación hacia atrás, y su análisis de tiempo, memoria y *roofline* frente a la implementación en PyTorch.
+- Un núcleo CUDA que fusiona la asociación entre píxeles y superpíxeles con afinidad sobre las bandas originales, y su comparación de tiempo y memoria pico frente a la implementación en PyTorch.
 - El código fuente del segmentador, del núcleo y de los experimentos, publicado como código abierto.
 
 Los trabajos del cuadro comparativo (@tbl-comparativo) cumplen algunas de estas características, pero ninguno las cumple todas: los que aprenden superpíxeles en HSI lo hacen con la señal de las etiquetas, los que prescinden de ellas trabajan en imágenes RGB o en el agrupamiento de la imagen en clases sin ninguna etiqueta, solo PCNN-SAM usa una afinidad angular, pero con superpíxeles fijos, y ninguno analiza el costo de la asociación en GPU.

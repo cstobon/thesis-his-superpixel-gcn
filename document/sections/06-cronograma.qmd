@@ -6,6 +6,8 @@
      actividad (celda roja), \X para el tono claro (actualización continua)
      y \hito para marcar un hito; deja vacío el resto. -->
 
+El plan de trabajo se ajusta al término de la beca: los experimentos se cerrarán el 31 de mayo de 2027, el borrador completo de la tesis se entregará a la directora el 15 de julio, la tesis se entregará a los sinodales a finales de julio y el examen de grado se presentará a finales de agosto de 2027.
+
 ```{=latex}
 \kern10pt
 \begingroup\small\setlength{\tabcolsep}{3.5pt}\renewcommand{\arraystretch}{1.1}
@@ -15,33 +17,31 @@
 Revisión del estado del arte.
  & \X & \X & \X & \X & \X & \X & \X & \X & \X & \X & \\ \hline
 Estudio de fundamentos de aprendizaje profundo, redes de grafos y superpíxeles diferenciables.
- & \X & \X & \X & \X & & & & & & & \\ \hline
-Estudiar las extensiones CUDA para PyTorch y las herramientas de perfilado (Nsight Compute).
- & & & & \X & & & & & & & \\ \hline
-Redacción y entrega del protocolo de tesis.
+ & \X & \X & \X & & & & & & & & \\ \hline
+Redacción y entrega del protocolo de tesis corregido.
  & \X & \X & & & & & & & & & \\ \hline
-Reproducir la arquitectura PCNN-GCN y los métodos de referencia (SLIC, LSC, ERS, SEEDS y PCNN-SAM) sobre seis conjuntos de datos.
- & & & \X & \X & & & & & & & \\ \hline
-Reproducir SSN en imágenes RGB (BSDS500) y evaluar su viabilidad.
- & & & & \X & \X & & & & & & \\ \hline
-Adaptar SSN a imágenes hiperespectrales mediante un extractor espectral y una afinidad angular inspirada en SAM.
+Estudiar las extensiones CUDA para PyTorch y las herramientas de perfilado (Nsight Compute).
+ & & \X & \X & & & & & & & & \\ \hline
+I. Reproducir PCNN-GCN con SLIC y PCNN-SAM sobre seis conjuntos de datos.
+ & & \X & \X & & & & & & & & \\ \hline
+II. Adaptar SSN a imágenes hiperespectrales con afinidad angular.
+ & & & & \X & & & & & & & \\ \hline
+III. Formular la pérdida no supervisada y entrenar el segmentador sin etiquetas.
  & & & & & \X & \X & & & & & \\ \hline
-Formular la función de pérdida no supervisada (EV + compacidad) y entrenar el segmentador sin etiquetas.
+IV. Evaluar los superpíxeles aprendidos en la GCN frente a SLIC y PCNN-SAM.
  & & & & & \X & \X & & & & & \\ \hline
-Evaluar los superpíxeles aprendidos en la GCN semi-supervisada frente a SLIC, LSC, ERS, SEEDS y PCNN-SAM.
- & & & & & & \X & \X & & & & \\ \hline
-Explorar el entrenamiento de extremo a extremo del segmentador con la GCN.
+V. Analizar los resultados por tipo de escena y la relación EV--OA; ablaciones.
+ & & & & & & & \X & & & & \\ \hline
+VI. Núcleo CUDA: propagación hacia adelante (abril), hacia atrás y mediciones (mayo).
  & & & & & & & \X & \X & & & \\ \hline
-Implementar el núcleo CUDA fusionado de la asociación, verificar sus gradientes y compararlo con PyTorch (tiempo, memoria y \textit{roofline}).
- & & & & & & & \X & \X & & & \\ \hline
-Determinar mediante ablaciones el efecto de la compacidad, de la dimensión de las características, de la afinidad y de la pérdida de reconstrucción.
- & & & & & & & & \X & & & \\ \hline
-Analizar los resultados por tipo de escena y la relación entre las métricas de segmentación y la exactitud de clasificación.
- & & & & & & & & & \X & & \\ \hline
-Redacción del manuscrito de tesis.
- & & & & & \X & \X & \X & \X & \X & \X & \X \\ \hline
-Revisión final, preparación de artículo y defensa.
- & & & & & & & & & & \X & \X \\ \hline
+Redacción del manuscrito de tesis (introducción, marco teórico y estado del arte desde febrero; metodología y resultados desde abril).
+ & & & & & \X & \X & \X & \X & \X & \X & \\ \hline
+Correcciones y entrega de la tesis a los sinodales.
+ & & & & & & & & & & \X & \\ \hline
+Atención de observaciones, trámites y examen de grado.
+ & & & & & & & & & & & \X \\ \hline
 \end{tabular}
 \endgroup
 ```
+
+Si al 31 de marzo de 2027 la pérdida no supervisada no converge o produce soluciones degeneradas, se fijará la mejor configuración disponible y se documentará el resultado, aunque sea negativo, en lugar de seguir ajustándola.

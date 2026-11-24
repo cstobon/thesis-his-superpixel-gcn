@@ -1,22 +1,24 @@
 # Firmas de aprobación {#sec-firmas}
 
-<!-- Tabla de firmas. Para cambiar un nombre o cargo, edita solo el texto de
-     la fila; \firma dibuja la línea para firmar. -->
+<!-- Firmas. Para cambiar un nombre, edita solo el texto; \firma dibuja la
+     línea para firmar. -->
 
 ```{=latex}
-\vspace{3cm}
+\newcommand{\firma}{\rule{0.4\textwidth}{0.4pt}}
+\vspace{2cm}
 \begin{center}
-\renewcommand{\arraystretch}{2.2}
-\newcommand{\firma}{\rule[-2pt]{0.27\textwidth}{0.4pt}}
-\begin{tabular}{@{\hspace{6pt}}p{0.34\textwidth}p{0.25\textwidth}p{0.29\textwidth}@{}}
-\hline
-Nombre & Cargo & Firma \\
-\hline
-Dra. Xiaoou Li Zhang & Asesora de tesis & \firma \\
-Por definir & Sinodal & \firma \\
-Por definir & Sinodal & \firma \\
-Edgar Tobón Sosa & Estudiante de Maestría & \firma \\
-\hline
-\end{tabular}
+Firma del alumno:\par
+\vspace{1.5cm}
+\rule{0.45\textwidth}{0.4pt}\par
+\vspace{2pt}
+Edgar Tobón Sosa\par
+\vspace{3cm}
+\textbf{Comité de aprobación del tema de tesis}\par
 \end{center}
+\vspace{2cm}
+\noindent\begin{tabular}{@{}p{0.5\textwidth}@{}r@{}}
+Dra. Xiaoou Li & \firma \\[2.2cm]
+Dr. Cuauhtemoc Mancillas López & \firma \\[2.2cm]
+Por definir & \firma \\
+\end{tabular}
 ```

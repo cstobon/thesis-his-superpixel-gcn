@@ -21,13 +21,13 @@
 \vspace{6pt}
 {\Large\bfseries Protocolo de investigación\par}
 \vspace*{\fill}
-{\large\textbf{Título:} Superpíxeles diferenciables guiados por retención espectral para la clasificación semi-supervisada de imágenes hiperespectrales mediante redes convolucionales de grafos\par}
+{\large\textbf{Título:} Superpíxeles diferenciables entrenados sin etiquetas para maximizar la retención espectral en la clasificación semi-supervisada de imágenes hiperespectrales con GCN\par}
 \vspace{3em}
 {\large\textbf{Candidato:} Edgar Tobón Sosa\par}
 \vspace{1em}
-{\large\textbf{Asesora de Tesis:} Dra. Xiaoou Li Zhang\par}
+{\large\textbf{Asesora de Tesis:} Dra. Xiaoou Li\par}
 \vspace{3em}
-{\large 19 de noviembre de 2026\par}
+{\large 23 de noviembre de 2026\par}
 \vspace*{\fill}
 \end{titlepage}
 % ---------------- ÍNDICE ----------------
